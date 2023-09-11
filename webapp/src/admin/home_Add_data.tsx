@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import _debounce from 'lodash/debounce';
+import _debounce from 'lodash/debounce';//for saving data in time span
 import undo_icon from "../.icons/undo.png";
 import redo_icon from '../.icons/redo.png';
 import add_icon from "../.icons/add.png";
@@ -143,19 +143,25 @@ const SpreadsheetInterface = () => {
       setMessage('Error:Fill the empty value');
       return;
     }
-
+    let Admin_Sheet_Id=sessionStorage.getItem('Admin_Sheet_Id');
+    let username=sessionStorage.getItem('username');
     fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_data`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({dataRows,Admin_Sheet_Id:sessionStorage.getItem('Admin_Sheet_Id')}),
+      body: JSON.stringify({dataRows,Admin_Sheet_Id,username}),
     })
-      .then((response) => {
+      .then((response:any) => {
         if (!response.ok) {
           setMessage('Network error');
           console.log('Network response was not ok');
         }
+        if(response.hasOwnProperty('error')){
+          setMessage('Server error');
+          console.log(response.error);
+          return;
+      }
         return response.json(); //convert json to object
       })
       .then((data) => {
@@ -163,6 +169,8 @@ const SpreadsheetInterface = () => {
           if(data.hasOwnProperty('message')){
             setMessage(data.message);
             setDataRows( new Array(1).fill('').map(() => ({...Empty_data})));
+            setMessage('Login email sent succesfully');
+            
             return;
           }
         
@@ -342,7 +350,7 @@ const SpreadsheetInterface = () => {
       <button 
         key={columnIndex}
         onClick={() => handleColumnSelection(columnName)}
-        className={` bg-blue-500 text-white px-4 py-2 rounded mr-2 mb-2 md:mb-0 hover:bg-blue-300 ${selectedColumn===columnName?'opacity-50':''}`}
+        className={` bg-blue-500 text-white px-4 py-2 pt-2 rounded mr-2 mb-2 md:mb-0 hover:bg-blue-300 ${selectedColumn===columnName?'opacity-50':''}`}
       >
         Select {columnName}
       </button>

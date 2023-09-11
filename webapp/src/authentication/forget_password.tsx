@@ -30,7 +30,7 @@ const ForgotPassword: React.FC = () => {
     if(email==='' && selectedRole !=='')
       setMessage('Please fill the form');
     try {
-      const response = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=send-forget-password-email`, {
+      const response:any = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=send-forget-password-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,6 +39,12 @@ const ForgotPassword: React.FC = () => {
           email,username
         }),
       });
+
+      if(response.hasOwnProperty('error')){
+        setMessage('Server error');
+        console.log(response.error);
+        return;
+    }
       const data = await response.json();
       
       setMessage(data.message);
@@ -58,7 +64,7 @@ const ForgotPassword: React.FC = () => {
       setMessage('New password and confirm password do not match.');
       return;
     }
-        const response = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=change-password`, {
+        const response:any = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=change-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -70,6 +76,11 @@ const ForgotPassword: React.FC = () => {
             username
           }),
         });
+        if(response.hasOwnProperty('error')){
+          setMessage('Server error');
+          console.log(response.error);
+          return;
+      }
         const data = await response.json();
         setMessage(data.message);
         console.log(data.error);

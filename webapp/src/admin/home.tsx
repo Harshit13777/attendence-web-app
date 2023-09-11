@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate,Link } from 'react-router-dom';
 import {Add_data} from './home_Add_data';
+import {Login_Email_Status} from './home_login_email_staus';
+
 import add_data_icon from '../.icons/add_data_icon.png';
 import setting from '../.icons/setting.png';
 import logout from "../.icons/logout.png";
 import overview from "../.icons/overview.png";
 import system_control from "../.icons/system_control.png";
 import navbar_open from "../.icons/navbar.png";
+import check_email from '../.icons/check_email_status.png';
 
 
 // HomePage.tsx
@@ -87,11 +90,22 @@ const NavBar=()=> {
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
+                            <img src={check_email}  alt="" />
+                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
+                                <Link to='/admin/login_email_status'>Check Email Login Status</Link>
+                            </span>
+                        </li>
+                        <li
+                            className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                                        mt-2 menu-items `} >
                             <img src={system_control} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 System Control
                             </span>
                         </li>
+
+                        
+
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-10 menu-items `} >
@@ -141,6 +155,7 @@ export const HomePage: React.FC = () => {
                 <div className='w-6/7 ml-16'>
                     <Routes>
                         <Route path="/add_data" element={<Add_data/>} />
+                        <Route path="/login_email_status" element={<Login_Email_Status/>} />
                     </Routes>
                 </div>
             </div>

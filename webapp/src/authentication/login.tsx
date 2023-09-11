@@ -46,12 +46,16 @@ const Login: React.FC = () => {
         },
         body: JSON.stringify(formData),
       })
-        .then((response) => {
+        .then((response:any) => {
           if (!response.ok) {
             setMessage('Network error');
             throw new Error('Network response was not ok');
           }
-
+          if(response.hasOwnProperty('error')){
+            setMessage('Server error');
+            console.log(response.error);
+            return;
+        }
           return response.json(); //convert json to object
         })
         .then((data) => {

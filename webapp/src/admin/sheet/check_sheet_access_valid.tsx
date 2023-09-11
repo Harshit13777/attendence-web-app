@@ -12,7 +12,7 @@ export const Admin_sheet_access_valid =()=>{
       handleOnClick();//hide instruction when fetching
       try{
 
-        const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=checking_admin_sheet_access_valid}`, {
+        const response:any = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=checking_admin_sheet_access_valid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -21,13 +21,13 @@ export const Admin_sheet_access_valid =()=>{
             admin_sheet_id:sessionStorage.getItem('Admin_Sheet_Id')
           }),
         });
-        const data=await response.json();
-        if(data.hasOwnProperty('error')){
-
-          console.log(data.error);
+        if(response.hasOwnProperty('error')){
+          
+          console.log(response.error);
           setMessage('server error');
           return;
         }
+        const data=await response.json();
         if(!data.sheet_valid){ 
           setMessage('Sheet not Found');
           sessionStorage.removeItem('Admin_Sheet_Id');

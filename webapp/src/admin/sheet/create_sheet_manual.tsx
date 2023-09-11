@@ -20,7 +20,7 @@ const UserCreatedSheet=()=>{
         try{
           handleOnClick();//hide instructions while fetching
           
-          const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_admin_sheet_id_manual`, {
+          const response:any = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_admin_sheet_id_manual`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -30,13 +30,12 @@ const UserCreatedSheet=()=>{
               username:sessionStorage.getItem('username')
             }),
           });
-          const data=await response.json();
-          if(data.hasOwnProperty('error')){
-  
-            console.log(data.error);
-            setMessage('server error');
+          if(response.hasOwnProperty('error')){
+            setMessage('Server error');
+            console.log(response.error);
             return;
-          }
+        }
+          const data=await response.json();
           
           if(!data.sheet_valid){ 
             setMessage('Sheet not Found');
