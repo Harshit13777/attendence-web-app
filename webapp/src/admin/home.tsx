@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate,Link } from 'react-router-dom';
 import {Add_data} from './home_Add_data';
 import {Login_Email_Status} from './home_login_email_staus';
+import {Student_Img_Status} from  './home_student_img_status';
 
 import add_data_icon from '../.icons/add_data_icon.png';
 import setting from '../.icons/setting.png';
@@ -98,6 +99,14 @@ const NavBar=()=> {
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
+                            <img src='' alt="" />
+                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
+                                <Link to='student_img_status'>Check Student img status</Link>
+                            </span>
+                        </li>
+                        <li
+                            className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                                        mt-2 menu-items `} >
                             <img src={system_control} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 System Control
@@ -156,6 +165,7 @@ export const HomePage: React.FC = () => {
                     <Routes>
                         <Route path="/add_data" element={<Add_data/>} />
                         <Route path="/login_email_status" element={<Login_Email_Status/>} />
+                        <Route path="/student_img_status" element={<Student_Img_Status/>} />
                     </Routes>
                 </div>
             </div>

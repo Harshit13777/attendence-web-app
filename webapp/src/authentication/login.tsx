@@ -19,7 +19,11 @@ const Login: React.FC = () => {
     password: '',
     username:''
   });
+  const [open_setpassword_comp,set_opensetpassword_comp]=useState(false);
+  const [spassword,set_spassword]=useState('');
+  const [s_conformpassword,set_sconformpassword]=useState('');
 
+  
   const locat = useLocation();
   const navigat = useNavigate();
 
@@ -28,11 +32,9 @@ const Login: React.FC = () => {
     setSelectedRole(event.target.value);
   };
 
-  useEffect(() => {if(sessionStorage.getItem('username')){navigat('/admin/Checking_admin_sheet_exist')}}, [navigat, locat]);//if somebody logined 
-
   function handleSubmit(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     event.preventDefault();
-    const { email, password } = formData;
+    const { email, password,username } = formData;
     if (email === '' || password === '') {
       alert('Please fill in all fields');
     } else {
@@ -44,7 +46,7 @@ const Login: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({email,password,username}),
       })
         .then((response:any) => {
           if (!response.ok) {
@@ -62,33 +64,44 @@ const Login: React.FC = () => {
             setMessage(data.message);
             console.log(data.error);
 
-          setFormData({
+          
+            
+            
+            //for admin handle
+            if(selectedRole==='admin'){
+              
+              if(data.admin_sheet_Exists){
+                sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
+              }
+              if(data.admin_sheet_access_valid){
+                sessionStorage.setItem('admin_sheet_access_valid','Y');
+              }
+              sessionStorage.setItem('username',data.username);
+            setTimeout(() => {
+              navigat('/admin');
+              setMessage('loading...');
+            }, 5000);
+            
+            setFormData({
             email: '',
             password: '',
             username:''
           });
-
-          
-          sessionStorage.setItem('username',data.username);
-          
-          if(selectedRole==='admin'){
-
-            if(data.admin_sheet_Exists){
-              sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
-            }
-            if(data.admin_sheet_access_valid){
-              sessionStorage.setItem('admin_sheet_access_valid','Y');
-            }
-            setTimeout(() => {
-              navigat('/admin/home');
-              setMessage('loading...');
-            }, 5000);
             
-          }
+          }//for teacher and student handle
           else {
-            if(data.canlogin){
+            setMessage(data.message);
+            if(data.message=='Seting_password'){
+              set_opensetpassword_comp(true);
+              sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
+
+              return;
+            }
+            if(data.hasOwnProperty('Admin_Sheet_Id')){
+              sessionStorage.setItem('sheet_exist','T');
+              sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
               setTimeout(() => {
-                navigat(`${selectedRole}/home`);
+                navigat(`/${selectedRole}`);
                 setMessage('loading...');
               }, 5000);
             }
@@ -102,10 +115,73 @@ const Login: React.FC = () => {
     }
   }
 
+  function handle_setPasswordSubmit(){
+    const {email,password,username}=formData;
+    if(spassword==='' || s_conformpassword===''){
+      setMessage('Fill the form');
+      return;
+    }
+    if(spassword !==s_conformpassword){
+      setMessage('password not same');
+      return;
+    }
+    const Admin_Sheet_Id=sessionStorage.getItem('Admin_Sheet_Id');
+    if(!Admin_Sheet_Id){
+      setMessage('Reload this page');
+      return ;
+    }
+
+    fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=set_password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({newpassword:spassword,Admin_Sheet_Id,email}),
+    })
+      .then((response:any) => {
+        if (!response.ok) {
+          setMessage('Network error');
+          throw new Error('Network response was not ok');
+        }
+        if(response.hasOwnProperty('error')){
+          setMessage('Server error');
+          console.log(response.error);
+          return;
+      }
+        return response.json(); //convert json to object
+      })
+      .then((data) => {
+          setMessage(data.message);
+          console.log(data.error);
+
+          
+          
+          setMessage(data.message);
+
+          if(data.message=='password set'){
+            setMessage('Your new password set');
+            sessionStorage.setItem('sheet_exist','T');
+              setTimeout(() => {
+                navigat(`/${selectedRole}`);
+                setMessage('loading...');
+              }, 3000);
+            
+            return;
+        }
+          if(data.hasOwnProperty('sheet_access') && !data.sheet_access){
+              setMessage(data.message);
+              return;
+          }
+      });
+  }
+
   return (
     <>
       <div className="container mx-auto">
-        <div className="mt-8 p-8 max-w-lg m-auto h-[calc(100vh-50px)] pb-6 bg-gray-800 text-white rounded-md shadow-lg hover:shadow-xl transition duration-300">
+        
+        {//login comp
+          !open_setpassword_comp && 
+          <div className="mt-8 p-8 max-w-lg m-auto h-[calc(100vh-50px)] pb-6 bg-gray-800 text-white rounded-md shadow-lg hover:shadow-xl transition duration-300">
           <h1 className="text-3xl font-semibold text-center mb-4">LOGIN UP</h1>
           <form>
             <div className="mb-4">
@@ -191,8 +267,49 @@ const Login: React.FC = () => {
             </div>
 
           </form>
-        </div>
-        <p className="text-center mt-4">{message}</p>
+        </div>}
+        {//set password comp
+        open_setpassword_comp &&
+        <div>
+        <h1 className="text-3xl font-semibold text-center mb-4">set Password</h1>
+        <form onSubmit={handle_setPasswordSubmit}>
+          <div className="mb-4">
+            <label htmlFor="newPassword" className="block text-lg font-medium">
+              New Password
+            </label>
+            <input
+              type="password"
+              id="newPassword"
+              value={spassword}
+              onChange={(e) => set_spassword(e.target.value)}
+              className="w-full text-black px-3 py-2 border rounded-md"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="confirmPassword" className="block text-lg font-medium">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              value={s_conformpassword}
+              onChange={(e) => set_sconformpassword(e.target.value)}
+              className="w-full text-black px-3 py-2 border rounded-md"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
+          >
+            Set Password
+          </button>
+        </form>
+      </div>
+        }
+        <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 p-6 shadow-md">
+        <p className="text-xl">{message}</p>
+      </div>
       </div>
     </>
   );
