@@ -27,7 +27,7 @@ const ForgotPassword: React.FC = () => {
 
   const handleForgetPasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if(email==='' && selectedRole !=='')
+    if(email==='' || selectedRole !=="")
       setMessage('Please fill the form');
     try {
       const response:any = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=send-forget-password-email`, {
@@ -36,7 +36,7 @@ const ForgotPassword: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,username
+          email,username,selectedRole
         }),
       });
 
@@ -64,6 +64,7 @@ const ForgotPassword: React.FC = () => {
       setMessage('New password and confirm password do not match.');
       return;
     }
+    
         const response:any = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=change-password`, {
           method: 'POST',
           headers: {
@@ -83,14 +84,14 @@ const ForgotPassword: React.FC = () => {
       }
         const data = await response.json();
         setMessage(data.message);
-        console.log(data.error);
+        
 
         // For this example, we'll assume the API call was successful and display a success message
       
         setNewPassword('');
         setConfirmPassword('');
         setTimeout(() => {
-          navigat(`/${selectedRole}/login`);
+          navigat(`/login`);
           setMessage('Loading...');
         }, 3000);
     

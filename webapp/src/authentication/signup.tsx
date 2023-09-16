@@ -74,7 +74,7 @@ const Signup: React.FC = () => {
 
           
           setTimeout(() => {
-            navigat('/admin/login');
+            navigat('/login');
             setMessage('loading...');
           }, 5000);
         });
@@ -156,7 +156,7 @@ const Signup: React.FC = () => {
               Submit
             </button>
             <div className="mt-4 w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 flex items-center justify-center">
-              <Link to="/admin/login">
+              <Link to="/login">
                 Login
               </Link>
             </div>

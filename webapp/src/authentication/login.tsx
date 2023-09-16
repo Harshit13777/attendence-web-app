@@ -37,7 +37,8 @@ const Login: React.FC = () => {
     const { email, password,username } = formData;
     if (email === '' || password === '') {
       alert('Please fill in all fields');
-    } else {
+    } 
+    else {
       setMessage('loging...');
       // Perform login logic here
 
@@ -46,12 +47,11 @@ const Login: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({email,password,username}),
+        body: JSON.stringify({email,password,username,selectedRole}),
       })
         .then((response:any) => {
           if (!response.ok) {
             setMessage('Network error');
-            throw new Error('Network response was not ok');
           }
           if(response.hasOwnProperty('error')){
             setMessage('Server error');
@@ -79,14 +79,8 @@ const Login: React.FC = () => {
               sessionStorage.setItem('username',data.username);
             setTimeout(() => {
               navigat('/admin');
-              setMessage('loading...');
-            }, 5000);
+            }, 3000);
             
-            setFormData({
-            email: '',
-            password: '',
-            username:''
-          });
             
           }//for teacher and student handle
           else {
@@ -98,17 +92,30 @@ const Login: React.FC = () => {
               return;
             }
             if(data.hasOwnProperty('Admin_Sheet_Id')){
+
+              sessionStorage.setItem('email',email);
               sessionStorage.setItem('sheet_exist','T');
               sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
+              
+              if(selectedRole==='student'){
+                //check if sheet db has student img or not if not then take him to upload comp 
+                if(!data.student_img_upload){
+                  sessionStorage.setItem('upload_img','T');
+                }
+              }
               setTimeout(() => {
-                navigat(`/${selectedRole}`);
-                setMessage('loading...');
-              }, 5000);
+                navigat(`/${selectedRole}`);   
+              }, 3000);
             }
             else{
-                setMessage('Error: contact to admin');
-              }
+              setMessage('Error: contact to admin');
+            }
           }
+          setFormData({
+          email: '',
+          password: '',
+          username:''
+        });
           
 
         });
@@ -136,12 +143,11 @@ const Login: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({newpassword:spassword,Admin_Sheet_Id,email}),
+      body: JSON.stringify({newpassword:spassword,Admin_Sheet_Id,email,selectedRole}),
     })
       .then((response:any) => {
         if (!response.ok) {
           setMessage('Network error');
-          throw new Error('Network response was not ok');
         }
         if(response.hasOwnProperty('error')){
           setMessage('Server error');
@@ -160,11 +166,10 @@ const Login: React.FC = () => {
 
           if(data.message=='password set'){
             setMessage('Your new password set');
+            sessionStorage.setItem('email',email);
             sessionStorage.setItem('sheet_exist','T');
-              setTimeout(() => {
-                navigat(`/${selectedRole}`);
-                setMessage('loading...');
-              }, 3000);
+            sessionStorage.setItem('upload_img','T');
+              
             
             return;
         }
@@ -256,12 +261,12 @@ const Login: React.FC = () => {
             </button>
 
             <div className="mt-4 w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 flex items-center justify-center">
-              <Link to="/admin/forget_password" className=''>
+              <Link to="/forget_password" className=''>
                 Forget Password
               </Link>
             </div>
             <div className="mt-4 w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 flex items-center justify-center">
-              <Link to="/admin/signup">
+              <Link to="/signup">
                 Signup
               </Link>
             </div>

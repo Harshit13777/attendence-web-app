@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Link, Route, Routes,useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Link, Route,Routes,useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { HomePage } from '../home';
 
@@ -6,6 +6,7 @@ export const Admin_sheet_access_valid =()=>{
     const [show_instruction,set_show]=useState(false);
     const handleOnClick = () => set_show((prevState) => !prevState);
     const [message,setMessage]=useState('');
+    const navigat=useNavigate();
     
     const fetch_check_sheet_access=async()=>{
       setMessage('checking...');  
@@ -40,7 +41,9 @@ export const Admin_sheet_access_valid =()=>{
         setMessage(data.message);
         
           sessionStorage.setItem('admin_sheet_access_valid','Y');
-            return (<><HomePage/></>)
+          setInterval(()=>{
+            navigat('/admin');
+          },1000);
         
       }
       catch (error:any) {

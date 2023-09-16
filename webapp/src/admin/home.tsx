@@ -6,10 +6,10 @@ import {Student_Img_Status} from  './home_student_img_status';
 
 import add_data_icon from '../.icons/add_data_icon.png';
 import setting from '../.icons/setting.png';
-import logout from "../.icons/logout.png";
 import overview from "../.icons/overview.png";
-import system_control from "../.icons/system_control.png";
+import logout from "../.icons/logout.png";
 import navbar_open from "../.icons/navbar.png";
+import system_control from "../.icons/system_control.png";
 import check_email from '../.icons/check_email_status.png';
 
 

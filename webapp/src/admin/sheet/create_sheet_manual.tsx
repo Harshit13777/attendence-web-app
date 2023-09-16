@@ -52,8 +52,8 @@ const UserCreatedSheet=()=>{
               setMessage('Sheet created');
             
               setTimeout(() => {
-                navigat('/admin/home');
-                setMessage('loading...');
+                navigat('/admin');
+               
               }, 3000);
 
 
