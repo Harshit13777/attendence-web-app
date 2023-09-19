@@ -9,6 +9,7 @@ import  Signup  from './authentication/signup';
 import  Login  from './authentication/login';
 import  Forget_password from './authentication/forget_password';
 import { Upload_Img } from './student/Upload_Img';
+import Add_Attendence_Sheet from "./teacher/Add_Attendence_Sheet";
 
 
 
@@ -21,7 +22,7 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         
-        <Route path="/" element={<Upload_Img/>} />
+        <Route path="/" element={<Add_Attendence_Sheet/>} />
         <Route path="/signup" element={<Signup/>} />
         <Route path="/forget_password" element={<Forget_password/>} />
         <Route path="/login" element={<Login/>} />
