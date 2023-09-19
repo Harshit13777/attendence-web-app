@@ -2,17 +2,24 @@ import { BrowserRouter as Router, Link, Route, Routes,useNavigate } from 'react-
 import React, { useState, useEffect } from 'react';
 
 import add_icon from '../.icons/add.png';
+import { loadavg } from 'os';
 
 const Add_Attendence_Sheet=()=>{
 
   const [dataRows, setDataRows] = useState<string[]>(['']);
   const [message, setMessage] = useState('');
   const navigate=useNavigate();
+  const pre_sheet_arr_json=localStorage.getItem('Attendence_Sheet_Name');
 
 
   const handleInputChange = (index: number, value: string) => {
+    
     const updatedDataRows = [...dataRows];
-    updatedDataRows[index] = value;
+    if(updatedDataRows[index]===''){
+      if(value===' ')return;//if first word is space then return
+      value=value.toUpperCase();
+    }
+    updatedDataRows[index] = value.toLowerCase();
     setDataRows(updatedDataRows);
   };
   
@@ -41,14 +48,62 @@ const Add_Attendence_Sheet=()=>{
     
   }
 
-  function submitData  ()
-  {
+  const same_subject_found=()=>{
+
+    const binarySearchContains=(pre_sheet_arr:string[], elem:string)=> {
+    let left = 0;
+    let right = pre_sheet_arr.length - 1;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+
+      // Use the localeCompare method to compare strings in a case-insensitive manner
+      const comparison = pre_sheet_arr[mid].localeCompare(elem, undefined, {
+        sensitivity: 'base',
+      });
+
+      if (comparison === 0) {
+        // Found a match
+        return true;
+      } else if (comparison < 0) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+  // Element not found
+  return false;
+    }
+    const pre_sheet_name_json=sessionStorage.getItem('Attendence_Sheet_Name');
     
-    
+    if(!pre_sheet_name_json){
+      return;
+    }
+    const pre_sheet_arr =JSON.parse(pre_sheet_name_json);
+
+
+    dataRows.forEach((elem:string) => {
+      if(binarySearchContains(pre_sheet_arr, elem)){
+        setMessage(`${elem} is already contain in dataRows: `);
+        return true;
+      }
+    });
+    return false;
+
+  }
+
+  function submitData  (){ 
     if(!isValidData()){
       setMessage('Error:Fill the empty value');
       return;
     }
+
+    if(localStorage.getItem('Attendence_Sheet_Name') && same_subject_found()){
+      return;
+    } 
+
+
     let Admin_Sheet_Id=sessionStorage.getItem('Admin_Sheet_Id');
     let email=sessionStorage.getItem('email');
     fetch(`${sessionStorage.getItem('api')}?page=teacher&action=add_attendence_sheet`, {
