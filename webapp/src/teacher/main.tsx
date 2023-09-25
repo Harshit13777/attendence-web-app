@@ -33,8 +33,8 @@ export const Main: React.FC = () => {
   
 
   return (<> 
-            {loading_comp && <Sync setloading/>}
-            {!loading_comp && <HomePage  setMessage={setMessage} />}
+            {loading_comp && <Sync setloading={setloading}/>}
+            {!loading_comp && <HomePage />}
         </>);
 
   }
@@ -45,6 +45,7 @@ export const Main: React.FC = () => {
    
     
     //syncing attendence sheet name and student img_ids and update in local storage
+   /*
   useEffect(()=>{
 
     async function sync_attendence_sheet_name(){
@@ -185,7 +186,8 @@ export const Main: React.FC = () => {
         sync_student_imgs(pre_student_ids)
     }
   },[]);
-
+*/
+setloading(false);
   return (<> 
             
             {message=='' && <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">

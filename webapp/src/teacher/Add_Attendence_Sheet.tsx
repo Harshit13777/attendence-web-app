@@ -4,13 +4,12 @@ import React, { useState, useEffect } from 'react';
 import add_icon from '../.icons/add.png';
 import { loadavg } from 'os';
 
-const Add_Attendence_Sheet=()=>{
+const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
 
   const [dataRows, setDataRows] = useState<string[]>(['']);
   const [message, setMessage] = useState('');
   const navigate=useNavigate();
-  const pre_sheet_arr_json=localStorage.getItem('Attendence_Sheet_Name');
-
+ 
 
   const handleInputChange = (index: number, value: string) => {
     
@@ -75,13 +74,6 @@ const Add_Attendence_Sheet=()=>{
   // Element not found
   return false;
     }
-    const pre_sheet_name_json=sessionStorage.getItem('Attendence_Sheet_Name');
-    
-    if(!pre_sheet_name_json){
-      return;
-    }
-    const pre_sheet_arr =JSON.parse(pre_sheet_name_json);
-
 
     dataRows.forEach((elem:string) => {
       if(binarySearchContains(pre_sheet_arr, elem)){
