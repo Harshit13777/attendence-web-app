@@ -1,16 +1,32 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
+import { useNavigate } from 'react-router-dom';
 
-export const Upload_Img: React.FC = () => {
+export const Upload_Img= () => {
   const webcamRef = useRef<Webcam | null>(null);
-  const imgref = useRef<HTMLImageElement|null>(null);
   const [message, setMessage] = useState('');
   const [detectedFaces, setDetectedFaces] = useState<{ img: CanvasImageSource; descriptor: Float32Array }[]>([]);
   const [selectedFaceIndex, setSelectedFaceIndex] = useState<number | null>(null);
-  const [save,setsave]=useState(false);
-  const [i,seti]=useState(0);
   const [interval_id,setIntervalid]=useState<NodeJS.Timer|null>(null);
+  const navigate=useNavigate();
+
+  const [selectedFaces, setSelectedFaces] = useState<number[]>([]);
+
+const isSelected = (index: number) => selectedFaces.includes(index);
+
+const handleCheckboxChange = (index: number) => {
+  if (isSelected(index)) {
+    // Face is already selected, so deselect it
+    setDetectedFaces(detectedFaces.filter((i)=>i !== detectedFaces[index]));
+    setSelectedFaces(selectedFaces.filter((i) => i !== index));
+  } else {
+    // Face is not selected, so select it
+    setSelectedFaces([...selectedFaces, index]);
+  }
+};
+
+
   useEffect(() => {
     const loadModels = async () => {
       await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
@@ -22,45 +38,30 @@ export const Upload_Img: React.FC = () => {
     setMessage('Capture your img')
   }, []);
 
+  const handleFaceSelect = (index: number) => {
+    setSelectedFaceIndex(index);
+  };
+
   const onDetect = async () => {
-    if (webcamRef.current && webcamRef.current.getScreenshot() && imgref.current) {
+    if (webcamRef.current && webcamRef.current.getScreenshot() ) {
       const image: any = webcamRef.current.getScreenshot();
       const img = new Image() as HTMLImageElement;
       img.src = image;
-      
-      
-
-      if(save){
-        
-          seti((prev)=>prev+i);
-          const detections = await faceapi
-            .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
-            .withFaceLandmarks().withFaceDescriptors();
-            
-            
-          
-          if (detections.length > 0) {
-          
-            const canvasDescriptor = detections.map((detection) => ({
-              img: drawResizedImage(img, detection.detection.box),
-              descriptor: detection.descriptor,
-            }));
-            setDetectedFaces((prev) => [...prev, ...canvasDescriptor]);
-          }
-        
-        
+      setMessage('detecting...')
+      const detections = await faceapi
+        .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks().withFaceDescriptors();
+                
+      if (detections.length > 0) {
+      setMessage('Detected');
+        const canvasDescriptor = detections.filter((detection)=>detection.detection.score>0.9 && detection.detection.classScore>0.9).map((detection) => ({
+          img: drawResizedImage(img, detection.detection.box),
+          descriptor: detection.descriptor,
+        }));
+        setDetectedFaces((prev) => [...prev, ...canvasDescriptor]);
       }
-      else{
-
-        const detections = await faceapi
-        .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions());
-        if (detections.length > 0) 
-          drawLandmark(img,detections);
-        else
-          imgref.current.src=img.src
-        
-      } 
     }
+    setMessage('Recapturing...')
   };
 
 
@@ -85,23 +86,12 @@ export const Upload_Img: React.FC = () => {
 
     return canvas;
   };
-  const drawLandmark=(img:HTMLImageElement,detections:faceapi.FaceDetection[])=>{
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    const displaySize = { width: img.width, height: img.height }
-    faceapi.matchDimensions(canvas, displaySize);
-    context?.drawImage(img,0,0,img.width,img.height);
-    
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    faceapi.draw.drawDetections(canvas, resizedDetections);
-    if(imgref.current)
-      imgref.current.src=canvas.toDataURL();
-  }
-
+ 
   const start=()=>{
     const id = setInterval(()=>{
+        if(webcamRef.current)
         onDetect();
-      },2000);
+      },1000);
 
     setIntervalid(id);
     return()=>{
@@ -118,21 +108,32 @@ export const Upload_Img: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      start();
-    }, 2500);
-    
-  },[webcamRef.current]);
+  useEffect(() => {  
+    if(webcamRef.current){
 
-  useEffect(()=>{
-    if(detectedFaces.length===7)
+      setTimeout(() => {
+        start();
+      }, 2500);
+    }
+    else{
+      setMessage('Choose your photo');
       stopInterval();
-  },[detectedFaces]);
+    }
+  },[webcamRef.current])
 
 
-  const handleSendImage = (selectedIndex: number) => {
-    // Implement your logic to send the selected image here
+  const handleSendImage = () => {
+    const label=['m','v','s','b','y','a','r','a','c','v'];
+    
+    const objs=selectedFaces.map((index,i)=>{
+      return {label:label[i],descriptor:Array.from(detectedFaces[index].descriptor)}
+    })
+    const json=JSON.stringify(objs);
+
+    sessionStorage.setItem('student_imgs_json',json);
+    setMessage('done');
+   
+    
   };
 
   return (
@@ -143,54 +144,57 @@ export const Upload_Img: React.FC = () => {
         </div>
       )}
       
-        <div className="face-container flex flex-wrap justify-center">
-          {detectedFaces.map((obj, index) => (
-            <div
-              key={index}
-              className={`face-box m-2`}
-            >
-              <img
-                src={(obj.img as HTMLCanvasElement)?.toDataURL()}
-                alt={`Face ${index}`}
-                className={`w-32 h-32`}
-              />
-            </div>
-          ))}
-        </div>
+      <div className="face-container flex flex-wrap justify-center">
+  {detectedFaces.map((obj, index) => (
+    <div
+      key={index}
+      className={`face-box ${isSelected(index) ? 'selected' : ''} m-2`}
+      onClick={() => handleFaceSelect(index)}
+    >
+      <input
+        type="checkbox"
+        checked={isSelected(index)}
+        onChange={() => handleCheckboxChange(index)}
+      />
+      <img
+        src={(obj.img as HTMLCanvasElement).toDataURL()}
+        alt={`Face ${index}`}
+        className={`w-32 h-32 cursor-pointer ${
+          isSelected(index) ? 'border-4 border-blue-500' : ''
+        }`}
+      />
+    </div>
+  ))}
+</div>
+
   
         {selectedFaceIndex !== null && (
+          <>
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 block mx-auto"
-            onClick={() => handleSendImage(selectedFaceIndex)}
+            className={`${message==='syncing...' && 'hidden'} fixed top-3/4  left-1/4 right-1/4   bg-blue-700 hover:bg-blue-300 hover:text-blue-700 text-white font-bold py-2 px-4 rounded mt-4 block mx-auto`}
+            onClick={() => {setMessage('syncing...');handleSendImage()}}
           >
             Send Face {selectedFaceIndex + 1}
           </button>
+          
+          <div className={`${message==='syncing...' ?'': 'hidden'} flex items-center justify-center`}>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+            <div className="ml-4 text-xl text-gray-700">Loading...</div>
+          </div>
+            </>
         )}
 
-
-      <div className={` relative ${detectedFaces.length!<=5 && 'hidden'}`} >
+      {
+        detectedFaces.length<22 &&
+      <div className={` relative `} >
         <Webcam
-          className={`w-screen md:h-5/6 opacity-5`}
+          className={`w-screen md:h-5/6 opacity-100`}
           ref={webcamRef}
           audio={false}
           screenshotFormat="image/jpeg"
-        />
-        <div className={` absolute top-0`} >
-          <img  ref={imgref}  alt="" 
-          className={`w-screen md:h-5/6 `}/>
-        </div>
-        
+          />        
       </div >
-        
-      
-
-        <button
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold px-auto mx-auto`}
-          onClick={()=>{setsave(true);stopInterval();start();setMessage('saving...')}}
-          >
-          Capture Photo
-        </button>
-        
+      }  
     </div>
   );
 };

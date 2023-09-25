@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import  Signup  from './authentication/signup';
 import  Login  from './authentication/login';
 import  Forget_password from './authentication/forget_password';
-import { Upload_Img } from './student/Upload_Img';
+import { Upload_Img } from './teacher/example';
 import Take_Attendence from "./teacher/Take_attendence";
 
 

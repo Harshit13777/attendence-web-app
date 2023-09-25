@@ -39,7 +39,7 @@ export const Upload_Img= () => {
                 
       if (detections.length > 0) {
       setMessage('Detected');
-        const canvasDescriptor = detections.map((detection) => ({
+        const canvasDescriptor = detections.filter((detection)=>detection.detection.score>0.9).map((detection) => ({
           img: drawResizedImage(img, detection.detection.box),
           descriptor: detection.descriptor,
         }));
