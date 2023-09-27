@@ -43,13 +43,6 @@ const NavBar=()=> {
                             </span>
                         </li>
                         
-                      
-                        
-                       
-                    
-                       
-
-            
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer  text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-10 menu-items `} >

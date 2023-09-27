@@ -154,8 +154,9 @@ const HomePage=({setMessage}:any)=>{
                 <div className='w-6/7 ml-16'>
                     <Routes>
                         <Route path="/add_attendence_sheet" element={<Add_Attendence_Sheet pre_sheet_arr={sheet_name_arr}/>} />
-                        <Route path="/take_attendence" element={<Take_Attendence student_imgs_json={student_imgs_json}/>} />
-                    </Routes>                </div>
+                        <Route path="/take_attendence" element={<Take_Attendence student_imgs_json={student_imgs_json} sheet_name={sheet_name_arr}/>} />
+                    </Routes>                
+                </div>
             </div>
         
     </>

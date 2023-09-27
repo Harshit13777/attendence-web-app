@@ -5,7 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import { Set } from 'typescript';
 import { arrayBuffer } from 'stream/consumers';
 
-export const Take_Attendence = ({student_imgs_json}:any) => {
+interface propp {
+  student_imgs_json:string,
+  sheet_name:string[]
+}
+
+export const Take_Attendence:React.FC<propp> = ({student_imgs_json,sheet_name}) => {
   const webcamRef = useRef<Webcam | null>(null);
   const imgref = useRef<HTMLImageElement | null>(null);
   const [message, setMessage] = useState('');
@@ -13,8 +18,13 @@ export const Take_Attendence = ({student_imgs_json}:any) => {
   const navigate = useNavigate();
   const [interval_id,setIntervalid]=useState<NodeJS.Timer|null>(null);
   const [faceMatcher, setFaceMatcher] = useState<faceapi.FaceMatcher | null>(null);
-  const [RollNo,setRollNo]=useState<Set<string>>(new Set<string>());
- 
+  const [RollNo,setRollNo]=useState<Set<String>>(new Set<string>());
+  const [selectedSheet, setSelectedSheet] = useState('');
+
+  const handleSelectChange = (e:any) => {
+    setSelectedSheet(e.target.value);
+  };
+
   
   useEffect(() => {
     const loadModels = async () => {
@@ -24,9 +34,9 @@ export const Take_Attendence = ({student_imgs_json}:any) => {
       await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
       //parse json into object array
      
-        const json=sessionStorage.getItem('student_imgs_json');
-        if (!json){console.log('not json');return}
-      let imgs = JSON.parse(json);     
+       // const json=sessionStorage.getItem('student_imgs_json');
+       // if (!json){console.log('not json');return}
+      let imgs = JSON.parse(student_imgs_json);     
       const labeledFaceDescriptors = imgs.map((item:{label:number,descriptor:number[]}) => {      
           //console.log(new Float32Array(item.img));   
         return new faceapi.LabeledFaceDescriptors(item.label+'', [new Float32Array(item.descriptor)]);
@@ -165,6 +175,61 @@ export const Take_Attendence = ({student_imgs_json}:any) => {
   };
   
  
+  const handlesenddata=()=>{
+    if(selectedSheet===''){
+      setMessage('select subject name');
+      return;
+    }
+    if(RollNo.size===0){
+      setMessage('Detect a Student');
+      return;
+    }
+
+    const email=sessionStorage.getItem('email');
+    fetch(`${sessionStorage.getItem('api')}?page=teacher&action=upload_attendence`, {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({email,Admin_Sheet_Id:sessionStorage.getItem('Admin_Sheet_Id'),roll_nos:RollNo}),
+    })
+      .then((response:any) => {
+        if (!response.ok) {
+          setMessage('Network error');
+        }
+        if(response.hasOwnProperty('error')){
+          setMessage('Server error');
+          console.log(response.error);
+          return;
+        }
+        return response.json(); //convert json to object
+      })
+      .then((data) => {
+
+        //handle sheet errror
+        if(data.hasOwnProperty('sheet_access') && !data.sheet_access){
+          setMessage(data.message);
+          sessionStorage.removeItem('sheet_exist');//remove sheet exist from main if not valid
+          navigate('/teacher');
+          return;
+        }
+
+        //if img is added
+        if(data.hasOwnProperty('attendence_added')){
+          setMessage(data.message);
+          setInterval(()=>{
+            navigate('/teacher');
+          },1000);
+          return;
+        } 
+        //else
+        setMessage(data.message);
+
+      
+      });
+
+
+  }
   
   return (
     <div>
@@ -223,13 +288,29 @@ export const Take_Attendence = ({student_imgs_json}:any) => {
             <h3>{id as any}</h3>
           </li>
         ))}
-
-
         </div>
         
+        <div>
+          <h3>Select a Subject:</h3>
+          <select onChange={handleSelectChange} value={selectedSheet}>
+            <option value="">Select an option</option>
+            {sheet_name.map((sheetName, index) => (
+              <option key={index} value={sheetName}>
+                {sheetName}
+              </option>
+            ))}
+          </select>
+          {selectedSheet && (
+            <div>
+              <h4>Selected Sheet: {selectedSheet}</h4>
+              {/* You can render additional content related to the selected sheet here */}
+            </div>
+          )}
+        </div>
+
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 block mx-auto"
-          // onClick={}
+          onClick={handlesenddata}
         >
           Send Face
         </button>
