@@ -127,8 +127,7 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:{pre_sheet_arr:string[]|null})=>{
           if(data.hasOwnProperty('sheet_added')){
             setMessage(data.message);
             //convet datarow into json then add in localstorge
-            const prev_data=localStorage.getItem('Attendence_Sheet_Name')
-            if(!prev_data){
+            if(!pre_sheet_arr){
               const sheet_name=JSON.stringify(dataRows);
               localStorage.setItem('Attendence_Sheet_Name',sheet_name);
               setInterval(()=>{
@@ -136,10 +135,10 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:{pre_sheet_arr:string[]|null})=>{
               })
             }
             else{
-              let prev_sheet=JSON.parse(prev_data);
-              prev_sheet.push(dataRows);
-              let update_data=JSON.stringify(prev_sheet);
-              localStorage.setItem('Attendence_Sheet_Name',update_data);
+              
+              //combine new name with previous array then add in local storge 
+              let update_data=[pre_sheet_arr,dataRows];
+              localStorage.setItem('Attendence_Sheet_Name',JSON.stringify(update_data));
 
             }
             return;
