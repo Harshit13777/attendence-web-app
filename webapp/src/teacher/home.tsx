@@ -129,24 +129,31 @@ const HomePage=({setMessage}:any)=>{
 //syncing attendence sheet name in local storage
 
     const navigate =useNavigate();
-    const sheet_name_json=localStorage.getItem('Attendence_Sheet_Name')
+    const [sheet_name_arr,set_Sheet_name_arr]=useState<string[]|null>(null)
     const student_imgs_json=localStorage.getItem('Student_Imgs');
-   
-    if(!sheet_name_json){
-      return (
-          <Add_Attendence_Sheet pre_sheet_arr={['']}/>
-        
-      )
-    }
-    if(!student_imgs_json){
-        return(<><h1>No Student Imgs found</h1></>)
-    }
+    
+    useEffect(()=>{
+        const sheet_name_json=localStorage.getItem('Attendence_Sheet_Name')
+        if(sheet_name_json){
+            const sheet_arr=JSON.parse(sheet_name_json);
+            set_Sheet_name_arr(sheet_arr)
+        }
+    },[])
 
-    const sheet_name_arr:string[]=JSON.parse(sheet_name_json);
+
   return (
     <>
-       
-            <div className='flex'>
+
+            {
+                !sheet_name_arr
+                ?
+                <Add_Attendence_Sheet pre_sheet_arr={['']}/>
+                :
+                !student_imgs_json
+                    ?
+                    (<><h1>No Student Imgs found</h1></>)
+                    :   
+                    <div className='flex'>
                 <div className='w-1/7'>
                     <NavBar/>
                 </div>
@@ -157,7 +164,9 @@ const HomePage=({setMessage}:any)=>{
                         <Route path="/take_attendence" element={<Take_Attendence student_imgs_json={student_imgs_json} sheet_name={sheet_name_arr}/>} />
                     </Routes>                
                 </div>
-            </div>
+                    </div>
+            }
+
         
     </>
   )

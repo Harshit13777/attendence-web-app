@@ -10,7 +10,7 @@ export const Main: React.FC = () => {
   const [loading_comp,setloading]=useState(true);
   
 //if  admin not login in 
-  if (!sessionStorage.getItem('email')) {
+  if (!sessionStorage.getItem('email')) {//token + email 
     
     setInterval(()=>{
       navigate('/login');},10000);

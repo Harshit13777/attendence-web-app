@@ -4,15 +4,14 @@ import React, { useState, useEffect } from 'react';
 import add_icon from '../.icons/add.png';
 import { loadavg } from 'os';
 
-const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
+const Add_Attendence_Sheet=({pre_sheet_arr}:{pre_sheet_arr:string[]|null})=>{
 
   const [dataRows, setDataRows] = useState<string[]>(['']);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState<string[]>([]);
   const navigate=useNavigate();
  
 
   const handleInputChange = (index: number, value: string) => {
-    
     const updatedDataRows = [...dataRows];
     if(updatedDataRows[index]===''){
       if(value===' ')return;//if first word is space then return
@@ -22,6 +21,11 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
     setDataRows(updatedDataRows);
   };
   
+  useEffect(()=>{
+    if(message.length>3){
+      setMessage([]);
+    }
+  })
 
   const handleAddRow = () => {
    setDataRows([...dataRows, '']);
@@ -47,7 +51,8 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
     
   }
 
-  const same_subject_found=()=>{
+  const same_subject_found=(pre_sheets: string[])=>{
+    
 
     const binarySearchContains=(pre_sheet_arr:string[], elem:string)=> {
     let left = 0;
@@ -76,8 +81,8 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
     }
 
     dataRows.forEach((elem:string) => {
-      if(binarySearchContains(pre_sheet_arr, elem)){
-        setMessage(`${elem} is already contain in dataRows: `);
+      if(binarySearchContains(pre_sheets, elem)){
+        setMessage((prev)=>[...prev,`${elem} already taken: `]);
         return true;
       }
     });
@@ -87,11 +92,11 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
 
   function submitData  (){ 
     if(!isValidData()){
-      setMessage('Error:Fill the empty value');
+      setMessage((prev)=>[...prev,'Error:Fill the empty value']);
       return;
     }
 
-    if(localStorage.getItem('Attendence_Sheet_Name') && same_subject_found()){
+    if( pre_sheet_arr  && same_subject_found(pre_sheet_arr)){
       return;
     } 
 
@@ -107,11 +112,11 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
     })
       .then((response:any) => {
         if (!response.ok) {
-          setMessage('Network error');
+          setMessage((prev)=>[...prev,'Network error']);
           console.log('Network response was not ok');
         }
         if(response.hasOwnProperty('error')){
-          setMessage('Server error');
+          setMessage((prev)=>[...prev,'Server error']);
           console.log(response.error);
           return;
       }
@@ -142,7 +147,7 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
         
           if(data.hasOwnProperty('sheet_valid')){
             sessionStorage.removeItem('sheet_valid');
-            setMessage('sheet not valid contact to admin');
+            setMessage((prev)=>[...prev,'sheet not valid contact to admin']);
             return;
           }
           setMessage(data.message);
@@ -154,15 +159,45 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
   
   return (
     <div className="p-4 md:p-8">
-      <div className="flex flex-col items-center justify-center h-20 bg-lime-50 pb-2">
+      
+      <div className="flex flex-col  justify-cente  bg-lime-50 p-5 m-5 w-3/6">
+        {pre_sheet_arr && (
+          <div className="mb-4 ">
+            <h1 className="text-2xl font-bold  text-gray-900">Already Added Subjects</h1>
+          </div>
+        )}
+
+        {pre_sheet_arr &&
+        
+        
+           
+            pre_sheet_arr.map((subject, i) => (
+                <li className="mb-3 text-lg font-semibold">
+                  {subject}
+                </li>
+            ))
+          
+        
+          
+        
+          }
+      </div>
+      
+      <div className="flex flex-col items-center justify-center h-20 bg-lime-50 pb-2 ">
         <h1 className="text-4xl font-bold text-gray-900">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-950">
-            Add Attendence Sheets
+            Add a New Attendence Sheet
           </span>
         </h1>
       </div>
 
-      <div className="flex flex-row justify-between mb-4 mt-2">
+      
+      
+
+      
+
+
+      <div className="flex flex-row justify-between mb-4 mt-2 ">
         <div className="flex">
           <img
             src={add_icon}
@@ -173,11 +208,11 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
         </div>
       </div>
 
-      <div className="overflow-x-auto mb-4">
+      <div className="overflow-x-auto mb-4 bg-lime-50">
         <table className="w-full table-auto">
           <thead>
             <tr>
-              <th className="px-4 py-2">Enter Subjects Name</th>
+              <th className="px-4 py-2 font-bold text-xl">Enter Subjects Name</th>
             </tr>
           </thead>
           <tbody>
@@ -213,11 +248,11 @@ const Add_Attendence_Sheet=({pre_sheet_arr}:any)=>{
         Create Attendence Sheet
       </button>
 
-      {message !== '' && (
+      {message.map((message,i)=> (
         <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
           <p className="text-sm">{message}</p>
         </div>
-      )}
+      ))}
     </div>
   );
 };

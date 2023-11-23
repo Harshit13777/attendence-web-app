@@ -27,6 +27,9 @@ const Login: React.FC = () => {
   const locat = useLocation();
   const navigat = useNavigate();
 
+  function logout(){
+    sessionStorage.clear();
+  }
 
   const handleRoleChange = (event:any) => {
     setSelectedRole(event.target.value);
@@ -41,7 +44,13 @@ const Login: React.FC = () => {
     else {
       setMessage('loging...');
       // Perform login logic here
-
+      sessionStorage.setItem('Admin_Sheet_Id','Admin_Sheet_Id');
+      sessionStorage.setItem('admin_sheet_access_valid','Y');
+      sessionStorage.setItem('username','Ram');
+      setTimeout(() => {
+        navigat('/admin/');
+      }, 3000);
+      /*
       fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=login`, {
         method: 'POST',
         headers: {
@@ -119,6 +128,7 @@ const Login: React.FC = () => {
           
 
         });
+        */
     }
   }
 
