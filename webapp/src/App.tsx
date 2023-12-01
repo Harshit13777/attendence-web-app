@@ -11,8 +11,7 @@ import  Forget_password from './authentication/forget_password';
 import { Upload_Img } from './teacher/example';
 import Take_Attendence from "./teacher/Take_attendence";
 import Add_Attendence_Sheet from "./teacher/Add_Attendence_Sheet";
-
-
+import { Sheet_invalid } from "./authentication/sheetinvalid";
 
 
 const App: React.FC = () => {
@@ -24,17 +23,16 @@ const App: React.FC = () => {
       <Routes>
         
         {/* for admin 
-        <Route path="/u" element={<Upload_Img/>} />
-        <Route path="/add_sheet" element={<Take_Attendence student_imgs_json={''} sheet_name_arr={}/>} />
       */}
-      <Route path="/add_sheet" element={<Add_Attendence_Sheet pre_sheet_arr={['a','b']}/>} />
+        <Route path="/test" element={<Upload_Img/>} />
         <Route path="/login" element={<Login/>} />
         <Route path="/signup" element={<Signup/>} />
         <Route path="/forget_password" element={<Forget_password/>} />
+        <Route path="/sheet invalid" element={<Sheet_invalid/>} />
 
         <Route path="/admin/*" element={<Admin/>} />
-        <Route path="/teacher/*" element={<Teacher />} />
-        <Route path="/student/*" element={<Student />} />
+        <Route path="/teacher/*" element={<Teacher/>} />
+        <Route path="/student/*" element={<Student/>} />
       </Routes>
     </Router>
   );

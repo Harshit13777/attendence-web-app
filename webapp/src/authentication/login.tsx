@@ -44,13 +44,14 @@ const Login: React.FC = () => {
     else {
       setMessage('loging...');
       // Perform login logic here
-      sessionStorage.setItem('Admin_Sheet_Id','Admin_Sheet_Id');
-      sessionStorage.setItem('admin_sheet_access_valid','Y');
-      sessionStorage.setItem('username','Ram');
+      sessionStorage.setItem('Admin_Sheet_Id','113ynMauHpX_XTgu9tP9PPJieVS90qZK8Y_P1t1NUtKo');
+      sessionStorage.setItem('sheet_exist','Y');
+      sessionStorage.setItem('email','Ram');
       setTimeout(() => {
-        navigat('/admin/');
+        navigat('/teacher');
       }, 3000);
-      /*
+      return;
+      
       fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=login`, {
         method: 'POST',
         headers: {
@@ -78,7 +79,7 @@ const Login: React.FC = () => {
             
             //for admin handle
             if(selectedRole==='admin'){
-              
+              sessionStorage.setItem('user','admin');
               if(data.admin_sheet_Exists){
                 sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
               }
@@ -101,7 +102,7 @@ const Login: React.FC = () => {
               return;
             }
             if(data.hasOwnProperty('Admin_Sheet_Id')){
-
+              sessionStorage.setItem('user','teacher');
               sessionStorage.setItem('email',email);
               sessionStorage.setItem('sheet_exist','T');
               sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
@@ -128,7 +129,7 @@ const Login: React.FC = () => {
           
 
         });
-        */
+
     }
   }
 
@@ -153,7 +154,7 @@ const Login: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({newpassword:spassword,Admin_Sheet_Id,email,selectedRole}),
+      body: JSON.stringify({newpassword:spassword,prepassword:password,Admin_Sheet_Id,email,selectedRole}),
     })
       .then((response:any) => {
         if (!response.ok) {
@@ -174,13 +175,11 @@ const Login: React.FC = () => {
           
           setMessage(data.message);
 
-          if(data.message=='password set'){
+          if(data.message=='password_set'){
             setMessage('Your new password set');
-            sessionStorage.setItem('email',email);
-            sessionStorage.setItem('sheet_exist','T');
-            sessionStorage.setItem('upload_img','T');
-              
-            
+            sessionStorage.setItem('user','teacher');
+            sessionStorage.setItem('email',selectedRole);//admin ,student
+            sessionStorage.setItem('sheet_exist','T');  
             return;
         }
           if(data.hasOwnProperty('sheet_access') && !data.sheet_access){
@@ -193,7 +192,9 @@ const Login: React.FC = () => {
   return (
     <>
       <div className="container mx-auto">
-        
+      <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 p-6 shadow-md">
+        <p className="text-xl">{message}</p>
+      </div>
         {//login comp
           !open_setpassword_comp && 
           <div className="mt-8 p-8 max-w-lg m-auto h-[calc(100vh-50px)] pb-6 bg-gray-800 text-white rounded-md shadow-lg hover:shadow-xl transition duration-300">
@@ -322,9 +323,7 @@ const Login: React.FC = () => {
         </form>
       </div>
         }
-        <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 p-6 shadow-md">
-        <p className="text-xl">{message}</p>
-      </div>
+       
       </div>
     </>
   );

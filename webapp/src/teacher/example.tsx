@@ -123,17 +123,16 @@ const handleCheckboxChange = (index: number) => {
 
 
   const handleSendImage = () => {
-    const label=['m','v','s','b','y','a','r','a','c','v'];
+    const label=['1','2','3'];
     
     const objs=selectedFaces.map((index,i)=>{
       return {label:label[i],descriptor:Array.from(detectedFaces[index].descriptor)}
     })
     const json=JSON.stringify(objs);
 
-    sessionStorage.setItem('student_imgs_json',json);
+    sessionStorage.setItem('Students_Dataset',json);
     setMessage('done');
-   
-    
+    console.log(json);  
   };
 
   return (
