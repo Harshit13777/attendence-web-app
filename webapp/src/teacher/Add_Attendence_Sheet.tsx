@@ -143,8 +143,7 @@ const Add_Attendence_Sheet=()=>{
       }
   
       if (responseData.hasOwnProperty('sheet_added')) {
-        setMessage(responseData.message);
-  
+          
         if (!subject_names) {
           const sheetName = JSON.stringify(responseData.Subject_Names);
           localStorage.setItem('Subject_Names', sheetName);
@@ -154,12 +153,7 @@ const Add_Attendence_Sheet=()=>{
           localStorage.setItem('Subject_Names', JSON.stringify(updatedData));
           set_subject_names(updatedData);
         }
-  
-        setTimeout(() => {
-          navigate('/teacher');
-        }, 5000);
-  
-        return;
+        setDataRows(['']);
       }
   
       if (responseData.hasOwnProperty('sheet_invalid')) {
@@ -170,7 +164,7 @@ const Add_Attendence_Sheet=()=>{
         }, 5000);
         return;
       }
-  
+      setloading(false);
       setMessage([responseData.message]);
     } catch (error:any) {
       setloading(false);
@@ -222,6 +216,7 @@ const Add_Attendence_Sheet=()=>{
                     value={row}
                     placeholder="Enter Subject name"
                     aria-placeholder='Subject name'
+                    maxLength={30}
                     onChange={(e) => handleInputChange(rowIndex, e.target.value)}
                     className="w-full md:w-3/5 border rounded px-2 py-1 hover:bg-slate-100 hover:text-black"
                   />

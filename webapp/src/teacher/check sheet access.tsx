@@ -49,13 +49,16 @@ export const HandlecheckSheetStatusTeacher=()=>{
             throw new Error('Sheet Not valid')
             
           }
-          if(data.hasOwnProperty('sheet_valid'))
+          if(data.hasOwnProperty('sheet_valid')){
+
             sessionStorage.setItem('sheet_exist','Y');
             setMessage(data.message);
           
             setTimeout(()=>{
               navigate('/teacher');
             },1000);
+          }
+          setloading(false);
           
         }
         catch (e:any) {

@@ -250,12 +250,10 @@ export const Take_Attendence= () => {
         setDetectedFaces([]);
         setSelectedSheet(null);
         setRollNo(new Set<String>());
-        setMessage(data.message);
-      } else {
-        setMessage(data.message);
       }
-  
+      
       setloading(false);
+      setMessage(data.message);
     } catch (error:any) {
       setloading(false);
       console.log(error.message);
