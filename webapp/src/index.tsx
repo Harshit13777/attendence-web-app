@@ -11,11 +11,11 @@ const root = ReactDOM.createRoot(
 const clientid='352054297050-4lp1adh2n4a5a1fq5g6bbvtbffsjj3eh.apps.googleusercontent.com';
 const scriptid=''
 root.render(                     
-  <GoogleOAuthProvider clientId={clientid}>
   <React.StrictMode>
+  <GoogleOAuthProvider clientId={clientid}>
     <App />
-  </React.StrictMode>
   </GoogleOAuthProvider>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -31,21 +31,24 @@ const NavBar=()=> {
 
     return (
         <>
-            <div className= {`  contain h-screen  `}  onMouseEnter={handleOnClick} onMouseLeave={handleOnClick}>
-                <div className={`${
-                    open ? 'w-64' : ' w-16'} h-screen p-2 pt-8 bg-slate-900 fixed transition-all duration-300 top-0`}
-                    style={{
-                        backgroundImage: `url('your-favicon-image-url')`,
-                        backgroundSize: open ? 'auto' : 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                      }}    >
-                    <div className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
-                                        mt-2 menu-items `}> 
-                        <img src={navbar_open} alt="" onClick={handleOnClick} />
+           
+           <div className={`${
+                    open ? 'w-64' : ' w-16'} h-screen p-2 pt-8 bg-slate-900  transition-all duration-300 top-0`}
+                    onMouseEnter={()=>setOpen(true)} onMouseLeave={()=>setOpen(false)}
+                    >
+                    <div className={`flex  rounded-md pt-2 pb-2 text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
+                                        mt-2 menu-items `} > 
+ 
+                        {
+                            !open?
+                            <img src={navbar_open} onTouchStart={()=>setOpen(true)}  alt="" />
+                            :
+                            <img src={navbar_open} className=' rotate-180  translate-x-28'  onTouchStart={()=>setOpen(false)}  alt="" />}
+
+                        
                     </div>
                 
-                    <ul className="pt-6 h-screen menu">
+                    <ul className="pt-6  menu">
                     
                         <li
                             className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
@@ -137,7 +140,7 @@ const NavBar=()=> {
                 </div>
                 <div>
                 </div>
-            </div>
+            
         </>
     )
 }

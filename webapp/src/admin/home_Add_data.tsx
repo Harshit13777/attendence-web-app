@@ -23,7 +23,7 @@ const SpreadsheetInterface = () => {
   {...Empty_data}
     // Add more initial rows as needed
   ]);
-  const [message,setMessage]=useState('');
+  const [message,setMessage]=useState(['']);
   const MAX_HISTORY_LENGTH=10; // Set a suitable limit
   const [history, setHistory] = useState([dataRows]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -42,8 +42,9 @@ const SpreadsheetInterface = () => {
     setCurrentIndex(newHistory.length - 1);
     
     }, 300);
-    if(message!=='')
-        setMessage('');
+    if(message.length>3){
+      setMessage([]);
+    }
     if(!historyon)
       debouncedUpdateHistory();
     else
@@ -135,61 +136,54 @@ const SpreadsheetInterface = () => {
     
   }
 
-  function submitData  ()
-  {
-    
-    
-    if(!isValidData()){
-      setMessage('Error:Fill the empty value');
-      return;
-    }
-    let Admin_Sheet_Id=sessionStorage.getItem('Admin_Sheet_Id');
-    let username=sessionStorage.getItem('username');
-    fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_data`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({dataRows,Admin_Sheet_Id,username}),
-    })
-      .then((response:any) => {
-        if (!response.ok) {
-          setMessage('Network error');
-          console.log('Network response was not ok');
-        }
-        if(response.hasOwnProperty('error')){
-          setMessage('Server error');
-          console.log(response.error);
-          return;
+  async function submitData() {
+    try {
+      if (!isValidData()) {
+        setMessage(['Error: Fill the empty value']);
+        return;
       }
-        return response.json(); //convert json to object
-      })
-      .then((data) => {
+      
+      let Admin_Sheet_Id = sessionStorage.getItem('Admin_Sheet_Id');
+      let username = sessionStorage.getItem('username');
+      
+      const response = await fetch(`api?page=admin&action=add_data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dataRows, Admin_Sheet_Id, username }),
+      });
+      
+      if (!response.ok) {
+        setMessage(['Network error']);
+        console.log('Network response was not ok');
+        return;
+      }
+      
+      const data = await response.json(); // convert json to object
+      
+      if (data.hasOwnProperty('message')) {
+        setMessage(data.message);
+        setDataRows(new Array(1).fill('').map(() => ({ ...Empty_data })));
+        setMessage(['Login email sent successfully']);
+        return;
+      }
+      
+      if (data.hasOwnProperty('sheet_invalid')) {
         
-          if(data.hasOwnProperty('message')){
-            setMessage(data.message);
-            setDataRows( new Array(1).fill('').map(() => ({...Empty_data})));
-            setMessage('Login email sent succesfully');
-            
-            return;
-          }
-        
-          if(data.hasOwnProperty('sheet_valid')){
-            if(!data.sheet_valid){ 
-            setMessage('Sheet not Found');
-            sessionStorage.removeItem('Admin_Sheet_Id');
-            }
-            if(!data.admin_sheet_access_valid){
-              sessionStorage.removeItem('admin_sheet_access_valid');
-              setMessage('Sheet not valid check instructions');
-            }
-            return;
-          }
-          console.log(data.error);
-
-
-
-  });}
+          sessionStorage.removeItem('Admin_Sheet_Id');
+          setMessage(['Sheet not Found']);
+       
+        return;
+      }
+      
+    
+    } catch (error) {
+      console.error('An error occurred:', error);
+      setMessage(['An error occurred. Please try again later.']);
+    }
+  }
+  
 
 
   const handlePasteClipboard = async () => {
@@ -253,7 +247,7 @@ const SpreadsheetInterface = () => {
       </h1>
     </div>
   
-      <div className="flex flex-row justify-between mb-4 mt-2">
+      <div className="flex flex-row justify-between mt-2">
         <div className="flex mb-2 md:mb-0">
           <img src={undo_icon}
             title='Undo'
@@ -366,16 +360,18 @@ const SpreadsheetInterface = () => {
   >
     Paste Clipboard
   </button>
-</div>
+      </div>
 
       <button
         onClick={submitData}
         className="bg-blue-500 text-white px-4 py-2 rounded hover:opacity-50">
         Submit
       </button>
-      {message!=='' && <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
-      <p className="text-sm">{message}</p>
-      </div>}
+      {message.map((message,i)=> (
+        <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+          <p className="text-sm">{message}</p>
+        </div>
+      ))}
 
       
      
@@ -390,7 +386,7 @@ export const Add_data: React.FC = () => {
  
   
   return (
-    <div>
+    <div className="p-4 md:p-8">
      
    < SpreadsheetInterface/>
     </div>

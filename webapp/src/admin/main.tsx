@@ -8,47 +8,59 @@ import Create_admin_sheet from './sheet/create_sheet_main';
 import {HomePage} from './home';
 import Admin_sheet_access_valid from './sheet/check_sheet_access_valid';
 
+const user=sessionStorage.getItem('user');
 
-export const Main: React.FC = () => {
+
+
+export const Main= () => {
     
     //check the 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
     
-     
+ //if  admin not login in 
+  if (!sessionStorage.getItem('email')) {//token + email 
     
-  //if  admin not login in 
-    if (sessionStorage.getItem('username')) {
+  setTimeout(()=>{
+    navigate('/login')},5000);
+    
+  return(
+    <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+      <p className="text-sm">Account Not Login in</p>
+    </div>)
+  }
+
+
+   //if user not admin
+  else if(!user || user!=='admin'){
+    console.log(user)
+    return(
+      <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+        <p className="text-sm">User not verified</p>
+      </div>
+    )
+  }
+
+    
+  else{
       
-      if(!sessionStorage.getItem('Admin_Sheet_Id')){
-        return (<>
-                  <Create_admin_sheet/>
-              </>)  
+      if(!sessionStorage.getItem('sheet_exist')){
+          setTimeout(() => {
+            navigate('/sheet invalid')
+          }, 50);
+          return(
+
+            <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+              <p className="text-sm">Sheet Error</p>
+            </div>
+          )
+
         }
-        
-      else if(!sessionStorage.getItem('admin_sheet_access_valid')){
-         return (<>
-            <Admin_sheet_access_valid/>
-          </>)
-        } 
       else 
         return (<>
             <HomePage/>  
           </>);
 
     }
-    else{
-      setInterval(()=>{
-        navigate('/login');
-      },3000);
-      return(
-
-      <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
-        <p className="text-sm">Account Not Login in</p>
-      </div>
-      
-      );
-    }
-
   
   };
   

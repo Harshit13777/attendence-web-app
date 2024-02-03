@@ -104,10 +104,10 @@ const Login: React.FC = () => {
       setSelectedRole(null)
       return;
     }
-    if(event.target.value==='admin'){
-      setusername('');
+    else if(event.target.value==='admin'){
+      formData.username='';//admin nothave username
     }
-    else
+    
       setSelectedRole(event.target.value);
   };
 
@@ -169,6 +169,27 @@ const Login: React.FC = () => {
         navigat('/teacher');
       }, 3000);
       */
+
+
+      //for testing
+      sessionStorage.setItem('email','email');
+      sessionStorage.setItem('user','admin');
+      sessionStorage.setItem('username','ram');
+      sessionStorage.setItem('token','hghghjtoken');
+      
+      sessionStorage.setItem('Admin_Sheet_Id','113ynMauHpX_XTgu9tP9PPJieVS90qZK8Y_P1t1NUtKo');
+      //if(data.admin_sheet_Exists){
+       
+      
+     // }
+      //if(data.admin_sheet_access_valid){
+        
+      //}
+    setTimeout(() => {
+      navigat('/admin');
+    }, 300);
+    return;
+      //
      
     const response=await  fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=login`, {
         method: 'POST',
@@ -196,21 +217,32 @@ const Login: React.FC = () => {
         set_opensetpassword_comp(true);
       }
 
-      if(data.hasOwnProperty('logind')){
+      if(data.hasOwnProperty('logind')){//mean sheet exit and all data received
 
+        if(!data.Admin_Sheet_Id || !data.token){
+          throw Error('Server Error');
+        }
 
         //for admin handle
             if(selectedRole==='admin'){
               sessionStorage.setItem('user','admin');
               sessionStorage.setItem('username',data.username);
               sessionStorage.setItem('token',data.token);
+              sessionStorage.setItem('email',email);
 
-              if(data.admin_sheet_Exists){
+              if(data.sheet_status){
+                if(data.sheet_status==='Not Exist'){
+                
+              }
+              else if(data.sheet_status==='No Access'){
                 sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
               }
-              if(data.admin_sheet_access_valid){
-                sessionStorage.setItem('admin_sheet_access_valid','Y');
+              else if(data.sheet_status==='Exist with access'){
+                sessionStorage.setItem('Admin_Sheet_Id',data.Admin_Sheet_Id);
+                sessionStorage.setItem('sheet_exist','T');
               }
+            }
+              
             setTimeout(() => {
               navigat('/admin');
             }, 300);
@@ -520,8 +552,6 @@ const Login: React.FC = () => {
   );
  };
 
-export default Login;
-function setusername(arg0: string) {
-  throw new Error('Function not implemented.');
-}
+ export default Login;
+
 
