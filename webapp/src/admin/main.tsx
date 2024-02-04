@@ -8,8 +8,6 @@ import Create_admin_sheet from './sheet/create_sheet_main';
 import {HomePage} from './home';
 import Admin_sheet_access_valid from './sheet/check_sheet_access_valid';
 
-const user=sessionStorage.getItem('user');
-
 
 
 export const Main= () => {
@@ -31,8 +29,8 @@ export const Main= () => {
 
 
    //if user not admin
-  else if(!user || user!=='admin'){
-    console.log(user)
+  else if(!sessionStorage.getItem('user') || sessionStorage.getItem('user')!=='admin'){
+  
     return(
       <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
         <p className="text-sm">User not verified</p>
@@ -46,11 +44,12 @@ export const Main= () => {
       if(!sessionStorage.getItem('sheet_exist')){
           setTimeout(() => {
             navigate('/sheet invalid')
-          }, 50);
+          }, 5000);
           return(
 
             <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
-              <p className="text-sm">Sheet Error</p>
+              <p className="text-sm">Sheet Error...</p>
+             
             </div>
           )
 

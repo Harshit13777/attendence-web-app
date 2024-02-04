@@ -34,8 +34,8 @@ export const Create_sheet_Main=()=>{
         <div className={` flex-col flex gap-y-4 text-center items-center`}>
           <h3 className={` md:w-2/4 m-10 border-solid border-8 text-5xl rounded-lg bg-slate-800 text-slate-200 ml-6 mr-6 p-4 font-extrabold `}>Choose interface</h3>
           <div className='flex-col gap-y-2 flex  border-slate-800 m-2 '>
-            <button className={`bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ${!showopenChooseoption && autoset && '  -translate-y-full duration-700'}`} onClick={handleauto}>Auto Create SpreadSheet</button>
-            <button className={`bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ${!showopenChooseoption && userset && ' -translate-y-full duration-700'}`} onClick={handleUser}>Manual Create SpreadSheet</button>
+            <button className={`bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ${!showopenChooseoption  && '   -translate-y-3/4 duration-700'}`} onClick={handleauto}>Auto Create SpreadSheet</button>
+            <button className={`bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ${!showopenChooseoption  && ' -translate-y-full duration-700'}`} onClick={handleUser}>Manual Create SpreadSheet</button>
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ const AutoSheetCreator=()=>{
       }
 
       setmessage(data.message);
-      
+      set_loading(false);
     
     } catch (error:any) {
       set_loading(false)
@@ -177,84 +177,113 @@ const AutoSheetCreator=()=>{
 const UserCreatedSheet=()=>{
     const [SheetId,setSheetId]=useState('');
     const [message,setMessage]=useState('');
+    const [loading,set_loading]=useState(false);
     const [show_instruction,set_show]=useState(false);
       const handleOnClick = () => set_show((prevState) => !prevState);
   
     let navigat=useNavigate();
   
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      if(SheetId==='')
-        setMessage('Please fill the form');
+    const handleSubmit = async (sheetid:string) => {
+      try{
       
-        try{
-          handleOnClick();//hide instructions while fetching
-          
-          const response:any = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_admin_sheet_id_manual`, {
+      if(SheetId==='')
+        throw new Error('Enter Sheet Id');
+
+      const token=sessionStorage.getItem('token');
+      if(!token)
+        throw new Error('Error')
+      
+          set_show(false);
+
+          const response:any = await fetch(`api?page=admin&action=add_admin_sheet_id_manually`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               admin_sheet_id:SheetId,
-              username:sessionStorage.getItem('username')
+              token
             }),
           });
-          if(response.hasOwnProperty('error')){
-            setMessage('Server error');
-            console.log(response.error);
-            return;
-        }
-          const data=await response.json();
-          
-          if(!data.sheet_valid){ 
-            setMessage('Sheet not Found');
-            return
+
+          console.log('data sent');
+          if (!response.ok) {
+            throw new Error('Network response was not ok.' );
           }
-          if(!data.admin_sheet_access_valid){
-            setMessage('Sheet not valid check instructions')
-            return
+    
+          const data =  await response.json();
+        
+          if(response.hasOwnProperty('error'))
+          { //server error
+            throw new Error('Server Error');  
           }
 
-          sessionStorage.setItem('Admin_Sheet_Id',SheetId);
-          sessionStorage.setItem('admin_sheet_access_valid',"Y");
-
-              setMessage('Sheet created');
-            
+          if(data.hasOwnProperty('is_Sheet_Id_Added')){
+            if(data.is_Sheet_Id_Added==='yes'){
+              sessionStorage.setItem('sheet_exist','Y');
+              setMessage('Sheet Added Succesfully')
               setTimeout(() => {
-                navigat('/admin');
-               
+                navigat('/admin/');
               }, 3000);
 
-
+            }
+            else if(data.is_Sheet_Id_Added==='no'){
+              setMessage(data.message)
+              
+            }
+          }
+        
+          setMessage(data.message)
+          set_loading(false);
         }
         catch (error:any) {
-          setMessage('Error sync');
+          set_loading(false)
+          setMessage(error.message);
           console.log(error.message);
         }
     };
   
     return(<>
-      <button onClick={handleOnClick}>show the instructions of sheet</button>
-            <div className={`${!show_instruction && 'hidden'}`}>
-            <div>
+      <div className='  flex flex-col items-center text-center gap-y-4 '>
+         <h3 className={` m-10  border-solid border-8 text-2xl md:text-5xl rounded-lg bg-slate-800 text-slate-200 p-4 font-extrabold text-center`} >Manual SpreadSheet Creater</h3>
+        <div className=' relative w-11/12' >
+
+          <button className={`  m-2 border-solid border-yellow-700  ${show_instruction ? 'absolute p-1 pl-4 pr-4 border-4  left-3/4  translate-x-full text-red-400 bg-yellow-200  rounded-full duration-500 ':' p-2  font-bold rounded-lg text-slate-600 bg-yellow-200 text-xl'} `} onClick={handleOnClick}>{show_instruction ?'':'show instruction'}</button>
+          <div className={`${!show_instruction && 'hidden'} bg-yellow-100 rounded-md`}>
+            <div className=' p-2 border-solid   rounded-md'>
               instruction...
             </div>
-            </div>    
-    <form onSubmit={handleSubmit}>
-  
-        <div>
-          <label htmlFor="SheetId">New Password:</label>
-          <input
-            type="text"
-            id="SheetId"
-            value={SheetId}
-            onChange={(e) => setSheetId(e.target.value)}
-          />
+          </div>   
+
         </div>
-        <button type='submit'>Save</button>
-      </form>
-      <p>{message}</p>
+
+        <div className='flex flex-col gap-y-4 bg-green-100 rounded-lg w-9/12 p-5 text-center items-center'>
+          <div className='flex flex-row gap-x-6 '>
+            <label htmlFor="SheetId" className=' text-lg font-bold '>Sheet Id:</label>
+            <input
+              className=' rounded-lg font-semibold focus:bg-green-200  focus:text-slate-700 border-solid border-2 focus:w-7/12 w-2/4 p-1 border-green-700 focus:border-black'
+              type="text"
+              id="SheetId"
+              value={SheetId}
+              onChange={(e) => setSheetId(e.target.value)}
+            />
+          </div>
+          {
+          loading
+            ?
+            <div className="animate-spin rounded-lg border-blue-500 border-solid border-8 h-10 w-10"></div>
+            :           
+            <button className='bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ' onClick={()=>{set_loading(true);handleSubmit(SheetId);}}>Save</button>
+          }
+        </div>
+       
+
+      {message!=='' &&
+          <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+          <p className="text-sm">{message}</p>
+        </div>
+        }
+      </div>
     </>)
   }
 
