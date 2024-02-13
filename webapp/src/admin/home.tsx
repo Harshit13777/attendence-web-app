@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate,Link } from 'react-router-dom';
-import {Add_data} from './home_Add_data';
+import {Add_data_teacher} from './add_teachers';
 import {Login_Email_Status} from './home_login_email_staus';
 import {Student_Img_Status} from  './home_student_img_status';
 
@@ -11,6 +11,7 @@ import logout from "../.icons/logout.png";
 import navbar_open from "../.icons/navbar.png";
 import system_control from "../.icons/system_control.png";
 import check_email from '../.icons/check_email_status.png';
+import Add_data_student from './add_student';
 
 
 // HomePage.tsx
@@ -23,6 +24,7 @@ const NavBar=()=> {
     const [datamenuopen, setdatamenuOpen] = useState(false);
     const navigate=useNavigate();
     const handleOnClick = () => setOpen((prevState) => !prevState);
+    const [isfetching,set_isfetching]=useState(false);
     const handleOndatamenu = (e:any) =>{
         e.stopPropagation();
         setdatamenuOpen((prevState) => !prevState);
@@ -34,6 +36,7 @@ const NavBar=()=> {
             navigate('/login')
         }, 300);
     }
+
     
 
     return (
@@ -84,7 +87,10 @@ const NavBar=()=> {
                               <div className={` ${!open && "hidden"}  block ${!datamenuopen && "hidden"}`}>
                                   <ul className='pt-5  menu'>
                                     <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
-                                      <Link to="/admin/add_data">Add data</Link> 
+                                      <Link to="/admin/add_teacher">Add Teacher</Link> 
+                                    </li>
+                                    <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
+                                      <Link to="/admin/add_student">Add Student</Link> 
                                     </li>
                                     <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
                                       Edit data
@@ -144,9 +150,7 @@ const NavBar=()=> {
                         {/* Item5 */}
                         
                     </ul>
-                </div>
-                <div>
-                </div>
+            </div>
             
         </>
     )
@@ -165,18 +169,20 @@ export const HomePage: React.FC = () => {
         console.log('hello')
     },[window.innerWidth])
   
+
   
   return (
     <>
        
-            <div className='flex flex-row bg-gradient-to-tr from-blue-50 to-red-50 h-screen w-screen'>
+            <div className='flex flex-row bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
                 <div className=''>
                     <NavBar/>
                 </div>
 
                 <div className='ml-16' style={{width:`${((wdth-64)/wdth)*100}%`}}>
                     <Routes>
-                        <Route index path="/add_data" element={<Add_data/>} />
+                        <Route index path="/add_teacher" element={<Add_data_teacher/>} />
+                        <Route index path="/add_student" element={<Add_data_student/>} />
                         <Route path="/login_email_status" element={<Login_Email_Status/>} />
                         <Route path="/student_img_status" element={<Student_Img_Status/>} />
                     </Routes>

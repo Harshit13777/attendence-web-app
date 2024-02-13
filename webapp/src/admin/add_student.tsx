@@ -6,12 +6,11 @@ import add_icon from "../.icons/add.png";
 import minus_icon from '../.icons/minus.png';
 import { last } from 'lodash';
 import { paste } from '@testing-library/user-event/dist/paste';
-import { useNavigate } from 'react-router-dom';
+import { Form, useNavigate } from 'react-router-dom';
 
 
-interface DataRow {
-    Teacher_Name: string;
-    Teacher_Email: string;
+
+interface DataRow_Student {
     Student_Name: string;
     Student_Roll_No:string;
     Student_Email:string;
@@ -19,14 +18,13 @@ interface DataRow {
   }
 
 const SpreadsheetInterface = () => {
-  const Empty_data={Teacher_Name:'',Teacher_Email:'', Student_Name:'',Student_Roll_No:'', Student_Email:''};
-  const [dataRows, setDataRows] = useState<DataRow[]>([
-  {...Empty_data}
-    // Add more initial rows as needed
-  ]);
+  const Empty_data_Student={Student_Name:'',Student_Roll_No:'', Student_Email:''};
+
+ const [Student_dataRows,set_studentDatarows]=useState<DataRow_Student[]>([{...Empty_data_Student}]);
+
   const [message,setMessage]=useState(['']);
   const MAX_HISTORY_LENGTH=10; // Set a suitable limit
-  const [history, setHistory] = useState([dataRows]);
+  const [history, setHistory] = useState([Student_dataRows]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const  [historyon,setHistoryon]=useState(false);
   
@@ -41,7 +39,7 @@ const SpreadsheetInterface = () => {
   useEffect(()=>{
     
   const debouncedUpdateHistory = _debounce(() => {
-    const newHistory = [...history.slice(0, currentIndex + 1),dataRows].slice(-MAX_HISTORY_LENGTH);
+    const newHistory = [...history.slice(0, currentIndex + 1),Student_dataRows].slice(-MAX_HISTORY_LENGTH);
     setHistory(newHistory);
     setCurrentIndex(newHistory.length - 1);
     
@@ -54,14 +52,48 @@ const SpreadsheetInterface = () => {
     else
       setHistoryon(false);
 
-  },[dataRows])
+  },[Student_dataRows])
   
-  const handleInputChange = (index: number, field: string, value: string) => {
+  const handleInputChange_Teacher = (index: number, field: string, value: string) => {
     //add data change in dataRows 
-    const newDataRows = dataRows.map((row, rowIndex) =>
+
+    const inputElement = document.getElementById(`input-${index}-${field}`);
+
+
+    if(inputElement){
+        inputElement.style.borderColor=''
+        inputElement.style.borderWidth= ''
+    }
+
+    if(field==='Student_Roll_No' && inputElement){
+        const inputName = document.getElementById(`input-${index}-Student_Name`);
+        const Namevalue= Student_dataRows[index]['Student_Name']==='';
+        if(inputName){
+            inputName.style.borderColor = Namevalue?'red':'';
+            inputName.style.borderWidth=Namevalue?'2px':''; 
+        }
+    }
+    if (field === 'Student_Email'&& inputElement) {
+        const inputRollNo = document.getElementById(`input-${index}-Student_Roll_No`)
+        const Rollvalue=Student_dataRows[index]['Student_Roll_No']===''
+        if(inputRollNo){
+            inputRollNo.style.borderColor =Rollvalue?'red':'';
+            inputRollNo.style.borderWidth=Rollvalue?'2px':''; 
+        }
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        const isValidEmail = emailPattern.test(value);
+    
+        // Update the border color based on email validity
+        if (inputElement) {
+          inputElement.style.borderColor = isValidEmail ? '' : 'red';
+          inputElement.style.borderWidth = isValidEmail ? '' : '2px';
+        }
+    }
+    
+    const newDataRows = Student_dataRows.map((row, rowIndex) =>
     rowIndex === index ? { ...row, [field]: value } : row
-  );
-    setDataRows(newDataRows);
+    );
+    set_studentDatarows(newDataRows);
     
   
   };
@@ -83,39 +115,43 @@ const SpreadsheetInterface = () => {
   
   const handleAddRows = () => {
     if(rowsToAddCount>0){
-      if(rowsToAddCount>50){
-        setMessage(['Row Length must be less than 50'])
-        setRowsToAddCount(1);
-        return
+      if(Student_dataRows.length<100){
+
+          const emptyRow = { name: '', age: '', email: '' };
+          const newRows = new Array(rowsToAddCount).fill('').map(() => ({...Empty_data_Student}));
+          set_studentDatarows([...Student_dataRows, ...newRows]);
+          setRowsToAddCount(1);
       }
-      const emptyRow = { name: '', age: '', email: '' };
-      const newRows = new Array(rowsToAddCount).fill('').map(() => ({...Empty_data}));
-      setDataRows([...dataRows, ...newRows]);
-      setRowsToAddCount(1);
+      else{
+        setMessage(['Row Length must be less than 100'])
+        setRowsToAddCount(1);
+      }
     }
   };
 
-  const handleDeleteRow = (index:number) => {
-    if(dataRows.length>1){
+  //by delete button
+  const handleDeleteRow_Teaher = (index:number) => {
+    if(Student_dataRows.length>1){
 
-      const updatedDataRows = dataRows.filter((row, rowIndex) => rowIndex !== index);
-      setDataRows(updatedDataRows);
+      const updatedDataRows = Student_dataRows.filter((row, rowIndex) => rowIndex !== index);
+      set_studentDatarows(updatedDataRows);
      
     }
     else{
-      setDataRows( new Array(1).fill('').map(() => ({...Empty_data})));
+      set_studentDatarows( new Array(1).fill('').map(() => ({...Empty_data_Student})));
     }
     setRowsToDeleteCount(1)
   };
 
+
   const handleDeleteRows = () => {
-    if (rowsToDeleteCount < dataRows.length) {
+    if (rowsToDeleteCount < Student_dataRows.length) {
       
-      setDataRows(dataRows.slice(0, dataRows.length - rowsToDeleteCount));
+      set_studentDatarows(Student_dataRows.slice(0, Student_dataRows.length - rowsToDeleteCount));
       
     }
     else {
-      setDataRows( new Array(1).fill('').map(() => ({...Empty_data})));
+      set_studentDatarows( new Array(1).fill('').map(() => ({...Empty_data_Student})));
     }
   };
   
@@ -123,7 +159,7 @@ const SpreadsheetInterface = () => {
     if (currentIndex > 0) {
       setHistoryon(true);
       setCurrentIndex(currentIndex - 1);
-      setDataRows(history[currentIndex-1]);
+      set_studentDatarows(history[currentIndex-1]);
       
     }
   };
@@ -132,38 +168,39 @@ const SpreadsheetInterface = () => {
     if (currentIndex < history.length - 1) {
       setHistoryon(true);
       setCurrentIndex(currentIndex + 1);
-      setDataRows(history[currentIndex + 1]);
+      set_studentDatarows(history[currentIndex + 1]);
     }
   };
   
-  const isValidData=(sdatarows: DataRow[])=> {
+  const isValidData=(sdatarows: DataRow_Student[])=> {
+      let res=true;
     for (let i in sdatarows) {
       let obj=sdatarows[i];
-      let res=true;
       // Check if Teacher_Name and Teacher_Email are not empty
-      if(!((obj.Teacher_Name !== '' && obj.Teacher_Email !== '') || ((obj.Teacher_Name === '' && obj.Teacher_Email === '') && (obj.Student_Name !== '' && obj.Student_Email !== '' && obj.Student_Roll_No!==''))))
-      { 
-        setMessage((p)=>[...p,'Empty cell in Teacher column'])  
-        res=false;
-      }
-      
-    
       // Check if Student_Name and Student_Email are not empty
       if(!((obj.Student_Name !== '' && obj.Student_Email !== '' && obj.Student_Roll_No) || (obj.Student_Name === '' && obj.Student_Email === '' && obj.Student_Roll_No=== '')))
       {
         setMessage((p)=>[...p,'Empty cell in Student column']) 
         res=false
       } 
-      if(!res){
-        return false
+      
+      const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      
+      if (!emailPattern.test(obj.Student_Email)) {
+        setMessage((p)=>[...p,`Email not valid:${obj.Student_Email}`])
+        res=false
       }
-    
+      if(!res){
+        return res
+      }
+
     } 
-      return true;
+      return res;
     
   }
 
-  async function submitData(sdatarows: DataRow[]) {
+  async function submitData(sdatarows: DataRow_Student[]) {
+    
     set_loading(true);
     try {
       if (!isValidData(sdatarows)) {
@@ -185,7 +222,7 @@ const SpreadsheetInterface = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ dataRows, token }),
+        body: JSON.stringify({ Student_dataRows, token }),
       });
       
       if (!response.ok) {
@@ -209,7 +246,7 @@ const SpreadsheetInterface = () => {
       
       if(data.hasOwnProperty('is_data_added')){
         if(data.is_data_added==='yes'){
-          setDataRows(new Array(rowsToAddCount).fill('').map(() => ({...Empty_data})))
+          set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({...Empty_data_Student})))
         }
         else{
           setMessage((p)=>[...p,'Data Not Added'])
@@ -242,21 +279,21 @@ const SpreadsheetInterface = () => {
   
   
       // Find the last filled row in the selected column
-      const lastFilledRow = dataRows
+      const lastFilledRow = Student_dataRows
         .slice()
         .reverse()
         .find(row => row[selectedColumn].trim() !== '' || null);
   
       // If there's no filled row, start pasting from the first row
       const lastfilledIndex :any= lastFilledRow
-        ? dataRows.indexOf(lastFilledRow) + 1
+        ? Student_dataRows.indexOf(lastFilledRow) + 1
         : 0;
   
       // Ensure the pasted data fits within the array
-      const rowsToAdd = Math.max(0, pastedData.length - (dataRows.length - lastfilledIndex));
+      const rowsToAdd = Math.max(0, pastedData.length - (Student_dataRows.length - lastfilledIndex));
   
-      const newRows = new Array(rowsToAdd).fill('').map(() => ({...Empty_data}));
-      const updatedDataRows=[...dataRows, ...newRows];
+      const newRows = new Array(rowsToAdd).fill('').map(() => ({...Empty_data_Student}));
+      const updatedDataRows=[...Student_dataRows, ...newRows];
   
       // Fill in the data from the clipboard
       pastedData.forEach((data, index) => {
@@ -264,7 +301,7 @@ const SpreadsheetInterface = () => {
       });
   
       
-      setDataRows(updatedDataRows);
+      set_studentDatarows(updatedDataRows);
       setSelectedColumn('');
   
       // Add the updated dataRows to history
@@ -274,7 +311,6 @@ const SpreadsheetInterface = () => {
     }
   };
   
-
   
   
   return (
@@ -282,13 +318,14 @@ const SpreadsheetInterface = () => {
     <div className=" text-center p-2 md:p-8 rounded-lg h-full"> 
    
         <h1 className="flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-500 bg-lime-50 p-3 rounded-lg">
-            Add Data
+          <span className="bg-clip-text text-transparent bg-gradient-to-tl from-slate-300 to-gray-300 bg-lime-50 p-3 rounded-lg">
+            Add Student
           </span>
         </h1>
-    
-  
-      <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
+
+      <div className="  mb-4  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2"  >
+       
+        <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
         <div className="flex  gap-x-1 md:gap-x-3  w-4/12  justify-center">
           <img src={undo_icon}
             title='Undo'
@@ -341,49 +378,47 @@ const SpreadsheetInterface = () => {
           />
           
         </div>
-      </div>
+        </div>
      
-      <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-500 bg-lime-50 rounded-lg">
+        <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+          <span className="bg-clip-text text-transparent bg-gradient-to-tl from-blue-800 to-red-500 bg-lime-50 rounded-lg">
            Fill the Form
           </span>
-      </h1>
-      <div className=" overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 rounded-xl  p-2"  >
+        </h1>
+      <div  className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
         <table className="table-auto w-full ">
           <thead className=' text-center items-center '>
             <tr className=''>
-              <th colSpan={2} className=" text-xl md:text-3xl font-semibold px-4 py-2">Teachers</th>
-              <th colSpan={3} className=" text-xl md:text-3xl font-semibold px-4 py-2">Students</th>
+              <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
+
             </tr>
             <tr className=' '>
-              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Name</th>
-              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Email</th>
-              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Name</th>
-              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Email</th>
-              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Roll No.</th>
+              <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
+              <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
+              <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
               {/* Add more column headers */}
             </tr>
           </thead>
           <tbody >
-            {dataRows.map((row, rowIndex) => (
-              <tr key={rowIndex}>
+            {Student_dataRows.map((row, rowIndex) => (
+              <tr key={rowIndex} id={`input-${rowIndex}`}>
                 {Object.keys(row).map((key) => (
                   <td key={key} className="px-4 py-2">
                     <input
                       maxLength={50}
-                      
+                      id={`input-${rowIndex}-${key}`}
                       value={row[key]}
                       placeholder={`Enter ${key}`}
                       onChange={(e) =>
-                        handleInputChange(rowIndex, key, e.target.value)
+                        handleInputChange_Teacher(rowIndex, key, e.target.value)
                       }
-                      className="border rounded-xl font-bold  p-2 focus:outline-none focus:border-blue-400 hover:bg-slate-100 hover:text-black"
+                      className="border focus:border-4 rounded-xl font-bold  p-2 focus:outline-none focus:border-blue-400 hover:bg-slate-100 hover:text-black"
                     />
                   </td>
                 ))}
                 <td className="px-4 py-2">
                   <button
-                    onClick={() => handleDeleteRow(rowIndex)}
+                    onClick={() => handleDeleteRow_Teaher(rowIndex)}
                     className="bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-white hover:text-red-700 hover:border-red-700 focus:outline-none"
                   >
                     Delete
@@ -395,7 +430,9 @@ const SpreadsheetInterface = () => {
         </table>
       </div>
 
-      <div className=' bg-gradient-to-tr from-blue-200 to-red-100 hover:bg-gradient-to-r rounded-lg p-2 mt-10 mb-5'>      
+      </div>
+
+      <div className='  p-4 bg-gradient-to-tr from-blue-200 to-red-100 hover:bg-gradient-to-r rounded-lg mt-10 mb-5'>      
         <h1 onClick={()=>set_open_copyPaste((p)=>!p)} className="  flex text-center items-center justify-center text-lg md:text-2xl font-bold text-gray-900 ">
             <span className="bg-clip-text text-transparent bg-gradient-to-l from-slate-800 to-slate-600  rounded-lg">
               {open_copyPaste?'Close':'Open Copy&Paste'}
@@ -403,9 +440,9 @@ const SpreadsheetInterface = () => {
         </h1>
       {open_copyPaste &&
       
-        <div className="flex flex-col md:flex-row mb-4 md:items-center">
+        <div className="flex mt-5 flex-col md:flex-row mb-4 md:items-center">
         <div className="md:mr-4 mb-2 md:mb-0">
-          {Object.keys(dataRows[0]).map((columnName, columnIndex) => (
+          {Object.keys(Student_dataRows[0]).map((columnName, columnIndex) => (
             <button 
               key={columnIndex}
               onClick={() => handleColumnSelection(columnName)}
@@ -419,7 +456,7 @@ const SpreadsheetInterface = () => {
         <button
           onClick={handlePasteClipboard}
           disabled={selectedColumn === ''}
-          className={`bg-green-500 text-white  py-2 rounded-lg hover:bg-green-400 ${
+          className={`bg-green-500 text-white  p-5 py-2 rounded-lg hover:bg-green-400 ${
             selectedColumn ? '' : 'opacity-50 cursor-not-allowed'
           }`}
         >
@@ -435,13 +472,14 @@ const SpreadsheetInterface = () => {
       <div className="  ml-auto mr-auto  animate-spin rounded-lg border-blue-500 border-solid border-8 h-10 w-10"></div>
       :
       <button
-        onClick={()=>submitData(dataRows)}
-        className=" bg-gradient-to-t hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
+        onClick={()=>submitData(Student_dataRows)}
+        className=" bg-gradient-to-t text-xl font-bold hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
         Submit
       </button>
       }
 
-      {message.map((message,i)=> (
+      {message.length!==0 && 
+        message.map((message,i)=> (
         <div className="bg-red-100 text-center mt-5 border-t border-b border-red-300 text-red-700 px-4 py-3" role="alert">
           <p className="text-sm">{message}</p>
         </div>
@@ -456,7 +494,7 @@ const SpreadsheetInterface = () => {
 
 
 
-export const Add_data: React.FC = () => {
+export const Add_data_student: React.FC = () => {
  
   
   return (
@@ -467,4 +505,4 @@ export const Add_data: React.FC = () => {
   );
   };
 
-  export default Add_data;
+  export default Add_data_student;

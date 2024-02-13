@@ -62,7 +62,7 @@ export const Main= () => {
     //syncing attendence sheet name and student img_ids and update in local storage
    
   useEffect(()=>{
-
+ 
     const syncing = async () => {
       try {
         const syncSubjectNames = async (subjectJson: string | null) => {

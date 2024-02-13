@@ -55,9 +55,11 @@ export const Main= () => {
 
         }
       else 
-        return (<>
+        return (
+          <>
             <HomePage/>  
-          </>);
+          </>
+          );
 
     }
   
