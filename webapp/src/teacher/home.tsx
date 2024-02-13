@@ -40,7 +40,7 @@ const NavBar=()=> {
     return (
         <>
             
-                <div className={`${
+                <div className={`${ 
                     open ? 'w-64' : ' w-16'} h-screen p-2 pt-8 bg-slate-900  transition-all duration-300 top-0`}
                     onMouseEnter={()=>setOpen(true)} onMouseLeave={()=>setOpen(false)}
                     >

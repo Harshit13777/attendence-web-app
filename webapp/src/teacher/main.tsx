@@ -208,7 +208,7 @@ export const Main= () => {
         setMessage('Error. Please try again later.');
         console.error(error);
       }
-      //setloading(false);//remover after testing
+      
     };
     
   syncing();

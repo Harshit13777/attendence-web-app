@@ -21,23 +21,30 @@ const NavBar=()=> {
     
     const [open, setOpen] = useState(false);
     const [datamenuopen, setdatamenuOpen] = useState(false);
-    
+    const navigate=useNavigate();
     const handleOnClick = () => setOpen((prevState) => !prevState);
     const handleOndatamenu = (e:any) =>{
         e.stopPropagation();
         setdatamenuOpen((prevState) => !prevState);
     } 
+
+    const handlelogout=()=>{
+        sessionStorage.clear();
+        setTimeout(() => {
+            navigate('/login')
+        }, 300);
+    }
     
 
     return (
         <>
            
            <div className={`${
-                    open ? 'w-64' : ' w-16'} h-screen p-2 pt-8 bg-slate-900  transition-all duration-300 top-0`}
+                    open ? 'w-64' : 'w-16'} fixed h-full min-h-screen md:h-screen p-2 pt-8 bg-slate-900  transition-all duration-300 top-0`}
                     onMouseEnter={()=>setOpen(true)} onMouseLeave={()=>setOpen(false)}
                     >
                     <div className={`flex  rounded-md pt-2 pb-2 text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
-                                        mt-2 menu-items `} > 
+                                        mt-2 menu-items `} >
  
                         {
                             !open?
@@ -128,7 +135,7 @@ const NavBar=()=> {
                         </li>
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer  text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
-                                        mt-10 menu-items `} >
+                                        mt-10 menu-items `} onClick={()=>handlelogout()} >
                             <img src={logout} className=' ' alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Log-out
@@ -151,22 +158,25 @@ const NavBar=()=> {
 
 export const HomePage: React.FC = () => {
     const navigate =useNavigate();
+    const [wdth,setWdth]=useState(window.innerWidth);//width of scroll bar 16
     
-    
-  
+    useEffect(()=>{
+        setWdth(window.innerWidth)
+        console.log('hello')
+    },[window.innerWidth])
   
   
   return (
     <>
        
-            <div className='flex'>
-                <div className='w-1/7'>
+            <div className='flex flex-row bg-gradient-to-tr from-blue-50 to-red-50 h-screen w-screen'>
+                <div className=''>
                     <NavBar/>
                 </div>
 
-                <div className='w-6/7 ml-16'>
+                <div className='ml-16' style={{width:`${((wdth-64)/wdth)*100}%`}}>
                     <Routes>
-                        <Route path="/add_data" element={<Add_data/>} />
+                        <Route index path="/add_data" element={<Add_data/>} />
                         <Route path="/login_email_status" element={<Login_Email_Status/>} />
                         <Route path="/student_img_status" element={<Student_Img_Status/>} />
                     </Routes>

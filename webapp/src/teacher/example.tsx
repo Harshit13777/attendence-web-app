@@ -19,7 +19,7 @@ const handleCheckboxChange = (index: number) => {
   if (isSelected(index)) {
     // Face is already selected, so deselect it
     setDetectedFaces(detectedFaces.filter((i)=>i !== detectedFaces[index]));
-    setSelectedFaces(selectedFaces.filter((i) => i !== index));
+    setSelectedFaces(selectedFaces.filter((i) => i !== index))
   } else {
     // Face is not selected, so select it
     setSelectedFaces([...selectedFaces, index]);
@@ -123,7 +123,7 @@ const handleCheckboxChange = (index: number) => {
 
 
   const handleSendImage = () => {
-    const label=['1','2','3'];
+    const label=['1'];
     
     const objs=selectedFaces.map((index,i)=>{
       return {label:label[i],descriptor:Array.from(detectedFaces[index].descriptor)}
@@ -184,7 +184,7 @@ const handleCheckboxChange = (index: number) => {
         )}
 
       {
-        detectedFaces.length<22 &&
+        detectedFaces.length<2 &&
       <div className={` relative `} >
         <Webcam
           className={`w-screen md:h-5/6 opacity-100`}

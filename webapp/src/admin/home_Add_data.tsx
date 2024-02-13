@@ -6,6 +6,7 @@ import add_icon from "../.icons/add.png";
 import minus_icon from '../.icons/minus.png';
 import { last } from 'lodash';
 import { paste } from '@testing-library/user-event/dist/paste';
+import { useNavigate } from 'react-router-dom';
 
 
 interface DataRow {
@@ -33,7 +34,10 @@ const SpreadsheetInterface = () => {
   const [rowsToAddCount, setRowsToAddCount] = useState(1); // Default value for row count to add
   const [rowsToDeleteCount, setRowsToDeleteCount] = useState(1); // Default value for row count to delete
 
-  
+  const [open_copyPaste,set_open_copyPaste]=useState(false);
+  const [loading,set_loading]=useState(false);
+  const navigate=useNavigate();
+
   useEffect(()=>{
     
   const debouncedUpdateHistory = _debounce(() => {
@@ -62,7 +66,12 @@ const SpreadsheetInterface = () => {
   
   };
 
-  
+  useEffect(()=>{
+    if(message.length>0)
+      setTimeout(() => {
+        setMessage((p)=>p.slice(1,))
+      }, 7000);
+  },[message])
 
   const handleColumnSelection = (columnName:string) => {//choose coloum for clipboard
     if(selectedColumn===columnName){
@@ -74,10 +83,15 @@ const SpreadsheetInterface = () => {
   
   const handleAddRows = () => {
     if(rowsToAddCount>0){
-
+      if(rowsToAddCount>50){
+        setMessage(['Row Length must be less than 50'])
+        setRowsToAddCount(1);
+        return
+      }
       const emptyRow = { name: '', age: '', email: '' };
       const newRows = new Array(rowsToAddCount).fill('').map(() => ({...Empty_data}));
       setDataRows([...dataRows, ...newRows]);
+      setRowsToAddCount(1);
     }
   };
 
@@ -91,6 +105,7 @@ const SpreadsheetInterface = () => {
     else{
       setDataRows( new Array(1).fill('').map(() => ({...Empty_data})));
     }
+    setRowsToDeleteCount(1)
   };
 
   const handleDeleteRows = () => {
@@ -98,6 +113,9 @@ const SpreadsheetInterface = () => {
       
       setDataRows(dataRows.slice(0, dataRows.length - rowsToDeleteCount));
       
+    }
+    else {
+      setDataRows( new Array(1).fill('').map(() => ({...Empty_data})));
     }
   };
   
@@ -118,69 +136,92 @@ const SpreadsheetInterface = () => {
     }
   };
   
-  const isValidData=()=> {
-    for (let i in dataRows) {
-      let obj=dataRows[i];
-      
+  const isValidData=(sdatarows: DataRow[])=> {
+    for (let i in sdatarows) {
+      let obj=sdatarows[i];
+      let res=true;
       // Check if Teacher_Name and Teacher_Email are not empty
       if(!((obj.Teacher_Name !== '' && obj.Teacher_Email !== '') || ((obj.Teacher_Name === '' && obj.Teacher_Email === '') && (obj.Student_Name !== '' && obj.Student_Email !== '' && obj.Student_Roll_No!==''))))
-        return false;
+      { 
+        setMessage((p)=>[...p,'Empty cell in Teacher column'])  
+        res=false;
+      }
       
     
       // Check if Student_Name and Student_Email are not empty
       if(!((obj.Student_Name !== '' && obj.Student_Email !== '' && obj.Student_Roll_No) || (obj.Student_Name === '' && obj.Student_Email === '' && obj.Student_Roll_No=== '')))
-        return false;
+      {
+        setMessage((p)=>[...p,'Empty cell in Student column']) 
+        res=false
+      } 
+      if(!res){
+        return false
+      }
     
     } 
       return true;
     
   }
 
-  async function submitData() {
+  async function submitData(sdatarows: DataRow[]) {
+    set_loading(true);
     try {
-      if (!isValidData()) {
-        setMessage(['Error: Fill the empty value']);
-        return;
+      if (!isValidData(sdatarows)) {
+        throw new Error("Error:Fill the Form");
+        
       }
       
-      let Admin_Sheet_Id = sessionStorage.getItem('Admin_Sheet_Id');
-      let username = sessionStorage.getItem('username');
+      const token=sessionStorage.getItem('token');
+      if(!token){
+        sessionStorage.clear();
+        setTimeout(()=>
+          navigate('/login')
+          ,5000);
+        throw new Error('Error : No Token Found')
+      }
       
       const response = await fetch(`api?page=admin&action=add_data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ dataRows, Admin_Sheet_Id, username }),
+        body: JSON.stringify({ dataRows, token }),
       });
       
       if (!response.ok) {
-        setMessage(['Network error']);
-        console.log('Network response was not ok');
-        return;
-      }
-      
-      const data = await response.json(); // convert json to object
-      
-      if (data.hasOwnProperty('message')) {
-        setMessage(data.message);
-        setDataRows(new Array(1).fill('').map(() => ({ ...Empty_data })));
-        setMessage(['Login email sent successfully']);
-        return;
-      }
-      
-      if (data.hasOwnProperty('sheet_invalid')) {
-        
-          sessionStorage.removeItem('Admin_Sheet_Id');
-          setMessage(['Sheet not Found']);
-       
-        return;
+        throw new Error('Network response was not ok')
       }
       
     
-    } catch (error) {
-      console.error('An error occurred:', error);
-      setMessage(['An error occurred. Please try again later.']);
+      const data = await response.json(); // convert json to object
+      
+      
+      if(data.hasOwnProperty('error')){
+        throw new Error("Server Error");   
+      }
+      
+      if (data.hasOwnProperty('sheet_invalid')) {
+          sessionStorage.clear();
+          setTimeout(() => {
+            navigate('/login')
+          }, 5000);
+      }
+      
+      if(data.hasOwnProperty('is_data_added')){
+        if(data.is_data_added==='yes'){
+          setDataRows(new Array(rowsToAddCount).fill('').map(() => ({...Empty_data})))
+        }
+        else{
+          setMessage((p)=>[...p,'Data Not Added'])
+        }
+      }
+      
+      setMessage((p)=>[...p,data.message]);
+    
+    } catch (error:any) {
+      set_loading(false)
+      console.error('An error occurred:', error.message);
+      setMessage((p)=>[...p,'An error occurred:'+error.message]);
     }
   }
   
@@ -238,97 +279,112 @@ const SpreadsheetInterface = () => {
   
   return (
     
-    <div className="p-4 md:p-8">
-    <div className="flex flex-col items-center justify-center h-20 bg-lime-50 pb-2">
-      <h1 className="text-4xl font-bold text-gray-900">
-        <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-950">
-          Add Data
-        </span>
-      </h1>
-    </div>
+    <div className=" text-center p-2 md:p-8 rounded-lg h-full"> 
+   
+        <h1 className="flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-500 bg-lime-50 p-3 rounded-lg">
+            Add Data
+          </span>
+        </h1>
+    
   
-      <div className="flex flex-row justify-between mt-2">
-        <div className="flex mb-2 md:mb-0">
+      <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
+        <div className="flex  gap-x-1 md:gap-x-3  w-4/12  justify-center">
           <img src={undo_icon}
             title='Undo'
             onClick={handleUndo}
-            className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:opacity-50 "
+            className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
           />
             
-          
           <img
             src={redo_icon}
             title='Redo'
             onClick={handleRedo}
-            className="bg-blue-500 text-white px-2 py-1 rounded hover:opacity-50"
-          />
+            className="bg-slate-300 text-white rounded-xl hover:opacity-50"
+            />
+            
             
         </div>
-        <div className="flex">
+
+        <div className="flex  gap-x-1 md:gap-x-3 w-4/12 justify-center">
           <input
             type="number"
+            
+            size={4}
+            
+            maxLength={2}
             value={rowsToAddCount}
             onChange={(e) => setRowsToAddCount(parseInt(e.target.value))}
-            className="w-16 mr-2 px-2 py-1 border rounded hover:bg-slate-100 "
+            className=" w-8/12 md:w-3/12 text-center text-xl md:text-3xl border-2 border-lime-200 p-1 md:p-2 font-bold  focus:outline-none focus:border-blue-400  rounded-xl  hover:bg-slate-200"
           />
           <img src={add_icon}
             title='Add Rows'
             onClick={handleAddRows}
-            className="bg-green-500 text-white px-2 py-1 rounded hover:opacity-50"
+            className=" bg-slate-300 text-white rounded-lg hover:opacity-50"
           />
            
         </div>
-        <div className="flex">
+        <div className="flex  gap-x-1 md:gap-x-3 w-4/12 justify-center">
           <input
             type="number"
+            size={4}
+            
+            maxLength={50}
             value={rowsToDeleteCount}
             onChange={(e) => setRowsToDeleteCount(parseInt(e.target.value))}
-            className="w-16 mr-2 px-2 py-1 border rounded hover:bg-slate-100"
+            className=" w-8/12 md:w-3/12  text-center text-xl md:text-3xl border-2 border-lime-200 p-1 md:p-2 font-bold    rounded-xl focus:outline-none focus:border-blue-400 hover:bg-slate-200"
           />
           <img src={minus_icon}
             title='Delete Rows'
             onClick={handleDeleteRows}
-            className="bg-red-500 text-white px-2 py-1 rounded hover:opacity-50"
+            className="bg-slate-300 text-white rounded-lg hover:opacity-50"
           />
           
         </div>
       </div>
-      <div className="overflow-x-auto mb-4">
-        <table className="w-full table-auto">
-          <thead>
-            <tr>
-              <th colSpan={2} className="px-4 py-2">Teachers</th>
-              <th colSpan={3} className="px-4 py-2">Students</th>
-
+     
+      <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-500 bg-lime-50 rounded-lg">
+           Fill the Form
+          </span>
+      </h1>
+      <div className=" overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 rounded-xl  p-2"  >
+        <table className="table-auto w-full ">
+          <thead className=' text-center items-center '>
+            <tr className=''>
+              <th colSpan={2} className=" text-xl md:text-3xl font-semibold px-4 py-2">Teachers</th>
+              <th colSpan={3} className=" text-xl md:text-3xl font-semibold px-4 py-2">Students</th>
             </tr>
-            <tr>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Roll No.</th>
-            </tr>
+            <tr className=' '>
+              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Name</th>
+              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Email</th>
+              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Name</th>
+              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Email</th>
+              <th className="text-lg md:text-2xl font-semibold py-2 pr-20">Roll No.</th>
               {/* Add more column headers */}
+            </tr>
           </thead>
-          <tbody>
+          <tbody >
             {dataRows.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {Object.keys(row).map((key) => (
                   <td key={key} className="px-4 py-2">
                     <input
+                      maxLength={50}
+                      
                       value={row[key]}
                       placeholder={`Enter ${key}`}
                       onChange={(e) =>
                         handleInputChange(rowIndex, key, e.target.value)
                       }
-                      className="w-full border rounded px-2 py-1 hover:bg-slate-100 hover:text-black "
+                      className="border rounded-xl font-bold  p-2 focus:outline-none focus:border-blue-400 hover:bg-slate-100 hover:text-black"
                     />
                   </td>
                 ))}
                 <td className="px-4 py-2">
                   <button
                     onClick={() => handleDeleteRow(rowIndex)}
-                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-white hover:text-red-700 hover:bg-light-white"
+                    className="bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-white hover:text-red-700 hover:border-red-700 focus:outline-none"
                   >
                     Delete
                   </button>
@@ -338,37 +394,55 @@ const SpreadsheetInterface = () => {
           </tbody>
         </table>
       </div>
-      <div className="flex flex-col md:flex-row mb-4 md:items-center">
-  <div className="md:mr-4 mb-2 md:mb-0">
-    {Object.keys(dataRows[0]).map((columnName, columnIndex) => (
-      <button 
-        key={columnIndex}
-        onClick={() => handleColumnSelection(columnName)}
-        className={` bg-blue-500 text-white px-4 py-2 pt-2 rounded mr-2 mb-2 md:mb-0 hover:bg-blue-300 ${selectedColumn===columnName?'opacity-50':''}`}
-      >
-        Select {columnName}
-      </button>
-    ))}
-  </div>
-  <p className={`${selectedColumn!==''?'block':'hidden'} `}>note: To use this <br /> first copy only one coloum of google spreadsheet <br/> then select target coloum to paste data</p>
-  <button
-    onClick={handlePasteClipboard}
-    disabled={selectedColumn === ''}
-    className={`bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400 ${
-      selectedColumn ? '' : 'opacity-50 cursor-not-allowed'
-    }`}
-  >
-    Paste Clipboard
-  </button>
+
+      <div className=' bg-gradient-to-tr from-blue-200 to-red-100 hover:bg-gradient-to-r rounded-lg p-2 mt-10 mb-5'>      
+        <h1 onClick={()=>set_open_copyPaste((p)=>!p)} className="  flex text-center items-center justify-center text-lg md:text-2xl font-bold text-gray-900 ">
+            <span className="bg-clip-text text-transparent bg-gradient-to-l from-slate-800 to-slate-600  rounded-lg">
+              {open_copyPaste?'Close':'Open Copy&Paste'}
+            </span>
+        </h1>
+      {open_copyPaste &&
+      
+        <div className="flex flex-col md:flex-row mb-4 md:items-center">
+        <div className="md:mr-4 mb-2 md:mb-0">
+          {Object.keys(dataRows[0]).map((columnName, columnIndex) => (
+            <button 
+              key={columnIndex}
+              onClick={() => handleColumnSelection(columnName)}
+              className={`   px-4 py-2 pt-2 rounded-lg mr-2 mb-2 md:mb-0 hover:bg-blue-300 ${selectedColumn===columnName?' bg-blue-100 text-blue-700':'bg-blue-400 text-white'}`}
+            >
+              Select {columnName}
+            </button>
+          ))}
+        </div>
+        <p className={`${selectedColumn!==''?'block':'hidden'} `}><h1 className=' font-semibold '>Note:</h1><h3 className=' font-medium'>First copy only one coloum of google spreadsheet then select target coloum to paste data</h3></p>
+        <button
+          onClick={handlePasteClipboard}
+          disabled={selectedColumn === ''}
+          className={`bg-green-500 text-white  py-2 rounded-lg hover:bg-green-400 ${
+            selectedColumn ? '' : 'opacity-50 cursor-not-allowed'
+          }`}
+        >
+          Paste Clipboard
+        </button>
+        </div>
+      }
       </div>
 
+      {
+      loading
+       ?
+      <div className="  ml-auto mr-auto  animate-spin rounded-lg border-blue-500 border-solid border-8 h-10 w-10"></div>
+      :
       <button
-        onClick={submitData}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:opacity-50">
+        onClick={()=>submitData(dataRows)}
+        className=" bg-gradient-to-t hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
         Submit
       </button>
+      }
+
       {message.map((message,i)=> (
-        <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+        <div className="bg-red-100 text-center mt-5 border-t border-b border-red-300 text-red-700 px-4 py-3" role="alert">
           <p className="text-sm">{message}</p>
         </div>
       ))}

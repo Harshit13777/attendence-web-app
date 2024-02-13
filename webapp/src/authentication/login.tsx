@@ -172,12 +172,27 @@ const Login: React.FC = () => {
 
 
       //for testing
-      sessionStorage.setItem('email','email');
-      sessionStorage.setItem('user','admin');
+      if(selectedRole==='admin'){
+
+        sessionStorage.setItem('email','email');
+        sessionStorage.setItem('user','admin');
       sessionStorage.setItem('username','ram');
-      sessionStorage.setItem('token','hghghjtoken');
-      
+      sessionStorage.setItem('token','hghghjtoken'); 
       sessionStorage.setItem('Admin_Sheet_Id','113ynMauHpX_XTgu9tP9PPJieVS90qZK8Y_P1t1NUtKo');
+      sessionStorage.setItem('sheet_exist','T');
+      setTimeout(() => {
+        navigat('/admin');
+      }, 300);
+    }
+      
+      if(selectedRole==='teacher'){
+        sessionStorage.setItem('user','teacher');
+        sessionStorage.setItem('email',email);
+        sessionStorage.setItem('sheet_exist','T');
+        sessionStorage.setItem('Admin_Sheet_Id','113ynMauHpX_XTgu9tP9PPJieVS90qZK8Y_P1t1NUtKo');
+        sessionStorage.setItem('Token','ffjlksjf')
+        setTimeout(()=>navigat('/teacher'),300);
+      }
       //if(data.admin_sheet_Exists){
        
       
@@ -185,9 +200,8 @@ const Login: React.FC = () => {
       //if(data.admin_sheet_access_valid){
         
       //}
-    setTimeout(() => {
-      navigat('/admin');
-    }, 300);
+   
+      
     return;
       //
      
