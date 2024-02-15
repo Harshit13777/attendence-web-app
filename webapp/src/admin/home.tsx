@@ -12,6 +12,7 @@ import navbar_open from "../.icons/navbar.png";
 import system_control from "../.icons/system_control.png";
 import check_email from '../.icons/check_email_status.png';
 import Add_data_student from './add_student';
+import { Edit_student } from './edit_student';
 
 
 // HomePage.tsx
@@ -93,7 +94,7 @@ const NavBar=()=> {
                                       <Link to="/admin/add_student">Add Student</Link> 
                                     </li>
                                     <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
-                                      Edit data
+                                    <Link to="/admin/edit_student">Edit Student</Link> 
                                     </li>
                                     <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
                                       Delete data
@@ -182,7 +183,8 @@ export const HomePage: React.FC = () => {
                 <div className='ml-16' style={{width:`${((wdth-64)/wdth)*100}%`}}>
                     <Routes>
                         <Route index path="/add_teacher" element={<Add_data_teacher/>} />
-                        <Route index path="/add_student" element={<Add_data_student/>} />
+                        <Route path="/add_student" element={<Add_data_student/>} />
+                        <Route path="/edit_student" element={<Edit_student/>} />
                         <Route path="/login_email_status" element={<Login_Email_Status/>} />
                         <Route path="/student_img_status" element={<Student_Img_Status/>} />
                     </Routes>
