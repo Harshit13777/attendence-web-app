@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import _debounce from 'lodash/debounce';//for saving data in time span
 import undo_icon from "../.icons/undo.png";
 import redo_icon from '../.icons/redo.png';
 import add_icon from "../.icons/add.png";
 import minus_icon from '../.icons/minus.png';
-import { last } from 'lodash';
+import { debounce, last } from 'lodash';
 import { paste } from '@testing-library/user-event/dist/paste';
 import { Form, useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,13 @@ interface DataRow_Student {
     Student_Email: string;
     [key: string]: string; // Index signature to allow dynamic properties
 }
+type HistoryItem = {
+    studentRows: DataRow_Student[];
+    error_row: DataRow_Student[];
+    update_row: { [key: string]: string; }[]
+
+};
+
 
 const SpreadsheetInterface = () => {
     const Empty_data_Student = { Student_Name: '', Student_Roll_No: '', Student_Email: '' };
@@ -24,12 +31,16 @@ const SpreadsheetInterface = () => {
     const [storage_dataRows, set_storage_dataRows] = useState<DataRow_Student[] | null>(null)
 
     const [Student_dataRows, set_studentDatarows] = useState<DataRow_Student[]>([]);
+    const [Datarow_error_message, set_Datarow_error_message] = useState<DataRow_Student[]>([])
 
+    const [Student_updatedRows, set_student_updatedRows] = useState<{ [key: string]: string; }[]>([])
+    const [student_deleteRows, set_student_deleteRows] = useState<{ deleted: boolean }[]>([]);
 
     const [message, setMessage] = useState(['']);
     const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
-    const [history, setHistory] = useState([Student_dataRows]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const history = useRef<HistoryItem[]>([{ studentRows: Student_dataRows, error_row: Datarow_error_message, update_row: Student_updatedRows }]);
+
+    const currentIndex = useRef(0);
     const [historyon, setHistoryon] = useState(false);
 
     const [selectedColumn, setSelectedColumn] = useState('');//data for copy clipboard 
@@ -41,22 +52,23 @@ const SpreadsheetInterface = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-
         const debouncedUpdateHistory = _debounce(() => {
-            const newHistory = [...history.slice(0, currentIndex + 1), Student_dataRows].slice(-MAX_HISTORY_LENGTH);
-            setHistory(newHistory);
-            setCurrentIndex(newHistory.length - 1);
-
+            const error_mes = JSON.parse(JSON.stringify(Datarow_error_message));
+            const edit_med = JSON.parse(JSON.stringify(Student_updatedRows));
+            //console.log(Student_dataRows[0]['Student_Email'], ' ', Datarow_error_message[0]['Student_Email']);
+            const newHistory = [...history.current.slice(0, currentIndex.current + 1), { studentRows: [...Student_dataRows], error_row: error_mes, update_row: edit_med }].slice(-MAX_HISTORY_LENGTH);
+            history.current = (newHistory);
+            console.log(newHistory)
+            currentIndex.current = (newHistory.length - 1);
         }, 300);
-        if (message.length > 3) {
-            setMessage([]);
-        }
+
         if (!historyon)
             debouncedUpdateHistory();
         else
             setHistoryon(false);
 
-    }, [Student_dataRows])
+    }, [Student_dataRows]);
+
 
     useEffect(() => {//get data form localstorge
         const sjson = localStorage.getItem('Student_Data');
@@ -64,58 +76,86 @@ const SpreadsheetInterface = () => {
             const Student_data: DataRow_Student[] = JSON.parse(sjson);
             set_studentDatarows(Student_data);
             set_storage_dataRows(Student_data);
+            //make datarow for error message
+            const newErrorRow = new Array(Student_data.length).fill('').map(() => ({ ...Empty_data_Student }));
+            set_Datarow_error_message(newErrorRow)
+            //make update datarow 
+            const updateRowEMpty = new Array(Student_data.length).fill('').map(() => ({}));
+            set_student_updatedRows(updateRowEMpty);
+            //make delete datarow 
+            const deleteRowEMpty = new Array(Student_data.length).fill('').map(() => ({ deleted: false }));
+            set_student_deleteRows(deleteRowEMpty);
+            //set history
+            history.current = ([{ studentRows: Student_data, error_row: newErrorRow, update_row: updateRowEMpty }])
+
         }
     }, [])
 
     const handleInputChange_Teacher = (index: number, field: string, value: string) => {
         //add data change in dataRows 
 
-        const inputElement = document.getElementById(`input-${index}-${field}`);
+
+        const datarowerror = Datarow_error_message;
 
 
-        if (inputElement) {
-            inputElement.style.borderColor = ''
-            inputElement.style.borderWidth = ''
-            if (storage_dataRows)
-                if (value !== storage_dataRows[index][field]) {
-                    inputElement.style.borderColor = 'green'
-                    inputElement.style.borderWidth = '3px'
-                }
+        datarowerror[index][field] = ''
+        if (storage_dataRows)
+            if (value !== storage_dataRows[index][field]) {
+                Student_updatedRows[index][field] = value;
+            }
+            else {
+                delete Student_updatedRows[index][field];
+            }
 
-        }
 
-        if (field === 'Student_Roll_No' && inputElement) {
-            const inputName = document.getElementById(`input-${index}-Student_Name`);
+        if (field === 'Student_Roll_No') {
             const Namevalue = Student_dataRows[index]['Student_Name'] === '';
-            if (inputName && Namevalue) {
-                inputName.style.borderColor = 'red';
-                inputName.style.borderWidth = '2px';
+            if (Namevalue) {
+                datarowerror[index]['Student_Name'] = 'Fill this'
             }
         }
-        if (field === 'Student_Email' && inputElement) {
-            const inputRollNo = document.getElementById(`input-${index}-Student_Roll_No`)
+        if (field === 'Student_Email') {
+            //if name is empty then make border red
+            const Namevalue = Student_dataRows[index]['Student_Name'] === '';
+            if (Namevalue) {
+                datarowerror[index]['Student_Name'] = 'Fill this'
+            }
+
             const Rollvalue = Student_dataRows[index]['Student_Roll_No'] === ''
-            if (inputRollNo && Rollvalue) {
-                inputRollNo.style.borderColor = 'red'
-                inputRollNo.style.borderWidth = '2px'
+            if (Rollvalue) {
+                datarowerror[index]['Student_Roll_No'] = 'Fill this'
+
             }
             const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
             const isValidEmail = emailPattern.test(value);
 
             // Update the border color based on email validity
-            if (inputElement && !isValidEmail) {
-                inputElement.style.borderColor = 'red';
-                inputElement.style.borderWidth = '2px';
+            if (!isValidEmail) {
+                datarowerror[index]['Student_Email'] = 'Email Not valid'
             }
+            //check if email update then check if already exist 
+            if (storage_dataRows && Student_updatedRows[index].hasOwnProperty(field))//check if email exist already
+                CheckEmailExist(value, index);
+
+
         }
 
         const newDataRows = Student_dataRows.map((row, rowIndex) =>
             rowIndex === index ? { ...row, [field]: value } : row
         );
+
+        set_Datarow_error_message(datarowerror);
         set_studentDatarows(newDataRows);
 
 
     };
+
+    const CheckEmailExist = async (input_email: string, index: number) => {
+        const exist = storage_dataRows?.find((row) => row.Student_Email === input_email);
+        if (exist) {
+            Datarow_error_message[index]['Student_Email'] = 'Email already Added'
+        }
+    }
 
     useEffect(() => {
         if (message.length > 0)
@@ -134,36 +174,49 @@ const SpreadsheetInterface = () => {
 
 
     //by delete button
-    const handleDeleteRow_Teaher = (index: number) => {
+    const handleDeleteRow_student = (index: number) => {
         if (Student_dataRows.length > 1) {
+            if (student_deleteRows[index]['deleted'] === false) {
 
-            const updatedDataRows = Student_dataRows.filter((row, rowIndex) => rowIndex !== index);
-            set_studentDatarows(updatedDataRows);
+                const deleterow = student_deleteRows.map((row, rowIndex) =>
+                    rowIndex === index ? { ...row, ['deleted']: true } : row
+                );
+                set_student_deleteRows(deleterow)
+            }
+            else {
+
+                const deleterow = student_deleteRows.map((row, rowIndex) =>
+                    rowIndex === index ? { ...row, ['deleted']: false } : row
+                );
+                set_student_deleteRows(deleterow)
+            }
 
         }
-        else {
-            set_studentDatarows(new Array(1).fill('').map(() => ({ ...Empty_data_Student })));
-        }
-        setRowsToDeleteCount(1)
     };
-
 
     const handleUndo = () => {
-        if (currentIndex > 0) {
+        if (currentIndex.current > 1) {
             setHistoryon(true);
-            setCurrentIndex(currentIndex - 1);
-            set_studentDatarows(history[currentIndex - 1]);
-
+            currentIndex.current = (currentIndex.current - 1);
+            console.log(history.current[currentIndex.current]['error_row'][0]['Student_Email'], ' ', history.current[currentIndex.current]['studentRows'][0]['Student_Email']);
+            set_studentDatarows(history.current[currentIndex.current]['studentRows']);
+            set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
+            set_student_updatedRows(history.current[currentIndex.current]['update_row']);
         }
     };
 
-    const handleRedo = () => {
-        if (currentIndex < history.length - 1) {
+    const handleRedo = () => { //
+        if (currentIndex.current < history.current.length - 1) {
             setHistoryon(true);
-            setCurrentIndex(currentIndex + 1);
-            set_studentDatarows(history[currentIndex + 1]);
-        }
-    };
+            currentIndex.current = (currentIndex.current + 1);
+            set_studentDatarows(history.current[currentIndex.current]['studentRows']);
+            set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
+            set_student_updatedRows(history.current[currentIndex.current]['update_row']);
+
+
+        };
+    }
+
 
     const isValidData = (sdatarows: DataRow_Student[]) => {
         let res = true;
@@ -387,9 +440,9 @@ const SpreadsheetInterface = () => {
                                     </thead>
                                     <tbody >
                                         {Student_dataRows.map((row, rowIndex) => (
-                                            <tr key={rowIndex} id={`input-${rowIndex}`}>
+                                            <tr key={rowIndex} id={`input-${rowIndex}`} className={`${student_deleteRows[rowIndex]['deleted'] ? 'bg-red-200' : ''}`}>
                                                 {Object.keys(row).map((key) => (
-                                                    <td key={key} className="px-4 py-2">
+                                                    <td key={key} className={`px-4 py-2 ${student_deleteRows[rowIndex]['deleted'] ? 'opacity-50 pointer-events-none' : ''}`}>
                                                         <input
                                                             maxLength={50}
                                                             id={`input-${rowIndex}-${key}`}
@@ -398,16 +451,17 @@ const SpreadsheetInterface = () => {
                                                             onChange={(e) =>
                                                                 handleInputChange_Teacher(rowIndex, key, e.target.value)
                                                             }
-                                                            className="border focus:border-4 rounded-xl font-bold  p-2 focus:outline-none focus:border-blue-400 hover:bg-slate-100 hover:text-black"
+                                                            className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows[rowIndex].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
                                                         />
+                                                        {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
                                                     </td>
                                                 ))}
                                                 <td className="px-4 py-2">
                                                     <button
-                                                        onClick={() => handleDeleteRow_Teaher(rowIndex)}
+                                                        onClick={() => handleDeleteRow_student(rowIndex)}
                                                         className="bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-white hover:text-red-700 hover:border-red-700 focus:outline-none"
                                                     >
-                                                        Delete
+                                                        {student_deleteRows[rowIndex]['deleted'] !== true ? 'Delete' : 'UnDelete'}
                                                     </button>
                                                 </td>
                                             </tr>

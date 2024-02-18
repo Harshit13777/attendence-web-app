@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import _debounce from 'lodash/debounce';//for saving data in time span
 import undo_icon from "../.icons/undo.png";
 import redo_icon from '../.icons/redo.png';
@@ -27,8 +27,8 @@ const SpreadsheetInterface = () => {
 
   const [message, setMessage] = useState(['']);
   const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
-  const [history, setHistory] = useState([Teacher_dataRows]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const history = useRef([{ teacherRows: Teacher_dataRows, error_row: Datarow_error_message }]);
+  const currentIndex = useRef(0);
   const [historyon, setHistoryon] = useState(false);
 
   const [selectedColumn, setSelectedColumn] = useState('');//data for copy clipboard 
@@ -42,11 +42,13 @@ const SpreadsheetInterface = () => {
   useEffect(() => {
 
     const debouncedUpdateHistory = _debounce(() => {
-      const newHistory = [...history.slice(0, currentIndex + 1), Teacher_dataRows].slice(-MAX_HISTORY_LENGTH);
-      setHistory(newHistory);
-      setCurrentIndex(newHistory.length - 1);
-
+      const error_mes = JSON.parse(JSON.stringify(Datarow_error_message));
+      const newHistory = [...history.current.slice(0, currentIndex.current + 1), { teacherRows: [...Teacher_dataRows], error_row: error_mes }].slice(-MAX_HISTORY_LENGTH);
+      history.current = newHistory;
+      console.log(newHistory)
+      currentIndex.current = (newHistory.length - 1);
     }, 300);
+
 
     if (!historyon)
       debouncedUpdateHistory();
@@ -67,22 +69,14 @@ const SpreadsheetInterface = () => {
   const handleInputChange_Teacher = (index: number, field: string, value: string) => {
     //add data change in dataRows 
 
-    const inputElement = document.getElementById(`input-${index}-${field}`);
-
-    if (inputElement) {//make reset
-      inputElement.style.borderColor = ''
-      inputElement.style.borderWidth = ''
-      Datarow_error_message[index][field] = ''
-    }
+    Datarow_error_message[index][field] = ''
 
 
-    if (field === 'Teacher_Email' && inputElement) {
+
+    if (field === 'Teacher_Email') {
       //if name is empty then make border red
-      const inputName = document.getElementById(`input-${index}-Teacher_Name`);
       const Namevalue = Teacher_dataRows[index]['Teacher_Name'] === '';
-      if (inputName && Namevalue) {
-        inputName.style.borderColor = 'red';
-        inputName.style.borderWidth = '2px';
+      if (Namevalue) {
         Datarow_error_message[index]['Teacher_Name'] = 'Fill this'
       }
 
@@ -92,14 +86,12 @@ const SpreadsheetInterface = () => {
       const isValidEmail = emailPattern.test(value);
 
       // Update the border color based on email validity
-      if (inputElement && !isValidEmail) {
-        inputElement.style.borderColor = 'red';
-        inputElement.style.borderWidth = '2px';
+      if (!isValidEmail) {
         Datarow_error_message[index]['Teacher_Email'] = 'Email Not valid'
 
       }
       if (storage_datarows)//check if email exist already
-        CheckEmailExist(value, inputElement, index);
+        CheckEmailExist(value, index);
 
 
     }
@@ -114,12 +106,9 @@ const SpreadsheetInterface = () => {
   };
 
 
-  const CheckEmailExist = async (input_email: string, element: HTMLElement, index: number) => {
+  const CheckEmailExist = async (input_email: string, index: number) => {
     const exist = storage_datarows?.find((row) => row.Student_Email === input_email);
     if (exist) {
-      element.style.borderColor = 'red';
-      element.style.borderWidth = '2px';
-
       Datarow_error_message[index]['Teacher_Email'] = 'Email already Added'
     }
   }
@@ -144,7 +133,6 @@ const SpreadsheetInterface = () => {
     if (rowsToAddCount > 0) {
       if (Teacher_dataRows.length < 100) {
 
-        const emptyRow = { name: '', age: '', email: '' };
         const newRows = new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Teacher }));
         set__teacherDatarows([...Teacher_dataRows, ...newRows]);
 
@@ -164,27 +152,18 @@ const SpreadsheetInterface = () => {
   //by delete button
   const handleDeleteRow_Teaher = (index: number) => {
     if (Teacher_dataRows.length > 1) {
-
+      //delete datarow
       const updatedDataRows = Teacher_dataRows.filter((row, rowIndex) => rowIndex !== index);
       set__teacherDatarows(updatedDataRows);
+      //delte error message datarow
+      const updateddeleteDataRows = Datarow_error_message.filter((row, rowIndex) => rowIndex !== index);
+      set_Datarow_error_message(updateddeleteDataRows);
+
 
     }
     else {
-      const obj: DataRow_Teacher[] = new Array(1).fill('').map(() => ({ ...Empty_data_Teacher }))
-      //reset this
-      Object.keys(obj[0]).map((key) => {
-
-        const input = document.getElementById(`input-${0}-${key}`);
-
-        if (input) {
-          input.style.borderColor = ''
-          input.style.borderWidth = ''
-          Datarow_error_message[0][key] = ''
-        }
-
-
-      })
-      set__teacherDatarows(obj);
+      set__teacherDatarows(new Array(1).fill('').map(() => ({ ...Empty_data_Teacher })));
+      set_Datarow_error_message(new Array(1).fill('').map(() => ({ ...Empty_data_Teacher })));
     }
     setRowsToDeleteCount(1)
   };
@@ -194,27 +173,33 @@ const SpreadsheetInterface = () => {
     if (rowsToDeleteCount < Teacher_dataRows.length) {
 
       set__teacherDatarows(Teacher_dataRows.slice(0, Teacher_dataRows.length - rowsToDeleteCount));
+      //delte error message datarow
+      set_Datarow_error_message(Datarow_error_message.slice(0, Datarow_error_message.length - rowsToDeleteCount));
 
     }
     else {
       set__teacherDatarows(new Array(1).fill('').map(() => ({ ...Empty_data_Teacher })));
+      set_Datarow_error_message(new Array(1).fill('').map(() => ({ ...Empty_data_Teacher })))
     }
   };
 
   const handleUndo = () => {
-    if (currentIndex > 0) {
+    if (currentIndex.current > 0) {
       setHistoryon(true);
-      setCurrentIndex(currentIndex - 1);
-      set__teacherDatarows(history[currentIndex - 1]);
+      currentIndex.current = (currentIndex.current - 1);
+      set__teacherDatarows(history.current[currentIndex.current]['teacherRows']);
+      set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
+
 
     }
   };
 
   const handleRedo = () => {
-    if (currentIndex < history.length - 1) {
+    if (currentIndex.current < history.current.length - 1) {
       setHistoryon(true);
-      setCurrentIndex(currentIndex + 1);
-      set__teacherDatarows(history[currentIndex + 1]);
+      currentIndex.current = (currentIndex.current + 1);
+      set__teacherDatarows(history.current[currentIndex.current]['teacherRows']);
+      set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
     }
   };
 
@@ -516,7 +501,7 @@ const SpreadsheetInterface = () => {
                         onChange={(e) =>
                           handleInputChange_Teacher(rowIndex, key, e.target.value)
                         }
-                        className="border rounded-xl font-bold  p-2 focus:outline-none focus:border-blue-400 hover:bg-slate-100 hover:text-black"
+                        className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
                       />
                       {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
                     </td>
