@@ -222,19 +222,14 @@ const SpreadsheetInterface = () => {
 
   const isValidData = (sdatarows: DataRow_Student[]) => {
     let res = true;
+
     //check all row are filled
     for (let i in sdatarows) {
       let obj = sdatarows[i];
       // Check if Student_Name and Student_Email are not empty
       Object.keys(obj).map((key) => {
         if (obj[key] === '') {
-          const input = document.getElementById(`input-${i}-${key}`);
-
-          if (input) {
-            input.style.borderColor = 'red'
-            input.style.borderWidth = '2px'
-            Datarow_error_message[i][key] = 'Fill this'
-          }
+          Datarow_error_message[i][key] = 'Fill this'
           res = false
         }
       })
@@ -243,25 +238,30 @@ const SpreadsheetInterface = () => {
 
     //check if any email repeated or not
     const seen: { [key: string]: boolean } = {};
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
     for (let i in sdatarows) {
-      if (seen[sdatarows[i].Student_Email]) {
-        setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
-        const ele = document.getElementById(`input-${i}-${'Student_Email'}`)
-        if (ele) {
-          ele.style.borderColor = 'red'
-          ele.style.borderWidth = '2px'
+      //if email vaild
+      if (emailPattern.test(sdatarows[i]['Student_Email'])) {
+        //if email already in storage
+        if (seen[sdatarows[i].Teacher_Email]) {
+          setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
           Datarow_error_message[i]['Student_Email'] = 'Email repeated'
+          res = false // Found a duplicate
         }
-        res = false // Found a duplicate
+        if (sdatarows[i].Teacher_Email !== '')
+          seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
+      } else {
+        Datarow_error_message[i]['Student_Email'] = 'Email Not valid'
       }
-      if (sdatarows[i].Student_Email !== '')
-        seen[sdatarows[i].Student_Email] = true; // Record the string as seen
     }
+
+    //check emial exist in storage
+    sdatarows.map((row, index) => CheckEmailExist(row['Student_Email'], index));
 
     //check if all length are 0 in Datarow_error_message 
     Datarow_error_message.map((row, index) => {
-      if (row.Student_Name !== '' || row.Student_Email !== '' || row.Student_Roll_No === '') {
+      if (row.Student_Name !== '' || row.Student_Email !== '' || row.Student_Roll_No !== '') {
         setMessage((p) => [...p, `Fix Error in ${index + 1}th row`])
         res = false;
       }

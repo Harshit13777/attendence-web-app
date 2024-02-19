@@ -58,7 +58,7 @@ const SpreadsheetInterface = () => {
             //console.log(Student_dataRows[0]['Student_Email'], ' ', Datarow_error_message[0]['Student_Email']);
             const newHistory = [...history.current.slice(0, currentIndex.current + 1), { studentRows: [...Student_dataRows], error_row: error_mes, update_row: edit_med }].slice(-MAX_HISTORY_LENGTH);
             history.current = (newHistory);
-            console.log(newHistory)
+            //console.log(newHistory)
             currentIndex.current = (newHistory.length - 1);
         }, 300);
 
@@ -188,6 +188,7 @@ const SpreadsheetInterface = () => {
                 const deleterow = student_deleteRows.map((row, rowIndex) =>
                     rowIndex === index ? { ...row, ['deleted']: false } : row
                 );
+
                 set_student_deleteRows(deleterow)
             }
 
@@ -218,38 +219,86 @@ const SpreadsheetInterface = () => {
     }
 
 
-    const isValidData = (sdatarows: DataRow_Student[]) => {
+    const isValidData = (sdatarows: DataRow_Student[], updatedRows: { [key: string]: string; }[], deleteRows: { deleted: boolean; }[]) => {
         let res = true;
-        for (let i in sdatarows) {
-            let obj = sdatarows[i];
-            // Check if Student_Name and Student_Email are not empty
-            // Check if Student_Name and Student_Email are not empty
-            if (!((obj.Student_Name !== '' && obj.Student_Email !== '' && obj.Student_Roll_No) || (obj.Student_Name === '' && obj.Student_Email === '' && obj.Student_Roll_No === ''))) {
-                setMessage((p) => [...p, 'Empty cell in Student column'])
-                res = false
-            }
+        //console.log(updatedRows, deleteRows);
+        const error_data = Datarow_error_message;
+        //check all updated row are filled because all row in storage are already filled
+        for (let i in updatedRows) {
+            let obj = updatedRows[i];
+            if (!deleteRows[i]['deleted'] && Object.keys(obj).length !== 0) {
 
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-            if (!emailPattern.test(obj.Student_Email)) {
-                setMessage((p) => [...p, `Email not valid:${obj.Student_Email}`])
-                res = false
+                Object.keys(obj).map((key) => {
+                    if (obj[key] === '') {
+                        error_data[i][key] = 'Fill this'
+                    }
+                })
             }
-            if (!res) {
-                return res
-            }
-
         }
+
+        //check if any email repeated or not in updated rows
+        const seen: { [key: string]: boolean } = {};
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+        for (let i in sdatarows) {
+            //if email vaild
+            if (emailPattern.test(sdatarows[i]['Student_Email'])) {
+                //if email is in updated array and it duplicate
+                if (seen[sdatarows[i].Teacher_Email] && updatedRows[i].hasOwnProperty('Teacher_Email')) {
+                    setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
+                    error_data[i]['Student_Email'] = 'Email repeated'
+                }
+                if (sdatarows[i].Teacher_Email !== '')
+                    seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
+            } else {
+                error_data[i]['Student_Email'] = 'Email Not valid'
+            }
+        }
+
+        //console.log(error_data)
+        //check if all length are 0 in Datarow_error_message 
+        error_data.map((row, index) => {
+            if (row.Student_Name !== "" || row.Student_Email !== "" || row.Student_Roll_No !== "") {
+                setMessage((p) => [...p, `Fix Error in ${index + 1}th row`])
+                //console.log(row);
+                res = false;
+            }
+        })
+
+        set_Datarow_error_message(error_data);
+
         return res;
+
 
     }
 
-    async function submitData(sdatarows: DataRow_Student[]) {
+    async function submitData(sdatarows: DataRow_Student[], updatedRows: { [key: string]: string; }[], deleteRows: { deleted: boolean; }[]) {
 
         set_loading(true);
         try {
-            if (!isValidData(sdatarows)) {
+            if (!isValidData(sdatarows, updatedRows, deleteRows)) {
                 throw new Error("Error:Fill the Form");
+            }
+
+            //preprocess updated row and deleted row 
+            const UpdatedRows_byDelete = [...updatedRows];
+            const Delted_rows_send: number[] = []
+            const UpdatedRows_send: { id: number, update: { [key: string]: string; } }[] = []
+            //delte row which are in deletedRows array from updatedRows array
+            deleteRows.map((row, index) => {
+                if (row.deleted) {
+                    Delted_rows_send.push(index)//add index in array which will delted
+                    UpdatedRows_byDelete[index] = {};//null updatedrow which is deleted
+                }
+            })
+            UpdatedRows_byDelete.map((row, index) => {
+                if (Object.keys(row).length !== 0) {
+                    UpdatedRows_send.push({ id: index, update: row });
+                }
+            })
+
+            if (UpdatedRows_send.length === 0 && Delted_rows_send.length === 0) {
+                throw new Error("Data not Edited");
 
             }
 
@@ -267,7 +316,7 @@ const SpreadsheetInterface = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ Student_dataRows, token }),
+                body: JSON.stringify({ UpdatedRows: UpdatedRows_send, DeletedRows: Delted_rows_send, token }),
             });
 
             if (!response.ok) {
@@ -339,59 +388,9 @@ const SpreadsheetInterface = () => {
     }
 
 
-
-    const handlePasteClipboard = async () => {
-        if (selectedColumn === '') {
-            return; // No column selected
-        }
-
-        try {
-            const clipboardText = await navigator.clipboard.readText();
-            const pastedData = clipboardText.split('\r\n').filter(data => data.trim() !== ''); // Remove empty lines
-
-            if (pastedData.length === 0) {
-                return; // No data to paste
-            }
-
-
-            // Find the last filled row in the selected column
-            const lastFilledRow = Student_dataRows
-                .slice()
-                .reverse()
-                .find(row => row[selectedColumn].trim() !== '' || null);
-
-            // If there's no filled row, start pasting from the first row
-            const lastfilledIndex: any = lastFilledRow
-                ? Student_dataRows.indexOf(lastFilledRow) + 1
-                : 0;
-
-            // Ensure the pasted data fits within the array
-            const rowsToAdd = Math.max(0, pastedData.length - (Student_dataRows.length - lastfilledIndex));
-
-            const newRows = new Array(rowsToAdd).fill('').map(() => ({ ...Empty_data_Student }));
-            const updatedDataRows = [...Student_dataRows, ...newRows];
-
-            // Fill in the data from the clipboard
-            pastedData.forEach((data, index) => {
-                updatedDataRows[lastfilledIndex + index][selectedColumn] = data;
-            });
-
-
-            set_studentDatarows(updatedDataRows);
-            setSelectedColumn('');
-
-            // Add the updated dataRows to history
-
-        } catch (error) {
-            console.error('Error reading clipboard data:', error);
-        }
-    };
-
-
-
     return (
 
-        <div className=" text-center p-2 md:p-8 rounded-lg h-full">
+        <div className=" text-center p-2 md:p-8 rounded-lg h-full relative">
 
             <h1 className="flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
                 <span className="bg-clip-text text-transparent bg-gradient-to-tl from-slate-300 to-gray-300 bg-lime-50 p-3 rounded-lg">
@@ -402,118 +401,91 @@ const SpreadsheetInterface = () => {
                 Student_dataRows.length !== 0
                     ?
                     <>
-                        <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
-                            <div className="flex gap-x-5  md:gap-x-3  w-full  justify-center">
-                                <img src={undo_icon}
-                                    title='Undo'
-                                    onClick={handleUndo}
-                                    className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
-                                />
-
-                                <img
-                                    src={redo_icon}
-                                    title='Redo'
-                                    onClick={handleRedo}
-                                    className="bg-slate-300 text-white rounded-xl hover:opacity-50"
-                                />
+                        <div className={` ${loading && 'opacity-50 pointer-events-none'}`}>
 
 
-                            </div>
+                            <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
+                                <div className="flex gap-x-5  md:gap-x-3  w-full  justify-center">
+                                    <img src={undo_icon}
+                                        title='Undo'
+                                        onClick={handleUndo}
+                                        className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
+                                    />
 
-                        </div>
+                                    <img
+                                        src={redo_icon}
+                                        title='Redo'
+                                        onClick={handleRedo}
+                                        className="bg-slate-300 text-white rounded-xl hover:opacity-50"
+                                    />
 
-                        <div className="  mb-4  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2"  >
 
-                            <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
-                                <table className="table-auto w-full ">
-                                    <thead className=' text-center items-center '>
-                                        <tr className=''>
-                                            <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
-
-                                        </tr>
-                                        <tr className=' '>
-                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
-                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
-                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
-                                            {/* Add more column headers */}
-                                        </tr>
-                                    </thead>
-                                    <tbody >
-                                        {Student_dataRows.map((row, rowIndex) => (
-                                            <tr key={rowIndex} id={`input-${rowIndex}`} className={`${student_deleteRows[rowIndex]['deleted'] ? 'bg-red-200' : ''}`}>
-                                                {Object.keys(row).map((key) => (
-                                                    <td key={key} className={`px-4 py-2 ${student_deleteRows[rowIndex]['deleted'] ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                        <input
-                                                            maxLength={50}
-                                                            id={`input-${rowIndex}-${key}`}
-                                                            value={row[key]}
-                                                            placeholder={`Enter ${key}`}
-                                                            onChange={(e) =>
-                                                                handleInputChange_Teacher(rowIndex, key, e.target.value)
-                                                            }
-                                                            className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows[rowIndex].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
-                                                        />
-                                                        {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
-                                                    </td>
-                                                ))}
-                                                <td className="px-4 py-2">
-                                                    <button
-                                                        onClick={() => handleDeleteRow_student(rowIndex)}
-                                                        className="bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-white hover:text-red-700 hover:border-red-700 focus:outline-none"
-                                                    >
-                                                        {student_deleteRows[rowIndex]['deleted'] !== true ? 'Delete' : 'UnDelete'}
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                        </div>
-
-                        <div className='  p-4 bg-gradient-to-tr from-blue-200 to-red-100 hover:bg-gradient-to-r rounded-lg mt-10 mb-5'>
-                            <h1 onClick={() => set_open_copyPaste((p) => !p)} className="  flex text-center items-center justify-center text-lg md:text-2xl font-bold text-gray-900 ">
-                                <span className="bg-clip-text text-transparent bg-gradient-to-l from-slate-800 to-slate-600  rounded-lg">
-                                    {open_copyPaste ? 'Close' : 'Open Copy&Paste'}
-                                </span>
-                            </h1>
-                            {open_copyPaste &&
-
-                                <div className="flex mt-5 flex-col md:flex-row mb-4 md:items-center">
-                                    <div className="md:mr-4 mb-2 md:mb-0">
-                                        {Object.keys(Empty_data_Student).map((columnName, columnIndex) => (
-                                            <button
-                                                key={columnIndex}
-                                                onClick={() => handleColumnSelection(columnName)}
-                                                className={`   px-4 py-2 pt-2 rounded-lg mr-2 mb-2 md:mb-0 hover:bg-blue-300 ${selectedColumn === columnName ? ' bg-blue-100 text-blue-700' : 'bg-blue-400 text-white'}`}
-                                            >
-                                                Select {columnName}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <p className={`${selectedColumn !== '' ? 'block' : 'hidden'} `}><h1 className=' font-semibold '>Note:</h1><h3 className=' font-medium'>First copy only one coloum of google spreadsheet then select target coloum to paste data</h3></p>
-                                    <button
-                                        onClick={handlePasteClipboard}
-                                        disabled={selectedColumn === ''}
-                                        className={`bg-green-500 text-white  p-5 py-2 rounded-lg hover:bg-green-400 ${selectedColumn ? '' : 'opacity-50 cursor-not-allowed'
-                                            }`}
-                                    >
-                                        Paste Clipboard
-                                    </button>
                                 </div>
-                            }
+
+                            </div>
+
+                            <div className={` mb-4  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2`} >
+
+                                <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+                                    <table className="table-auto w-full ">
+                                        <thead className=' text-center items-center '>
+                                            <tr className=''>
+                                                <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
+
+                                            </tr>
+                                            <tr className=' '>
+                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
+                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
+                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
+                                                {/* Add more column headers */}
+                                            </tr>
+                                        </thead>
+                                        <tbody >
+                                            {Student_dataRows.map((row, rowIndex) => (
+                                                <tr key={rowIndex} id={`input-${rowIndex}`} className={`${student_deleteRows[rowIndex]['deleted'] ? 'bg-red-200' : ''}`}>
+                                                    {Object.keys(row).map((key) => (
+                                                        <td key={key} className={`px-4 py-2 ${student_deleteRows[rowIndex]['deleted'] ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                            <input
+                                                                maxLength={50}
+                                                                id={`input-${rowIndex}-${key}`}
+                                                                value={row[key]}
+                                                                placeholder={`Enter ${key}`}
+                                                                onChange={(e) =>
+                                                                    handleInputChange_Teacher(rowIndex, key, e.target.value)
+                                                                }
+                                                                className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows[rowIndex].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                                                            />
+                                                            {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
+                                                        </td>
+                                                    ))}
+                                                    <td className="px-4 py-2">
+                                                        <button
+                                                            onClick={() => handleDeleteRow_student(rowIndex)}
+                                                            className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows[rowIndex]['deleted'] !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
+                                                        >
+                                                            {student_deleteRows[rowIndex]['deleted'] !== true ? 'Delete' : 'UnDelete'}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
                         </div>
 
                         {
                             loading
                                 ?
-                                <div className="  ml-auto mr-auto  animate-spin rounded-lg border-blue-500 border-solid border-8 h-10 w-10"></div>
+
+                                <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
+
                                 :
                                 <button
-                                    onClick={() => submitData(Student_dataRows)}
+                                    onClick={() => submitData(Student_dataRows, Student_updatedRows, student_deleteRows)}
                                     className=" bg-gradient-to-t text-xl font-bold hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
-                                    Submit
+                                    Save
                                 </button>
                         }
 

@@ -110,6 +110,8 @@ const SpreadsheetInterface = () => {
     const exist = storage_datarows?.find((row) => row.Student_Email === input_email);
     if (exist) {
       Datarow_error_message[index]['Teacher_Email'] = 'Email already Added'
+    } else {
+      Datarow_error_message[index]['Teacher_Email'] = ''
     }
   }
 
@@ -206,50 +208,44 @@ const SpreadsheetInterface = () => {
   const isValidData = (sdatarows: DataRow_Teacher[]) => {
     let res = true;
     //check all row are filled
+
+    // Check if Teacher_Name and Teacher_Email are not empty
+
     for (let i in sdatarows) {
       let obj = sdatarows[i];
+      // Check if Student_Name and Student_Email are not empty
+      Object.keys(obj).map((key) => {
+        if (obj[key] === '') {
 
-      // Check if Teacher_Name and Teacher_Email are not empty
-
-      for (let i in sdatarows) {
-        let obj = sdatarows[i];
-        // Check if Student_Name and Student_Email are not empty
-        Object.keys(obj).map((key) => {
-          if (obj[key] === '') {
-            const input = document.getElementById(`input-${i}-${key}`);
-
-            if (input) {
-              input.style.borderColor = 'red'
-              input.style.borderWidth = '2px'
-              Datarow_error_message[i][key] = 'Fill this'
-            }
-            res = false
-          }
-        })
-      }
-
-
-
+          Datarow_error_message[i][key] = 'Fill this'
+          res = false
+        }
+      })
     }
 
 
     //check if any email repeated or not
     const seen: { [key: string]: boolean } = {};
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
     for (let i in sdatarows) {
-      if (seen[sdatarows[i].Teacher_Email]) {
-        setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
-        const ele = document.getElementById(`input-${i}-${'Teacher_Email'}`)
-        if (ele) {
-          ele.style.borderColor = 'red'
-          ele.style.borderWidth = '2px'
+      //if email vaild
+      if (emailPattern.test(sdatarows[i]['Teacher_Email'])) {
+        //if email already in storage
+        if (seen[sdatarows[i].Teacher_Email]) {
+          setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
           Datarow_error_message[i]['Teacher_Email'] = 'Email repeated'
+          res = false // Found a duplicate
         }
-        res = false // Found a duplicate
+        if (sdatarows[i].Teacher_Email !== '')
+          seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
+      } else {
+        Datarow_error_message[i]['Teacher_Email'] = 'Email Not valid'
       }
-      if (sdatarows[i].Teacher_Email !== '')
-        seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
     }
+
+    //check emial exist in storage
+    sdatarows.map((row, index) => CheckEmailExist(row['Teacher_Email'], index));
 
     //check if all length are 0 in Datarow_error_message 
     Datarow_error_message.map((row, index) => {
