@@ -28,7 +28,7 @@ const SpreadsheetInterface = () => {
 
   const [storage_datarows, set_storage_dataRows] = useState<DataRow_Student[] | null>(null);
 
-  const [message, setMessage] = useState(['']);
+  const [message, setMessage] = useState<string[]>([]);
   const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
   const history = useRef([{ studentRows: Student_dataRows, error_row: Datarow_error_message }]);
   const currentIndex = useRef(0);
@@ -366,12 +366,14 @@ const SpreadsheetInterface = () => {
                   //update local storage
                   const ujson = JSON.stringify(upd_Student_data)
                   localStorage.setItem('Student_Data', ujson);
+                  setloading(false)
+                  return;
                 }
                 else {
                   //error column not equal 
                   //run syncing funtion of student data
                 }
-      
+                
                 set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
               }
               else {
@@ -379,7 +381,7 @@ const SpreadsheetInterface = () => {
               }
             }
       
-            setMessage((p) => [...p, data.message]);
+            throw new Error(data.message)
             */
 
     } catch (error: any) {

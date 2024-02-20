@@ -36,7 +36,7 @@ const SpreadsheetInterface = () => {
     const [Student_updatedRows, set_student_updatedRows] = useState<{ [key: string]: string; }[]>([])
     const [student_deleteRows, set_student_deleteRows] = useState<{ deleted: boolean }[]>([]);
 
-    const [message, setMessage] = useState(['']);
+    const [message, setMessage] = useState<string[]>([]);
     const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
     const history = useRef<HistoryItem[]>([{ studentRows: Student_dataRows, error_row: Datarow_error_message, update_row: Student_updatedRows }]);
 
@@ -302,6 +302,41 @@ const SpreadsheetInterface = () => {
 
             }
 
+            //testing
+            const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
+            if (tjson) {
+
+                const _oldData: DataRow_Student[] = JSON.parse(tjson);
+                UpdatedRows_send.map((row, index) => {
+                    const target_row = _oldData[row.id];//select updated row in old data
+                    Object.keys(row.update).map((key) => {//get key of upated data  'Student_Name'|'Student_Roll_No'|'Student_Email'
+                        target_row[key] = row.update[key];//fill in target key
+                    })
+                })
+
+                const updated_data = _oldData.filter((_, index) => !Delted_rows_send.includes(index));
+
+                const sjson = JSON.stringify(updated_data);
+                localStorage.setItem('Student_Data', sjson);
+                localStorage.setItem('Student_Data', sjson);
+                set_studentDatarows(updated_data);
+                set_storage_dataRows(updated_data);
+
+                const newErrorRow = new Array(updated_data.length).fill('').map(() => ({ ...Empty_data_Student }));
+                set_Datarow_error_message(newErrorRow)
+                const updateRowEmpty = new Array(updated_data.length).fill('').map(() => ({}))
+                set_student_updatedRows(updateRowEmpty)
+                set_student_deleteRows(new Array(updated_data.length).fill('').map(() => ({ deleted: false })));
+                history.current = ([{ studentRows: updated_data, error_row: newErrorRow, update_row: updateRowEmpty }])
+                set_loading(false);
+                setMessage(['Sheet added'])
+                return
+
+
+
+            }
+
+            /*
             const token = sessionStorage.getItem('token');
             if (!token) {
                 sessionStorage.clear();
@@ -311,7 +346,7 @@ const SpreadsheetInterface = () => {
                 throw new Error('Error : No Token Found')
             }
 
-            const response = await fetch(`api?page=admin&action=add_data_student`, {
+            const response = await fetch(`api?page=admin&action=edit_data_student`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -338,48 +373,52 @@ const SpreadsheetInterface = () => {
                 }, 5000);
             }
 
-            if (data.hasOwnProperty('is_data_added')) {
-                if (data.is_data_added === 'yes' && data.hasOwnProperty('Sheet_Column_Length')) {
+            if (data.hasOwnProperty('is_data_edited')) {
+                if (data.is_data_edited === 'yes' && data.hasOwnProperty('Sheet_Column_Length')) {
 
                     const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
-
-                    const StudentName_arr = sdatarows.map((row) => row.Student_Name)//get new added name array
-                    const StudentEmail_arr = sdatarows.map((row) => row.Student_Email)//get new added email array
-                    const StudentRoll_arr = sdatarows.map((row) => row.Student_Roll_No)//get new added email array
-                    let upd_Student_data: { Name: string[], Email: string[], Roll_No: string[] };
-                    // merge if previous data exist with new data
                     if (tjson) {
-                        const pre_Student_data: { Name: string[], Email: string[], Roll_No: string[] } = JSON.parse(tjson);//get previous data
-                        upd_Student_data = { Name: [...pre_Student_data.Name, ...StudentName_arr], Email: [...pre_Student_data.Email, ...StudentEmail_arr], Roll_No: [...pre_Student_data.Roll_No, ...StudentRoll_arr] };
-                    }
-                    //mean no data exist in localstorage then add new data
-                    else {
-                        upd_Student_data = { Name: StudentName_arr, Email: StudentEmail_arr, Roll_No: StudentRoll_arr };
-                    }
-                    //get length of updata coloum
-                    const upd_name_length = upd_Student_data.Name.length;
-                    const upd_email_length = upd_Student_data.Email.length;
-                    const upd_Roll_length = upd_Student_data.Roll_No.length;
-                    //if length of colum same then save
-                    if (upd_name_length === upd_email_length && upd_email_length === upd_Roll_length && upd_name_length === data.Sheet_Column_Length) {
-                        //update local storage
-                        const ujson = JSON.stringify(upd_Student_data)
-                        localStorage.setItem('Student_Data', ujson);
-                    }
-                    else {
-                        //error column not equal 
-                        //run syncing funtion of student data
-                    }
 
-                    set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
+                        const _oldData: DataRow_Student[] = JSON.parse(tjson);
+                        UpdatedRows_send.map((row, index) => {
+                            const target_row = _oldData[row.id];//select updated row in old data
+                            Object.keys(row.update).map((key) => {//get key of upated data  'Student_Name'|'Student_Roll_No'|'Student_Email'
+                                target_row[key] = row.update[key];//fill in target key
+                            })
+                        })
+
+                        const updated_data = _oldData.filter((_, index) => !Delted_rows_send.includes(index));
+                        if (updated_data.length === data.Sheet_Column_Length) {
+                            const sjson = JSON.stringify(updated_data);
+                            localStorage.setItem('Student_Data', sjson);
+                            set_studentDatarows(updated_data);
+                            set_storage_dataRows(updated_data);
+
+                            const newErrorRow=new Array(updated_data.length).fill('').map(() => ({ ...Empty_data_Student }));
+                            set_Datarow_error_message(newErrorRow)
+                            const updateRowEmpty=new Array(updated_data.length).fill('').map(() => ({}))
+                            set_student_updatedRows(updateRowEmpty)
+                            set_student_deleteRows(new Array(updated_data.length).fill('').map(() => ({ deleted: false })));
+                            history.current = ([{ studentRows: updated_data, error_row: newErrorRow, update_row: updateRowEMpty }])
+
+                            set_loading(false);
+                            setMessage(data.message)
+                            return
+                        }
+                        else {
+                            //error column not equal 
+                            //run syncing funtion of student data
+                        }
+
+                    }
                 }
                 else {
-                    setMessage((p) => [...p, 'Data Not Added'])
+                    throw new Error("Data not Added");
                 }
             }
 
-            setMessage((p) => [...p, data.message]);
-
+            throw new Error(data.message);
+*/
         } catch (error: any) {
             set_loading(false)
             console.error('An error occurred:', error.message);
@@ -390,7 +429,7 @@ const SpreadsheetInterface = () => {
 
     return (
 
-        <div className=" text-center p-2 md:p-8 rounded-lg h-full relative">
+        <div className=" text-center p-2 md:p-8 rounded-lg h-full">
 
             <h1 className="flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
                 <span className="bg-clip-text text-transparent bg-gradient-to-tl from-slate-300 to-gray-300 bg-lime-50 p-3 rounded-lg">
@@ -401,7 +440,7 @@ const SpreadsheetInterface = () => {
                 Student_dataRows.length !== 0
                     ?
                     <>
-                        <div className={` ${loading && 'opacity-50 pointer-events-none'}`}>
+                        <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
 
 
                             <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
@@ -424,53 +463,51 @@ const SpreadsheetInterface = () => {
 
                             </div>
 
-                            <div className={` mb-4  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2`} >
 
-                                <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
-                                    <table className="table-auto w-full ">
-                                        <thead className=' text-center items-center '>
-                                            <tr className=''>
-                                                <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
+                            <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+                                <table className="table-auto w-full ">
+                                    <thead className=' text-center items-center '>
+                                        <tr className=''>
+                                            <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
 
-                                            </tr>
-                                            <tr className=' '>
-                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
-                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
-                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
-                                                {/* Add more column headers */}
-                                            </tr>
-                                        </thead>
-                                        <tbody >
-                                            {Student_dataRows.map((row, rowIndex) => (
-                                                <tr key={rowIndex} id={`input-${rowIndex}`} className={`${student_deleteRows[rowIndex]['deleted'] ? 'bg-red-200' : ''}`}>
-                                                    {Object.keys(row).map((key) => (
-                                                        <td key={key} className={`px-4 py-2 ${student_deleteRows[rowIndex]['deleted'] ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                            <input
-                                                                maxLength={50}
-                                                                id={`input-${rowIndex}-${key}`}
-                                                                value={row[key]}
-                                                                placeholder={`Enter ${key}`}
-                                                                onChange={(e) =>
-                                                                    handleInputChange_Teacher(rowIndex, key, e.target.value)
-                                                                }
-                                                                className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows[rowIndex].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
-                                                            />
-                                                            {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
-                                                        </td>
-                                                    ))}
-                                                    <td className="px-4 py-2">
-                                                        <button
-                                                            onClick={() => handleDeleteRow_student(rowIndex)}
-                                                            className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows[rowIndex]['deleted'] !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
-                                                        >
-                                                            {student_deleteRows[rowIndex]['deleted'] !== true ? 'Delete' : 'UnDelete'}
-                                                        </button>
+                                        </tr>
+                                        <tr className=' '>
+                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
+                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
+                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
+                                            {/* Add more column headers */}
+                                        </tr>
+                                    </thead>
+                                    <tbody >
+                                        {Student_dataRows.map((row, rowIndex) => (
+                                            <tr key={rowIndex} id={`input-${rowIndex}`} className={`${student_deleteRows[rowIndex]['deleted'] ? 'bg-red-200' : ''}`}>
+                                                {Object.keys(row).map((key) => (
+                                                    <td key={key} className={`px-4 py-2 ${student_deleteRows[rowIndex]['deleted'] ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                        <input
+                                                            maxLength={50}
+                                                            id={`input-${rowIndex}-${key}`}
+                                                            value={row[key]}
+                                                            placeholder={`Enter ${key}`}
+                                                            onChange={(e) =>
+                                                                handleInputChange_Teacher(rowIndex, key, e.target.value)
+                                                            }
+                                                            className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows[rowIndex].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                                                        />
+                                                        {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
                                                     </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                ))}
+                                                <td className="px-4 py-2">
+                                                    <button
+                                                        onClick={() => handleDeleteRow_student(rowIndex)}
+                                                        className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows[rowIndex]['deleted'] !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
+                                                    >
+                                                        {student_deleteRows[rowIndex]['deleted'] !== true ? 'Delete' : 'UnDelete'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
 
                             </div>
                         </div>

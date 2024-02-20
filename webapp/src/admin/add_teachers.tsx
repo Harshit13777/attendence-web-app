@@ -9,7 +9,6 @@ import { paste } from '@testing-library/user-event/dist/paste';
 import { useNavigate } from 'react-router-dom';
 import Add_data_student from './add_student';
 
-
 interface DataRow_Teacher {
   Teacher_Name: string;
   Teacher_Email: string;
@@ -25,7 +24,7 @@ const SpreadsheetInterface = () => {
   const [storage_datarows, set_storage_dataRows] = useState<DataRow_Teacher[] | null>(null);
 
 
-  const [message, setMessage] = useState(['']);
+  const [message, setMessage] = useState<string[]>([]);
   const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
   const history = useRef([{ teacherRows: Teacher_dataRows, error_row: Datarow_error_message }]);
   const currentIndex = useRef(0);
@@ -93,7 +92,6 @@ const SpreadsheetInterface = () => {
       if (storage_datarows)//check if email exist already
         CheckEmailExist(value, index);
 
-
     }
 
 
@@ -110,8 +108,6 @@ const SpreadsheetInterface = () => {
     const exist = storage_datarows?.find((row) => row.Student_Email === input_email);
     if (exist) {
       Datarow_error_message[index]['Teacher_Email'] = 'Email already Added'
-    } else {
-      Datarow_error_message[index]['Teacher_Email'] = ''
     }
   }
 
@@ -210,6 +206,7 @@ const SpreadsheetInterface = () => {
     //check all row are filled
 
     // Check if Teacher_Name and Teacher_Email are not empty
+    const errormessage = Datarow_error_message;
 
     for (let i in sdatarows) {
       let obj = sdatarows[i];
@@ -217,7 +214,7 @@ const SpreadsheetInterface = () => {
       Object.keys(obj).map((key) => {
         if (obj[key] === '') {
 
-          Datarow_error_message[i][key] = 'Fill this'
+          errormessage[i][key] = 'Fill this'
           res = false
         }
       })
@@ -234,13 +231,13 @@ const SpreadsheetInterface = () => {
         //if email already in storage
         if (seen[sdatarows[i].Teacher_Email]) {
           setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
-          Datarow_error_message[i]['Teacher_Email'] = 'Email repeated'
-          res = false // Found a duplicate
+          errormessage[i]['Teacher_Email'] = 'Email repeated'
+
         }
         if (sdatarows[i].Teacher_Email !== '')
           seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
       } else {
-        Datarow_error_message[i]['Teacher_Email'] = 'Email Not valid'
+        errormessage[i]['Teacher_Email'] = 'Email Not valid'
       }
     }
 
@@ -248,12 +245,13 @@ const SpreadsheetInterface = () => {
     sdatarows.map((row, index) => CheckEmailExist(row['Teacher_Email'], index));
 
     //check if all length are 0 in Datarow_error_message 
-    Datarow_error_message.map((row, index) => {
+    errormessage.map((row, index) => {
       if (row.Teacher_Name !== '' || row.Teacher_Email !== '') {
         setMessage((p) => [...p, `Fix Error in ${index + 1}th row`])
         res = false;
       }
     })
+    set_Datarow_error_message(errormessage);
 
     return res
 
@@ -267,80 +265,109 @@ const SpreadsheetInterface = () => {
 
       }
 
-      const token = sessionStorage.getItem('token');
-      if (!token) {
-        sessionStorage.clear();
-        setTimeout(() =>
-          navigate('/login')
-          , 5000);
-        throw new Error('Error : No Token Found')
+      //testing
+      const tjson = localStorage.getItem('Teacher_Data')//get exist data in localstorage
+
+      let upd_Teacher_data;
+      // merge if previous data exist with new data
+      if (tjson) {
+        const pre_Teacher_data: DataRow_Teacher[] = JSON.parse(tjson);//get previous data
+        upd_Teacher_data = [...pre_Teacher_data, ...sdatarows];
       }
-
-      const response = await fetch(`api?page=admin&action=add_data_teacher`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ Teacher_dataRows, token }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
+      //mean no data exist in localstorage then add new data
+      else {
+        upd_Teacher_data = sdatarows
       }
+      //get length of updata coloum
+      const upd_length = upd_Teacher_data.length;
+
+      //if length of colum on database and locastorgae same then save
+
+      //update local storage
+      const ujson = JSON.stringify(upd_Teacher_data)
+      localStorage.setItem('Teacher_Data', ujson);
+      set__teacherDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Teacher })))
+      set_loading(false)
 
 
-      const data = await response.json(); // convert json to object
+      /*
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+              sessionStorage.clear();
+              setTimeout(() =>
+                navigate('/login')
+                , 5000);
+              throw new Error('Error : No Token Found')
+            }
+      
+            const response = await fetch(`api?page=admin&action=add_data_teacher`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ Teacher_dataRows, token }),
+            });
+      
+            if (!response.ok) {
+              throw new Error('Network response was not ok')
+            }
+      
+      
+            const data = await response.json(); // convert json to object
+      
+      
+            if (data.hasOwnProperty('error')) {
+              throw new Error("Server Error");
+            }
+      
+            if (data.hasOwnProperty('sheet_invalid')) {
+              sessionStorage.clear();
+              setTimeout(() => {
+                navigate('/login')
+              }, 5000);
+            }
+            //if data added on sheet
+            if (data.hasOwnProperty('is_data_added')) {
+              if (data.is_data_added === 'yes' && data.hasOwnProperty('Sheet_Column_Length')) {
+      
+                const tjson = localStorage.getItem('Teacher_Data')//get exist data in localstorage
+      
+                let upd_Teacher_data;
+                // merge if previous data exist with new data
+                if (tjson) {
+                  const pre_Teacher_data: DataRow_Teacher[] = JSON.parse(tjson);//get previous data
+                  upd_Teacher_data = [...pre_Teacher_data, ...sdatarows];
+                }
+                //mean no data exist in localstorage then add new data
+                else {
+                  upd_Teacher_data = sdatarows
+                }
+                //get length of updata coloum
+                const upd_length = upd_Teacher_data.length;
+      
+                //if length of colum on database and locastorgae same then save
+                if (upd_Teacher_data === data.Sheet_Column_Length) {
+                  //update local storage
+                  const ujson = JSON.stringify(upd_Teacher_data)
+                  localStorage.setItem('Teacher_Data', ujson);
+                  setMessage(data.message)
+                }
+                else {
+                  //error column not equal 
+                  //run syncing funtion of student data
+                }
+                set__teacherDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Teacher })))
+                setloading(false)
 
-
-      if (data.hasOwnProperty('error')) {
-        throw new Error("Server Error");
-      }
-
-      if (data.hasOwnProperty('sheet_invalid')) {
-        sessionStorage.clear();
-        setTimeout(() => {
-          navigate('/login')
-        }, 5000);
-      }
-      //if data added on sheet
-      if (data.hasOwnProperty('is_data_added')) {
-        if (data.is_data_added === 'yes' && data.hasOwnProperty('Sheet_Column_Length')) {
-
-          const tjson = localStorage.getItem('Teacher_Data')//get exist data in localstorage
-
-          let upd_Teacher_data;
-          // merge if previous data exist with new data
-          if (tjson) {
-            const pre_Teacher_data: DataRow_Teacher[] = JSON.parse(tjson);//get previous data
-            upd_Teacher_data = [...pre_Teacher_data, ...sdatarows];
-          }
-          //mean no data exist in localstorage then add new data
-          else {
-            upd_Teacher_data = sdatarows
-          }
-          //get length of updata coloum
-          const upd_length = upd_Teacher_data.length;
-
-          //if length of colum on database and locastorgae same then save
-          if (upd_Teacher_data === data.Sheet_Column_Length) {
-            //update local storage
-            const ujson = JSON.stringify(upd_Teacher_data)
-            localStorage.setItem('Teacher_Data', ujson);
-          }
-          else {
-            //error column not equal 
-            //run syncing funtion of student data
-          }
-
-          set__teacherDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Teacher })))
-        }
-        else {
-          setMessage((p) => [...p, 'Data Not Added'])
-        }
-      }
-
-      setMessage((p) => [...p, data.message]);
-
+                return;
+              }
+              else {
+                setMessage((p) => [...p, 'Data Not Added'])
+              }
+            }
+      
+           throw new Error(data.message)
+      */
     } catch (error: any) {
       set_loading(false)
       console.error('An error occurred:', error.message);
