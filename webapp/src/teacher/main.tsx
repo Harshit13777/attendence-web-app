@@ -54,7 +54,7 @@ export const Main = () => {
     </>);
 
 }
-
+/*
 const Sync = ({ setloading }: { setloading: React.Dispatch<React.SetStateAction<boolean>> }) => {
   const navigate = useNavigate();
   const [message, setMessage] = useState<any>('loading...');
@@ -249,6 +249,6 @@ const Sync = ({ setloading }: { setloading: React.Dispatch<React.SetStateAction<
     </div>}
   </>);
 }
-
+*/
 
 
