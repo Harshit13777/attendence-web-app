@@ -97,15 +97,16 @@ export const Upload_Img = () => {
   };
 
   useEffect(() => {
+
     if (webcamRef.current) {
       setTimeout(() => {
         start();
-      }, 2500);
+      }, 10000);
     } else {
       setMessage('Choose your photo');
       stopInterval();
     }
-  }, [webcamRef.current, start, stopInterval]);
+  }, []);
 
   const handleSendImage = () => {
     const label = ['1'];
