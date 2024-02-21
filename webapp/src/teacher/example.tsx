@@ -3,7 +3,7 @@ import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
 import { useNavigate } from 'react-router-dom';
 
-export const UploadImg = () => {
+export const Upload_Img = () => {
   const webcamRef = useRef<Webcam | null>(null);
   const [message, setMessage] = useState('');
   const [detectedFaces, setDetectedFaces] = useState<{ img: CanvasImageSource; descriptor: Float32Array }[]>([]);
@@ -184,4 +184,4 @@ export const UploadImg = () => {
   );
 };
 
-export default UploadImg;
+export default Upload_Img;
