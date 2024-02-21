@@ -49,8 +49,8 @@ export const Main = () => {
 
   else
     return (<>
-      {loading_comp ? <Sync setloading={setloading} />
-        : <HomePage />}
+
+      <HomePage />
     </>);
 
 }
@@ -234,6 +234,7 @@ const Sync = ({ setloading }: { setloading: React.Dispatch<React.SetStateAction<
     };
 
     syncing();
+
   }, []);
 
 
