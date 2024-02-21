@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Add_Attendence_Sheet from "./Add_Attendence_Sheet";
-import { Take_Attendence } from "./Take_attendence";
+import Take_Attendence from "./Take_attendence";
 import Get_Attendance_Sheet from './Get_attendance'
 
 import add_data_icon from '../.icons/add.png';
