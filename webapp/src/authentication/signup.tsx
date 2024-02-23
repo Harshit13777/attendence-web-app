@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 
 interface FormData {
-  username:string;
+  username: string;
   name: string;
   email: string;
   password: string;
@@ -12,7 +12,7 @@ interface FormData {
 
 const Signup: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
-    username:'',
+    username: '',
     name: '',
     email: '',
     password: '',
@@ -21,24 +21,24 @@ const Signup: React.FC = () => {
 
   const locat = useLocation();
   const navigat = useNavigate();
-  const [loading,set_loading]=useState(false);
- 
-  const nameInputRef = useRef<HTMLInputElement|null>(null);
-  const emailInputRef = useRef<HTMLInputElement|null>(null);
-  const passwordInputRef = useRef<HTMLInputElement|null>(null);
-  const usernameInputRef = useRef<HTMLInputElement|null>(null);
+  const [loading, set_loading] = useState(false);
+
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
+  const passwordInputRef = useRef<HTMLInputElement | null>(null);
+  const usernameInputRef = useRef<HTMLInputElement | null>(null);
 
 
   useEffect(() => {
-    const handleKeyPress = (e:any) => {
+    const handleKeyPress = (e: any) => {
       if (e.key === 'Enter') {
         switch (e.target.name) {
           case 'name':
             usernameInputRef.current?.focus();
             break;
-            case 'username':
-              emailInputRef.current?.focus();
-              break;
+          case 'username':
+            emailInputRef.current?.focus();
+            break;
           case 'email':
             passwordInputRef.current?.focus();
             break;
@@ -49,9 +49,9 @@ const Signup: React.FC = () => {
             break;
         }
       }
-      else{
-        e.target.style.setProperty('border-color','black');
-        
+      else {
+        e.target.style.setProperty('border-color', 'black');
+
       }
     };
 
@@ -61,7 +61,7 @@ const Signup: React.FC = () => {
     nameInputRef.current?.addEventListener('keydown', handleKeyPress);
     usernameInputRef.current?.addEventListener('keydown', handleKeyPress);
     // Add more event listeners for other fields
-    
+
     // Cleanup the event listeners when the component is unmounted
     return () => {
       emailInputRef.current?.removeEventListener('keydown', handleKeyPress);
@@ -71,46 +71,60 @@ const Signup: React.FC = () => {
       // Remove event listeners for other fields
     };
   }, []);
-  
 
+  useEffect(() => {
+    if (message.length > 0)
+      setTimeout(() => {
+        setMessage((p) => p.slice(1,))
+      }, 7000);
+  }, [message])
 
-  useEffect(()=>{
-    const token=sessionStorage.getItem('token');
-    if(token){
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
       navigat(`/${sessionStorage.getItem('user')}`)
     }
-  },[])
+  }, [])
 
 
-  function validateForm(name: string,username: string,email: string,password: string) {
+  function validateForm(name: string, username: string, email: string, password: string) {
 
-    let isvalid=true;
-    if (name === ''){
-      nameInputRef.current?.style.setProperty('border-color','red');
-      isvalid=false;
-      setMessage((p)=>[...p,'Fill the Name'])
+    let isvalid = true;
+    if (name === '') {
+      nameInputRef.current?.style.setProperty('border-color', 'red');
+      isvalid = false;
+      setMessage((p) => [...p, 'Fill the Name'])
     }
-    if(username===''){
-      usernameInputRef.current?.style.setProperty('border-color','red');
-      isvalid=false;
-      setMessage((p)=>[...p,'Fill the Username'])
+    if (username === '') {
+      usernameInputRef.current?.style.setProperty('border-color', 'red');
+      isvalid = false;
+      setMessage((p) => [...p, 'Fill the Username'])
+    } else if (username.length < 5) {
+      usernameInputRef.current?.style.setProperty('border-color', 'red');
+      isvalid = false;
+      setMessage((p) => [...p, 'Username includes atleast 5 characters'])
     }
-    if(email===''){
-      emailInputRef.current?.style.setProperty('border-color','red');
-      isvalid=false;
-      setMessage((p)=>[...p,'Fill the Email'])
+    if (email === '') {
+      emailInputRef.current?.style.setProperty('border-color', 'red');
+      isvalid = false;
+      setMessage((p) => [...p, 'Fill the Email'])
     }
-    if(password===''){
-      passwordInputRef.current?.style.setProperty('border-color','red');
-      isvalid=false;
-      setMessage((p)=>[...p,'Fill the Password'])
+    if (password === '') {
+      passwordInputRef.current?.style.setProperty('border-color', 'red');
+      isvalid = false;
+      setMessage((p) => [...p, 'Fill the Password'])
+    } else if (password.length < 7) {
+      passwordInputRef.current?.style.setProperty('border-color', 'red');
+      isvalid = false;
+      setMessage((p) => [...p, 'Password length must be 7 characters '])
     }
-    
+
+
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if(!validEmail){
-      emailInputRef.current?.style.setProperty('border-color','red');
-      isvalid=false;
-      setMessage((p)=>[...p,'Email not valid'])
+    if (!validEmail) {
+      emailInputRef.current?.style.setProperty('border-color', 'red');
+      isvalid = false;
+      setMessage((p) => [...p, 'Email not valid'])
     }
 
     return isvalid;
@@ -118,57 +132,62 @@ const Signup: React.FC = () => {
 
 
   async function handleSubmit() {
-    const {email,name,password,username}=formData;
-    setMessage([])
-    try{
+    const { email, name, password, username } = formData;
+    set_loading(true);
+    try {
 
-    if (!validateForm(name,username,email,password)){
-      throw new Error();
-    }
-    
-    
-    const response=await fetch(`${sessionStorage.getItem('api')}?page=admin&action=signup`, {
-        method: 'POST',
+      if (!validateForm(name, username, email, password)) {
+        throw new Error('Fix Error');
+      }
+
+      console.log('sending')
+
+      const response = await fetch(`https://script.google.com/macros/s/AKfycbwU-Ny4uis-hHbp-sP-q3QKYGFBpWra9Ed3-d__6PC95ptZV7cuLn2UCkfJGla4Z9SUcA/exec?page=admin&action=signup`, {
+        method: 'post',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify({name,email,username,password}),
+        body: JSON.stringify({ name, email, username, password }),
       })
-      
-    if (!response.ok) {
-      setMessage(['Network error']);
-      throw new Error('Network response was not ok');
-    }
 
-    const data=await  response.json(); //convert json to object
-         
-    if(data.hasOwnProperty('error')){
-      setMessage(['server error']);
-      throw new Error('server error')
-    }
-    if(data.hasOwnProperty('account_created')){
-      setTimeout(() => {
-        navigat('/login');
-      }, 5000);
-    }
-    setMessage([data.message]);
-    set_loading(false);
-      
-    }catch(e:any){
+      if (!response.ok) {
+        setMessage(['Network error']);
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json(); //convert json to object
+
+      console.log('data=', data);
+      if (data.hasOwnProperty('message'))
+        setMessage((p) => [...p, data.message]);
+
+      if (data.hasOwnProperty('account_created')) {
+        setTimeout(() => {
+          navigat('/login');
+        }, 3000);
+        setMessage((p) => [...p, data.account_created])
+      }
+
       set_loading(false);
-      console.log(e.message);
+
+    } catch (e: any) {
+      set_loading(false);
+      console.log('Error', e.message);
     }
   }
-  
+
 
   return (
     <>
       <div className="mx-auto bg-gray-750 pt-4 pb-4 md:p-8">
         <div className="p-8 m-auto  h-max min-h-[calc(100vh-32px)]  md:min-h-[calc(100vh-64px)]  md:h-screen md:w-7/12 lg:w-5/12  bg-gray-800 text-white rounded-md shadow-lg hover:shadow-xl transition duration-300">
-            <h1 className="text-3xl text-center  text font-bold m-10 bg-gradient-to-r  from-gray-600 to-gray-800">Signup</h1>
+          <h1 className="text-3xl text-center  text font-bold m-10 bg-gradient-to-r  from-gray-600 to-gray-800">Signup</h1>
 
+
+
+          <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
             <div className="mb-8">
-              <label htmlFor="name" className={`block ${formData.name.length===0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
+              <label htmlFor="name" className={`block ${formData.name.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Name
               </label>
               <input
@@ -184,7 +203,7 @@ const Signup: React.FC = () => {
               />
             </div>
             <div className="mb-8">
-              <label htmlFor="username" className={`block ${formData.username.length===0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
+              <label htmlFor="username" className={`block ${formData.username.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Username
               </label>
               <input
@@ -201,7 +220,7 @@ const Signup: React.FC = () => {
               />
             </div>
             <div className="mb-8">
-              <label htmlFor="email" className={`block ${formData.email.length===0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
+              <label htmlFor="email" className={`block ${formData.email.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Email address
               </label>
               <input
@@ -217,7 +236,7 @@ const Signup: React.FC = () => {
               />
             </div>
             <div className="mb-8">
-              <label htmlFor="password" className={`block ${formData.password.length===0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
+              <label htmlFor="password" className={`block ${formData.password.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Password
               </label>
               <input
@@ -230,42 +249,48 @@ const Signup: React.FC = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full   text-black px-3 py-2  rounded-md border-2"
-              />  
+              />
             </div>
+            {message.length !== 0 && message.map((message, i) => (
+              <div className="bg-blue-100  text-center rounded-md  border-t border-b border-red-500 text-red-700  px-4 py-3" role="alert">
+                <p className="text-sm">{message}</p>
+              </div>
+            ))}
             <div className=' m-10 text-center flex flex-col items-center pt-5 gap-y-2'>
-        
-            {
-              loading
-              ?
-              <div className="animate-spin rounded-lg border-blue-500 border-solid border-8 h-10 w-10"></div>
-             :
-             <button
-              onClick={handleSubmit}
-              className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
+
+              {
+                loading
+                  ?
+
+                  <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
+                  :
+
+
+                  <button
+                    onClick={handleSubmit}
+                    className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
+                  >
+                    Submit
+                  </button>
+              }
+
+
+              <div className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
               >
-              Submit
-              </button>
-            }
-
-
-             <div  className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
-                   >
                 <Link to="/login">
                   Login
                 </Link>
               </div>
+
+
             </div>
-        
-            { message.map((message,i)=> (
-        <div className="bg-blue-100  text-center rounded-md  border-t border-b border-red-500 text-red-700  px-4 py-3" role="alert">
-          <p className="text-sm">{message}</p>
-        </div>
-      ))}
+          </div>
+
         </div>
       </div>
     </>
   );
-  
- };
+
+};
 
 export default Signup;
