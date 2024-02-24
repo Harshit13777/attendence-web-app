@@ -17,7 +17,7 @@ const Signup: React.FC = () => {
     email: '',
     password: '',
   });
-  const [message, setMessage] = useState(['']);
+  const [message, setMessage] = useState<string[]>([]);
 
   const locat = useLocation();
   const navigat = useNavigate();
@@ -142,7 +142,7 @@ const Signup: React.FC = () => {
 
       console.log('sending')
 
-      const response = await fetch(`https://script.google.com/macros/s/AKfycbwU-Ny4uis-hHbp-sP-q3QKYGFBpWra9Ed3-d__6PC95ptZV7cuLn2UCkfJGla4Z9SUcA/exec?page=admin&action=signup`, {
+      const response = await fetch(`${sessionStorage.getItem('adminUrl')}?page=admin&action=signup`, {
         method: 'post',
         headers: {
           'Content-Type': 'text/plain',
@@ -259,19 +259,18 @@ const Signup: React.FC = () => {
             <div className=' m-10 text-center flex flex-col items-center pt-5 gap-y-2'>
 
               {
-                loading
-                  ?
-
-                  <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
-                  :
+                !loading
+                &&
 
 
-                  <button
-                    onClick={handleSubmit}
-                    className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
-                  >
-                    Submit
-                  </button>
+
+
+                <button
+                  onClick={handleSubmit}
+                  className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
+                >
+                  Submit
+                </button>
               }
 
 
@@ -284,6 +283,9 @@ const Signup: React.FC = () => {
 
 
             </div>
+
+            {loading && <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
+            }
           </div>
 
         </div>
