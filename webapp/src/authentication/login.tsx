@@ -90,14 +90,23 @@ const Login: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const token = sessionStorage.getItem('token')
+    if (token) {
+      setTimeout(() => {
+        navigat(`/${sessionStorage.getItem('user')}`)
+      }, 20);
+    }
+  }, [])
+
 
 
   useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      navigat(`/${sessionStorage.getItem('user')}`)
-    }
-  }, [])
+    if (message.length > 0)
+      setTimeout(() => {
+        setMessage((p) => p.slice(1,))
+      }, 7000);
+  }, [message])
 
   const handleRoleChange = (event: any) => {
     if (event.target.value === '') {
@@ -216,7 +225,7 @@ const Login: React.FC = () => {
 
       */
 
-      const response = await fetch(`https://script.google.com/macros/s/AKfycbyU0OjcOUZu-QaJ-ZriDWVuqJjbNtBx-siohjEf4Frfx-CKHjHa1ax4V7t2VhbdeLPXgQ/exec?page=${selectedRole}&action=login`, {
+      const response = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=login`, {
         method: 'post',
         //headers: {
         // 
@@ -244,30 +253,26 @@ const Login: React.FC = () => {
         set_opensetpassword_comp(true);
       }
 
-      if (data.hasOwnProperty('logind')) {//mean sheet exit and all data received
+      if (data.hasOwnProperty('token')) {//mean sheet exit and all data received
 
-        if (!data.Admin_Sheet_Id || !data.token) {
-          throw Error('Server Error');
-        }
+
 
         //for admin handle
         if (selectedRole === 'admin') {
+          if (!data.hasOwnProperty('username')) {
+            throw new Error("Items not received");
+          }
           sessionStorage.setItem('user', 'admin');
           sessionStorage.setItem('username', data.username);
           sessionStorage.setItem('token', data.token);
           sessionStorage.setItem('email', email);
+          //set all user data in localstorage
+          const obj: { user: string, username: string, token: string, email: string } = { 'user': 'admin', username: data.username, token: data.token, email }
+          localStorage.setItem('User_data', JSON.stringify(obj));
 
-          if (data.sheet_status) {
-            if (data.sheet_status === 'Not Exist') {
-
-            }
-            else if (data.sheet_status === 'No Access') {
-              sessionStorage.setItem('Admin_Sheet_Id', data.Admin_Sheet_Id);
-            }
-            else if (data.sheet_status === 'Exist with access') {
-              sessionStorage.setItem('Admin_Sheet_Id', data.Admin_Sheet_Id);
-              sessionStorage.setItem('sheet_exist', 'T');
-            }
+          //if sheet valid then add sheet_exist in session so then it can go to home screen
+          if (data.sheet_status === 'valid') {
+            sessionStorage.setItem('sheet_exist', 'Y');
           }
 
           setTimeout(() => {

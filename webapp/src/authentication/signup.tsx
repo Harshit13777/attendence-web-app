@@ -142,7 +142,7 @@ const Signup: React.FC = () => {
 
       console.log('sending')
 
-      const response = await fetch(`${sessionStorage.getItem('adminUrl')}?page=admin&action=signup`, {
+      const response = await fetch(`https://script.google.com/macros/s/AKfycbwnKtKrHysKZUSsnewKaVlGo_lyyUheu044ey4aa_jobBgR3f9LdnutSC_LrBU4G7W58w/exec?page=admin&action=signup`, {
         method: 'post',
         headers: {
           'Content-Type': 'text/plain',
@@ -284,7 +284,7 @@ const Signup: React.FC = () => {
 
             </div>
 
-            {loading && <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
+            {loading && <div className=" absolute top-1/2 left-1/2 right-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
             }
           </div>
 
