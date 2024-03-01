@@ -13,63 +13,65 @@ export const Admin_sheet_query = () => {
     const [loading, set_loading] = useState(false);
 
     //calling api for sheet status
+    async function get_sheet_info() {
+        try {
+            set_message('');
+            set_loading(true);
+            const token = sessionStorage.getItem('token')
+            if (!token) {
+                sessionStorage.clear();
+                setTimeout(() =>
+                    navigate('/login')
+                    , 5000);
+                throw new Error('Error : No Token Found')
+            }
+            console.log('send')
+            const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=get_sheet_status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+                body: JSON.stringify({ token }),
+            });
+
+            if (!response.ok) {
+                set_message('Network error');
+                console.log('Network response was not ok');
+                set_loading(false);
+                return;
+            }
+
+            const data = await response.json(); // convert json to object
+
+
+
+            if (data.hasOwnProperty('sheet_status')) {
+                set_sheet_status(data.sheet_status)
+                set_loading(false);
+                set_message(data.sheet_status)
+                return;
+            }
+            else if (data.hasOwnProperty(message)) {
+                set_message(data.message)
+            }
+            else {
+                set_message('server error')
+            }
+            //else show message
+
+            set_loading(false);
+        } catch (e: any) {
+            set_loading(false);
+            console.error('error on calling get_sheet_info', e.message)
+        }
+    }
     useEffect(() => {
         //call api to check what problem
-        async function get_sheet_info() {
-            try {
-                set_loading(true);
-                const token = sessionStorage.getItem('token')
-                if (!token) {
-                    sessionStorage.clear();
-                    setTimeout(() =>
-                        navigate('/login')
-                        , 5000);
-                    throw new Error('Error : No Token Found')
-                }
-
-                const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=get_sheet_status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                    },
-                    body: JSON.stringify({ token }),
-                });
-
-                if (!response.ok) {
-                    set_message('Network error');
-                    console.log('Network response was not ok');
-                    set_loading(false);
-                    return;
-                }
-
-                const data = await response.json(); // convert json to object
-
-
-
-                if (data.hasOwnProperty('sheet_status')) {
-                    set_sheet_status(data.sheet_status)
-                    set_loading(false);
-                    set_message('');
-                    return;
-                }
-                else if (data.hasOwnProperty(message)) {
-                    set_message(data.message)
-                }
-                else {
-                    set_message('server error')
-                }
-                //else show message
-
-                set_loading(false);
-            } catch (e) {
-                set_loading(false);
-                console.error('error on calling get_sheet_info', e)
-            }
-        }
         get_sheet_info()
     }, [])
 
     const gotoAdmin = () => {
+        sessionStorage.setItem('sheet_exist', 'yes')
         setTimeout(() => {
             navigate('/admin')
         }, 100);
@@ -104,16 +106,16 @@ export const Admin_sheet_query = () => {
                             ://get access from sheet
                             sheet_status === 'Exist_without_Access'
                                 ?
-                                <Admin_sheet_access_valid set_sheet_status={set_sheet_status} />
+                                <Admin_sheet_access_valid get_sheet_status={() => get_sheet_info()} />
                                 :
                                 sheet_status === 'Exist_with_Access'
                                     ?//go to admin
                                     <div className="bg-blue-100 mt-20 text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
                                         <button
-                                            onClick={gotoAdmin}
+                                            onClick={() => gotoAdmin()}
                                             className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
                                         >
-                                            Go to Admin
+                                            Go to Home
                                         </button>
                                     </div>
                                     ://else error 
@@ -122,9 +124,9 @@ export const Admin_sheet_query = () => {
                                     </div>
                 }
 
-                <div className="bg-blue-100 align-middle text-center border-t border-b border-blue-500 text-blue-700 px-4 py-3 m-10" role="alert">
+                {message.length !== 0 && <div className="bg-red-100 w-max  align-middle ml-auto mr-auto rounded-lg text-center border border-blue-500 text-blue-700 px-4 py-3 m-10" role="alert">
                     <p className="text-sm">{message}</p>
-                </div>
+                </div>}
             </div>
         </div>
 

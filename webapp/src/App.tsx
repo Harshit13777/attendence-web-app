@@ -19,7 +19,7 @@ const App: React.FC = () => {
   //set all local storage item in session
   useEffect(() => {
     //set admin api
-    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbw1opbogI6qDGpcERf-ltxDurbLDPGeOGsLb1xZwMyIR9XST5dJ27oqDaRJQExSSPb6_Q/exec')
+    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbwJ7th94RX9qX--B5W4rVe8tNbcy1Z98zMcwp09LtI6opmz8VxWkUUP6W23FHnCNN9Bjw/exec')
 
     const obj = localStorage.getItem('User_data');
     if (obj) {
@@ -38,8 +38,8 @@ const App: React.FC = () => {
 
         {/* for admin 
       */}
-        <Route path="/test" element={<Upload_Img />} />
         <Route index path="/login" element={<Login />} />
+        <Route path="/test" element={<Upload_Img />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget_password" element={<Forget_password />} />
         <Route path="/sheet invalid" element={<Sheet_invalid />} />
