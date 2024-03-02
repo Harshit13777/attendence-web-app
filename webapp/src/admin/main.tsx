@@ -56,11 +56,13 @@ export const Main = () => {
 
     }
     else
+
       return (
         <>
           <HomePage />
         </>
       );
+
 
   }
 

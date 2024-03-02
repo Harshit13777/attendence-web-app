@@ -18,6 +18,9 @@ interface DataRow_Student {
     Student_Email: string;
     [key: string]: string; // Index signature to allow dynamic properties
 }
+type Store_Student_Data = {
+    [key: string]: DataRow_Student;
+}
 type HistoryItem = {
     studentRows: Store_Student_Data;
     error_row: Store_Student_Data;
@@ -25,9 +28,6 @@ type HistoryItem = {
 
 };
 
-type Store_Student_Data = {
-    [key: string]: DataRow_Student;
-}
 
 
 const SpreadsheetInterface = () => {
@@ -78,13 +78,7 @@ const SpreadsheetInterface = () => {
     useEffect(() => {//get data form localstorgebh
         const sjson = localStorage.getItem('Student_Data');
         if (sjson) {
-            const Student_data: Store_Student_Data = {
-                '1': {
-                    Student_Name: 'Ram',
-                    Student_Roll_No: "RamRam",
-                    Student_Email: 'sfdsihf@gmail.com'
-                }
-            }//JSON.parse(sjson);//{34:{StudentName:string,}}
+            const Student_data: Store_Student_Data = JSON.parse(sjson);//{34:{StudentName:string,}}
             const datalength = Object.keys(Student_data).length;
             set_studentDatarows({ ...Student_data });
             set_storage_dataRows({ ...Student_data });
@@ -206,7 +200,7 @@ const SpreadsheetInterface = () => {
         if (currentIndex.current > 1) {
             setHistoryon(true);
             currentIndex.current = (currentIndex.current - 1);
-            console.log(history.current[currentIndex.current]['error_row'][0]['Student_Email'], ' ', history.current[currentIndex.current]['studentRows'][0]['Student_Email']);
+            //console.log(history.current[currentIndex.current]['error_row'][0]['Student_Email'], ' ', history.current[currentIndex.current]['studentRows'][0]['Student_Email']);
             set_studentDatarows(history.current[currentIndex.current]['studentRows']);
             set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
             set_student_updatedRows(history.current[currentIndex.current]['update_row']);
@@ -232,7 +226,8 @@ const SpreadsheetInterface = () => {
         //console.log(updatedRows, deleteRows);
         const error_data: Store_Student_Data = {};
         //check all updated row are filled because all row in storage are already filled
-        for (let i in updatedRows) {
+        Object.entries(updatedRows).map(([i, row]) => {
+
             let obj = updatedRows[i];
             if (!deleteRows.hasOwnProperty(i) && Object.keys(obj).length !== 0) {
 
@@ -242,7 +237,8 @@ const SpreadsheetInterface = () => {
                     }
                 })
             }
-        }
+
+        })
 
         //check if any email repeated or not in updated rows
         const seen: { [key: string]: boolean } = {};
@@ -252,12 +248,12 @@ const SpreadsheetInterface = () => {
             //if email vaild
             if (emailPattern.test(sdatarows[i]['Student_Email'])) {
                 //if email is in updated array and it duplicate
-                if (seen[sdatarows[i].Teacher_Email] && updatedRows[i].hasOwnProperty('Teacher_Email')) {
+                if (seen[sdatarows[i].Student_Email] && updatedRows[i].hasOwnProperty('Teacher_Email')) {
                     setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
                     error_data[i] = { ...error_data[i], ['Student_Email']: 'Email repeated' }
                 }
-                if (sdatarows[i].Teacher_Email !== '')
-                    seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
+                if (sdatarows[i].Student_Email !== '')
+                    seen[sdatarows[i].Student_Email] = true; // Record the string as seen
             } else {
                 error_data[i] = { ...error_data[i], ['Student_Email']: 'Email not valid' }
             }
@@ -313,7 +309,7 @@ const SpreadsheetInterface = () => {
 
             }
 
-
+            console.log(UpdatedRows_send, Delted_rows_send)
 
             const token = sessionStorage.getItem('token');
             if (!token) {
@@ -324,10 +320,10 @@ const SpreadsheetInterface = () => {
                 throw new Error('Error : No Token Found')
             }
 
-            const response = await fetch(`api?page=admin&action=edit_data_student`, {
+            const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=edit_data_student`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'text/plain',
                 },
                 body: JSON.stringify({ UpdatedRows: UpdatedRows_send, DeletedRows: Delted_rows_send, token }),
             });
@@ -349,6 +345,20 @@ const SpreadsheetInterface = () => {
                 setTimeout(() => {
                     navigate('/sheet invalid')
                 }, 50);
+            }
+
+            if (data.hasOwnProperty('sheet_Erased')) {
+                if (data.sheet_Erased.includes('Student')) {
+                    localStorage.removeItem('Student_Data')
+                }
+                else if (data.sheet_Erased.includes('Teacher')) {
+                    localStorage.removeItem('Teacher_Data')
+                }
+                setTimeout(() => {
+                    navigate('/admin')
+                }, 1000);
+                throw new Error(data.sheet_Erased);
+
             }
 
             if (data.hasOwnProperty('data_edited')) {
@@ -377,12 +387,8 @@ const SpreadsheetInterface = () => {
                     history.current = ([{ studentRows: updated_data, error_row: {}, update_row: {} }])
 
                     set_loading(false);
-                    setMessage(data.message)
+                    setMessage(data.data_edited)
                     return
-
-
-
-
                 }
                 else {
                     throw new Error("Data not Added");
@@ -413,91 +419,89 @@ const SpreadsheetInterface = () => {
                     ?
                     <>
                         <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
+                            <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
 
 
-                            <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
-                                <div className="flex gap-x-5  md:gap-x-3  w-full  justify-center">
-                                    <img src={undo_icon}
-                                        title='Undo'
-                                        onClick={handleUndo}
-                                        className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
-                                    />
+                                <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
+                                    <div className="flex gap-x-5  md:gap-x-3  w-full  justify-center">
+                                        <img src={undo_icon}
+                                            title='Undo'
+                                            onClick={handleUndo}
+                                            className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
+                                        />
 
-                                    <img
-                                        src={redo_icon}
-                                        title='Redo'
-                                        onClick={handleRedo}
-                                        className="bg-slate-300 text-white rounded-xl hover:opacity-50"
-                                    />
+                                        <img
+                                            src={redo_icon}
+                                            title='Redo'
+                                            onClick={handleRedo}
+                                            className="bg-slate-300 text-white rounded-xl hover:opacity-50"
+                                        />
 
+
+                                    </div>
 
                                 </div>
 
-                            </div>
 
+                                <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+                                    <table className="table-auto w-full ">
+                                        <thead className=' text-center items-center '>
+                                            <tr className=''>
+                                                <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
 
-                            <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
-                                <table className="table-auto w-full ">
-                                    <thead className=' text-center items-center '>
-                                        <tr className=''>
-                                            <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
-
-                                        </tr>
-                                        <tr className=' '>
-                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
-                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
-                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
-                                            {/* Add more column headers */}
-                                        </tr>
-                                    </thead>
-                                    <tbody >
-                                        {Object.entries(Student_dataRows).map(([id, value]) => (
-                                            <tr key={id} id={`input-${id}`} className={`${student_deleteRows.hasOwnProperty(id) ? 'bg-red-200' : ''}`}>
-                                                {Object.keys(value).map((key) => (
-                                                    <td key={key} className={`px-4 py-2 ${student_deleteRows.hasOwnProperty(id) ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                        <input
-                                                            maxLength={50}
-                                                            id={`input-${id}-${key}`}
-                                                            value={value[key]} // Use value[key] instead of row[key]
-                                                            placeholder={`Enter ${key}`}
-                                                            onChange={(e) =>
-                                                                handleInputChange_Teacher(id, key, e.target.value)
-                                                            }
-                                                            className={`${Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows.hasOwnProperty(id) && Student_updatedRows[id].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
-                                                        />
-                                                        {Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] &&
-                                                            Datarow_error_message[id][key].length !== 0 && <h5 className=''>{Datarow_error_message[id][key]}</h5>}
-                                                    </td>
-                                                ))}
-                                                <td className="px-4 py-2">
-                                                    <button
-                                                        onClick={() => handleDeleteRow_student(id)}
-                                                        className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows.hasOwnProperty(id) !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
-                                                    >
-                                                        {!student_deleteRows.hasOwnProperty(id) ? 'Delete' : 'UnDelete'}
-                                                    </button>
-                                                </td>
                                             </tr>
-                                        ))}
+                                            <tr className=' '>
+                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
+                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
+                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
+                                                {/* Add more column headers */}
+                                            </tr>
+                                        </thead>
+                                        <tbody >
+                                            {Object.entries(Student_dataRows).map(([id, value]) => (
+                                                <tr key={id} id={`input-${id}`} className={`${student_deleteRows.hasOwnProperty(id) ? 'bg-red-200' : ''}`}>
+                                                    {Object.keys(value).map((key) => (
+                                                        <td key={key} className={`px-4 py-2 ${student_deleteRows.hasOwnProperty(id) ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                            <input
+                                                                maxLength={50}
+                                                                id={`input-${id}-${key}`}
+                                                                value={value[key]} // Use value[key] instead of row[key]
+                                                                placeholder={`Enter ${key}`}
+                                                                onChange={(e) =>
+                                                                    handleInputChange_Teacher(id, key, e.target.value)
+                                                                }
+                                                                className={`${Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows.hasOwnProperty(id) && Student_updatedRows[id].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                                                            />
+                                                            {Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] &&
+                                                                Datarow_error_message[id][key].length !== 0 && <h5 className=''>{Datarow_error_message[id][key]}</h5>}
+                                                        </td>
+                                                    ))}
+                                                    <td className="px-4 py-2">
+                                                        <button
+                                                            onClick={() => handleDeleteRow_student(id)}
+                                                            className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows.hasOwnProperty(id) !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
+                                                        >
+                                                            {!student_deleteRows.hasOwnProperty(id) ? 'Delete' : 'UnDelete'}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
 
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
 
+                                </div>
                             </div>
+
+
+                            <button
+                                onClick={() => submitData(Student_dataRows, Student_updatedRows, student_deleteRows)}
+                                className=" bg-gradient-to-t text-xl font-bold hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
+                                Save
+                            </button>
                         </div>
-
-                        {
-                            loading
-                                ?
-
-                                <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
-
-                                :
-                                <button
-                                    onClick={() => submitData(Student_dataRows, Student_updatedRows, student_deleteRows)}
-                                    className=" bg-gradient-to-t text-xl font-bold hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
-                                    Save
-                                </button>
+                        {loading &&
+                            <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
                         }
 
                         {message.length !== 0 &&
@@ -508,6 +512,7 @@ const SpreadsheetInterface = () => {
                             ))}
 
                     </>
+
                     :
                     <div className="  mb-4  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2"  >
 

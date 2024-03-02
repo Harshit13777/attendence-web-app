@@ -17,6 +17,10 @@ interface DataRow_Student {
   [key: string]: string; // Index signature to allow dynamic properties
 }
 
+type Store_Student_Data = {
+  [key: string]: DataRow_Student;
+}
+
 
 
 const SpreadsheetInterface = () => {
@@ -26,7 +30,7 @@ const SpreadsheetInterface = () => {
   const [Student_dataRows, set_studentDatarows] = useState<DataRow_Student[]>([{ ...Empty_data_Student }]);
   const [Datarow_error_message, set_Datarow_error_message] = useState<DataRow_Student[]>([{ ...Empty_data_Student }])
 
-  const [storage_datarows, set_storage_dataRows] = useState<DataRow_Student[] | null>(null);
+  const [storage_datarows, set_storage_dataRows] = useState<Store_Student_Data | null>(null);
 
   const [message, setMessage] = useState<string[]>([]);
   const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
@@ -48,7 +52,7 @@ const SpreadsheetInterface = () => {
       const error_mes = JSON.parse(JSON.stringify(Datarow_error_message));
       const newHistory = [...history.current.slice(0, currentIndex.current + 1), { studentRows: [...Student_dataRows], error_row: error_mes }].slice(-MAX_HISTORY_LENGTH);
       history.current = newHistory;
-      console.log(newHistory)
+      //console.log(newHistory)
       currentIndex.current = (newHistory.length - 1);
     }, 300);
 
@@ -62,7 +66,7 @@ const SpreadsheetInterface = () => {
   useEffect(() => {//get data form localstorge
     const sjson = localStorage.getItem('Student_Data');
     if (sjson) {
-      const Student_data: DataRow_Student[] = JSON.parse(sjson);
+      const Student_data: Store_Student_Data = JSON.parse(sjson);
       set_storage_dataRows(Student_data);
     }
   }, [])
@@ -122,7 +126,7 @@ const SpreadsheetInterface = () => {
   };
 
   const CheckEmailExist = async (input_email: string, index: number) => {
-    const exist = storage_datarows?.find((row) => row.Student_Email === input_email);
+    const exist = storage_datarows && Object.values(storage_datarows).find((row) => row.Student_Email === input_email);
     if (exist) {
       Datarow_error_message[index]['Student_Email'] = 'Email already Added'
     }
@@ -244,13 +248,13 @@ const SpreadsheetInterface = () => {
       //if email vaild
       if (emailPattern.test(sdatarows[i]['Student_Email'])) {
         //if email already in storage
-        if (seen[sdatarows[i].Teacher_Email]) {
+        if (seen[sdatarows[i].Student_Email]) {
           setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
           Datarow_error_message[i]['Student_Email'] = 'Email repeated'
           res = false // Found a duplicate
         }
-        if (sdatarows[i].Teacher_Email !== '')
-          seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
+        else if (sdatarows[i].Student_Email !== '')
+          seen[sdatarows[i].Student_Email] = true; // Record the string as seen
       } else {
         Datarow_error_message[i]['Student_Email'] = 'Email Not valid'
       }
@@ -317,6 +321,19 @@ const SpreadsheetInterface = () => {
           navigate('/sheet invalid')
         }, 500);
       }
+      if (data.hasOwnProperty('sheet_Erased')) {
+        if (data.sheet_Erased.includes('Student')) {
+          localStorage.removeItem('Student_Data')
+        }
+        else if (data.sheet_Erased.includes('Teacher')) {
+          localStorage.removeItem('Teacher_Data')
+        }
+        setTimeout(() => {
+          navigate('/admin')
+        }, 1000);
+        throw new Error(data.sheet_Erased);
+
+      }
 
       if (data.hasOwnProperty('data_added')) {
 
@@ -352,9 +369,27 @@ const SpreadsheetInterface = () => {
         localStorage.setItem('Student_Data', ujson);
         set_loading(false)
 
+        let not_saveData: DataRow_Student[] = []
+        for (let index = 0; index < saved_data_ids.length; index++) {
+          const element = saved_data_ids[index];
+          if (!element) {
+            not_saveData.push(Student_dataRows[index])
+          }
 
-        set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
-        return;
+        }
+        //update storge var
+        set_storage_dataRows(upd_Student_data);
+        if (not_saveData.length !== 0) {
+          set_studentDatarows(not_saveData);
+          throw new Error('These data not saved')
+        }
+        else {
+          set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
+
+          setMessage(['Data added'])
+          set_loading(false)
+          return
+        }
 
       }
 
@@ -429,161 +464,162 @@ const SpreadsheetInterface = () => {
         </span>
       </h1>
 
-      <div className="  mb-4  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2"  >
+      <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
+        <div className="  mb-4  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2"  >
 
-        <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
-          <div className="flex  gap-x-1 md:gap-x-3  w-4/12  justify-center">
-            <img src={undo_icon}
-              title='Undo'
-              onClick={handleUndo}
-              className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
-            />
+          <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
+            <div className="flex  gap-x-1 md:gap-x-3  w-4/12  justify-center">
+              <img src={undo_icon}
+                title='Undo'
+                onClick={handleUndo}
+                className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
+              />
 
-            <img
-              src={redo_icon}
-              title='Redo'
-              onClick={handleRedo}
-              className="bg-slate-300 text-white rounded-xl hover:opacity-50"
-            />
+              <img
+                src={redo_icon}
+                title='Redo'
+                onClick={handleRedo}
+                className="bg-slate-300 text-white rounded-xl hover:opacity-50"
+              />
 
 
-          </div>
-
-          <div className="flex  gap-x-1 md:gap-x-3 w-4/12 justify-center">
-            <input
-              type="number"
-
-              size={4}
-
-              maxLength={2}
-              value={rowsToAddCount}
-              onChange={(e) => setRowsToAddCount(parseInt(e.target.value))}
-              className=" w-8/12 md:w-3/12 text-center text-xl md:text-3xl border-2 border-lime-200 p-1 md:p-2 font-bold  focus:outline-none focus:border-blue-400  rounded-xl  hover:bg-slate-200"
-            />
-            <img src={add_icon}
-              title='Add Rows'
-              onClick={handleAddRows}
-              className=" bg-slate-300 text-white rounded-lg hover:opacity-50"
-            />
-
-          </div>
-          <div className="flex  gap-x-1 md:gap-x-3 w-4/12 justify-center">
-            <input
-              type="number"
-              size={4}
-
-              maxLength={50}
-              value={rowsToDeleteCount}
-              onChange={(e) => setRowsToDeleteCount(parseInt(e.target.value))}
-              className=" w-8/12 md:w-3/12  text-center text-xl md:text-3xl border-2 border-lime-200 p-1 md:p-2 font-bold    rounded-xl focus:outline-none focus:border-blue-400 hover:bg-slate-200"
-            />
-            <img src={minus_icon}
-              title='Delete Rows'
-              onClick={handleDeleteRows}
-              className="bg-slate-300 text-white rounded-lg hover:opacity-50"
-            />
-
-          </div>
-        </div>
-
-        <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
-          <span className="bg-clip-text text-transparent bg-gradient-to-tl from-blue-800 to-red-500 bg-lime-50 rounded-lg">
-            Fill the Form
-          </span>
-        </h1>
-        <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
-          <table className="table-auto w-full ">
-            <thead className=' text-center items-center '>
-              <tr className=''>
-                <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
-
-              </tr>
-              <tr className=' '>
-                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
-                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
-                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
-                {/* Add more column headers */}
-              </tr>
-            </thead>
-            <tbody >
-              {Student_dataRows.map((row, rowIndex) => (
-                <tr key={rowIndex} id={`input-${rowIndex}`}>
-                  {Object.keys(row).map((key) => (
-                    <td key={key} className="px-4 py-2">
-                      <input
-                        maxLength={50}
-                        id={`input-${rowIndex}-${key}`}
-                        value={row[key]}
-                        placeholder={`Enter ${key}`}
-                        onChange={(e) =>
-                          handleInputChange_Teacher(rowIndex, key, e.target.value)
-                        }
-                        className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
-                      />
-                      {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
-                    </td>
-                  ))}
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleDeleteRow_Teaher(rowIndex)}
-                      className="bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-white hover:text-red-700 hover:border-red-700 focus:outline-none"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-
-      <div className='  p-4 bg-gradient-to-tr from-blue-200 to-red-100 hover:bg-gradient-to-r rounded-lg mt-10 mb-5'>
-        <h1 onClick={() => set_open_copyPaste((p) => !p)} className="  flex text-center items-center justify-center text-lg md:text-2xl font-bold text-gray-900 ">
-          <span className="bg-clip-text text-transparent bg-gradient-to-l from-slate-800 to-slate-600  rounded-lg">
-            {open_copyPaste ? 'Close' : 'Open Copy&Paste'}
-          </span>
-        </h1>
-        {open_copyPaste &&
-
-          <div className="flex mt-5 flex-col md:flex-row mb-4 md:items-center">
-            <div className="md:mr-4 mb-2 md:mb-0">
-              {Object.keys(Student_dataRows[0]).map((columnName, columnIndex) => (
-                <button
-                  key={columnIndex}
-                  onClick={() => handleColumnSelection(columnName)}
-                  className={`   px-4 py-2 pt-2 rounded-lg mr-2 mb-2 md:mb-0 hover:bg-blue-300 ${selectedColumn === columnName ? ' bg-blue-100 text-blue-700' : 'bg-blue-400 text-white'}`}
-                >
-                  Select {columnName}
-                </button>
-              ))}
             </div>
-            <p className={`${selectedColumn !== '' ? 'block' : 'hidden'} `}><h1 className=' font-semibold '>Note:</h1><h3 className=' font-medium'>First copy only one coloum of google spreadsheet then select target coloum to paste data</h3></p>
-            <button
-              onClick={handlePasteClipboard}
-              disabled={selectedColumn === ''}
-              className={`bg-green-500 text-white  p-5 py-2 rounded-lg hover:bg-green-400 ${selectedColumn ? '' : 'opacity-50 cursor-not-allowed'
-                }`}
-            >
-              Paste Clipboard
-            </button>
+
+            <div className="flex  gap-x-1 md:gap-x-3 w-4/12 justify-center">
+              <input
+                type="number"
+
+                size={4}
+
+                maxLength={2}
+                value={rowsToAddCount}
+                onChange={(e) => setRowsToAddCount(parseInt(e.target.value))}
+                className=" w-8/12 md:w-3/12 text-center text-xl md:text-3xl border-2 border-lime-200 p-1 md:p-2 font-bold  focus:outline-none focus:border-blue-400  rounded-xl  hover:bg-slate-200"
+              />
+              <img src={add_icon}
+                title='Add Rows'
+                onClick={handleAddRows}
+                className=" bg-slate-300 text-white rounded-lg hover:opacity-50"
+              />
+
+            </div>
+            <div className="flex  gap-x-1 md:gap-x-3 w-4/12 justify-center">
+              <input
+                type="number"
+                size={4}
+
+                maxLength={50}
+                value={rowsToDeleteCount}
+                onChange={(e) => setRowsToDeleteCount(parseInt(e.target.value))}
+                className=" w-8/12 md:w-3/12  text-center text-xl md:text-3xl border-2 border-lime-200 p-1 md:p-2 font-bold    rounded-xl focus:outline-none focus:border-blue-400 hover:bg-slate-200"
+              />
+              <img src={minus_icon}
+                title='Delete Rows'
+                onClick={handleDeleteRows}
+                className="bg-slate-300 text-white rounded-lg hover:opacity-50"
+              />
+
+            </div>
           </div>
-        }
+
+          <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+            <span className="bg-clip-text text-transparent bg-gradient-to-tl from-blue-800 to-red-500 bg-lime-50 rounded-lg">
+              Fill the Form
+            </span>
+          </h1>
+          <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+            <table className="table-auto w-full ">
+              <thead className=' text-center items-center '>
+                <tr className=''>
+                  <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
+
+                </tr>
+                <tr className=' '>
+                  <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
+                  <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
+                  <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
+                  {/* Add more column headers */}
+                </tr>
+              </thead>
+              <tbody >
+                {Student_dataRows.map((row, rowIndex) => (
+                  <tr key={rowIndex} id={`input-${rowIndex}`}>
+                    {Object.keys(row).map((key) => (
+                      <td key={key} className="px-4 py-2">
+                        <input
+                          maxLength={50}
+                          id={`input-${rowIndex}-${key}`}
+                          value={row[key]}
+                          placeholder={`Enter ${key}`}
+                          onChange={(e) =>
+                            handleInputChange_Teacher(rowIndex, key, e.target.value)
+                          }
+                          className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                        />
+                        {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
+                      </td>
+                    ))}
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => handleDeleteRow_Teaher(rowIndex)}
+                        className="bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-white hover:text-red-700 hover:border-red-700 focus:outline-none"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <div className='  p-4 bg-gradient-to-tr from-blue-200 to-red-100 hover:bg-gradient-to-r rounded-lg mt-10 mb-5'>
+          <h1 onClick={() => set_open_copyPaste((p) => !p)} className="  flex text-center items-center justify-center text-lg md:text-2xl font-bold text-gray-900 ">
+            <span className="bg-clip-text text-transparent bg-gradient-to-l from-slate-800 to-slate-600  rounded-lg">
+              {open_copyPaste ? 'Close' : 'Open Copy&Paste'}
+            </span>
+          </h1>
+          {open_copyPaste &&
+
+            <div className="flex mt-5 flex-col md:flex-row mb-4 md:items-center">
+              <div className="md:mr-4 mb-2 md:mb-0">
+                {Object.keys(Student_dataRows[0]).map((columnName, columnIndex) => (
+                  <button
+                    key={columnIndex}
+                    onClick={() => handleColumnSelection(columnName)}
+                    className={`   px-4 py-2 pt-2 rounded-lg mr-2 mb-2 md:mb-0 hover:bg-blue-300 ${selectedColumn === columnName ? ' bg-blue-100 text-blue-700' : 'bg-blue-400 text-white'}`}
+                  >
+                    Select {columnName}
+                  </button>
+                ))}
+              </div>
+              <p className={`${selectedColumn !== '' ? 'block' : 'hidden'} `}><h1 className=' font-semibold '>Note:</h1><h3 className=' font-medium'>First copy only one coloum of google spreadsheet then select target coloum to paste data</h3></p>
+              <button
+                onClick={handlePasteClipboard}
+                disabled={selectedColumn === ''}
+                className={`bg-green-500 text-white  p-5 py-2 rounded-lg hover:bg-green-400 ${selectedColumn ? '' : 'opacity-50 cursor-not-allowed'
+                  }`}
+              >
+                Paste Clipboard
+              </button>
+            </div>
+          }
+        </div>
+
+
+        <button
+          onClick={() => submitData(Student_dataRows)}
+          className=" bg-gradient-to-t text-xl font-bold hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
+          Submit
+        </button>
       </div>
 
-      {
-        loading
-          ?
-          <div className="  ml-auto mr-auto  animate-spin rounded-lg border-blue-500 border-solid border-8 h-10 w-10"></div>
-          :
-          <button
-            onClick={() => submitData(Student_dataRows)}
-            className=" bg-gradient-to-t text-xl font-bold hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
-            Submit
-          </button>
-      }
 
+      {loading &&
+        <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
+      }
       {message.length !== 0 &&
         message.map((message, i) => (
           <div className="bg-red-100 text-center mt-5 border-t border-b border-red-300 text-red-700 px-4 py-3" role="alert">

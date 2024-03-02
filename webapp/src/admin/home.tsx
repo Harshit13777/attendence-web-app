@@ -172,7 +172,15 @@ const NavBar = () => {
     )
 }
 
-
+interface DataRow_Student {
+    Student_Name: string;
+    Student_Roll_No: string;
+    Student_Email: string;
+    [key: string]: string; // Index signature to allow dynamic properties
+}
+type Store_Student_Data = {
+    [key: string]: DataRow_Student;
+}
 
 
 
@@ -185,7 +193,102 @@ export const HomePage: React.FC = () => {
         console.log('hello')
     }, [window.innerWidth])
 
+    useEffect(() => {
+        const syncing_student = async () => {
 
+            const sync_student_data = async (all_store_ids: string[]) => {
+                try {
+                    const token = sessionStorage.getItem('token');
+                    if (!token) {
+                        sessionStorage.clear();
+                        setTimeout(() =>
+                            navigate('/login')
+                            , 5000);
+                        throw new Error('Error : No Token Found')
+                    }
+
+                    const response: Response = await fetch(`${sessionStorage.getItem('api')}?page=teacher&action=sync_student_data`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain',
+                        },
+                        body: JSON.stringify({
+                            token, all_store_ids
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok')
+                    }
+
+                    const data = await response.json();
+
+
+
+                    if (data.hasOwnProperty('sheet_invalid')) {
+                        sessionStorage.removeItem('sheet_exist')
+                        setTimeout(() => {
+                            navigate('/sheet invalid')
+                        }, 50);
+                    }
+
+                    if (data.hasOwnProperty('sheet_Erased')) {
+                        if (data.sheet_Erased.includes('Student')) {
+                            localStorage.removeItem('Student_Data')
+                        }
+                        else if (data.sheet_Erased.includes('Teacher')) {
+                            localStorage.removeItem('Teacher_Data')
+                        }
+                        setTimeout(() => {
+                            navigate('/admin')
+                        }, 1000);
+                        throw new Error(data.sheet_Erased);
+
+                    }
+
+
+                    if (data.hasOwnProperty('Add_data') && data.hasOwnProperty('Delete_data')) {
+                        //add data which received in localstorage
+                        const json = localStorage.getItem('Student_Data')
+                        let updated_data: Store_Student_Data = {};
+                        const receve_add_data: Store_Student_Data = data.Add_data;
+                        const delete_id: string[] = data.Delete_data;
+                        if (json) {
+                            const saved_data = JSON.parse(json)
+
+                            //delete id from stored data
+                            delete_id.map((id, i) => {
+                                delete saved_data[id]
+                            })
+
+                            updated_data = { ...saved_data, ...receve_add_data }
+                        }
+                        else {
+                            //if no store data then no need to delete data
+                            updated_data = receve_add_data
+                        }
+                        localStorage.setItem('Student_Data', JSON.stringify(updated_data))
+                    }
+
+                } catch (error) {
+                    //setMessage('Error. Please try again later.');
+                    console.error(error);
+                }
+            };
+
+            // Check attendance sheet name presence and sync
+            const dataJson = localStorage.getItem('Student_Data');
+            let all_store_ids: string[] = []
+            if (dataJson) {
+                const Student_data = JSON.parse(dataJson);
+                all_store_ids = Object.keys(Student_data)
+            }
+            sync_student_data(all_store_ids)
+
+        };
+        syncing_student();
+
+    }, [])
 
     return (
         <>
@@ -210,4 +313,8 @@ export const HomePage: React.FC = () => {
         </>
     )
 };
+
+function syncing() {
+    throw new Error('Function not implemented.');
+}
 
