@@ -5,7 +5,7 @@ import { HomePage } from '../home';
 export const Admin_sheet_access_valid: React.FC<{ get_sheet_status: () => Promise<void> }> = ({ get_sheet_status }) => {
   const [show_instruction, set_show] = useState(false);
   const handleOnClick = () => set_show((prevState) => !prevState);
-  const [message, setMessage] = useState('');
+  const [message, set_message] = useState('');
   const navigat = useNavigate();
   const [loading, set_loading] = useState(false);
 
@@ -13,6 +13,60 @@ export const Admin_sheet_access_valid: React.FC<{ get_sheet_status: () => Promis
     set_loading(true);
     await get_sheet_status();
     set_loading(false)
+  }
+
+  async function handledeleteSheet() {
+
+    try {
+      set_message('');
+      set_loading(true);
+      const token = sessionStorage.getItem('token')
+      if (!token) {
+        sessionStorage.clear();
+        setTimeout(() =>
+          navigat('/login')
+          , 5000);
+        throw new Error('Error : No Token Found')
+      }
+      console.log('send')
+      const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=delete_admin_sheet`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (!response.ok) {
+        set_message('Network error');
+        console.log('Network response was not ok');
+        set_loading(false);
+        return;
+      }
+
+      const data = await response.json(); // convert json to object
+
+
+
+      if (data.hasOwnProperty('deleted_sheet')) {
+
+        set_message(data.deleted_sheet)
+        get_sheet_status();
+        return;
+      }
+      else if (data.hasOwnProperty(message)) {
+        set_message(data.message)
+      }
+      else {
+        set_message('server error')
+      }
+      //else show message
+
+      set_loading(false);
+    } catch (e: any) {
+      set_loading(false);
+      console.error('error on calling api', e.message)
+    }
   }
 
 
@@ -41,8 +95,11 @@ export const Admin_sheet_access_valid: React.FC<{ get_sheet_status: () => Promis
           <button className='bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ' onClick={handleOnCheck}>Check</button>
       }
 
-      <button className='bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ' onClick={() => { }}>Delete Sheet</button>
+      <button className='bg-blue-500 text-2xl border-2 text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl ' onClick={() => { handledeleteSheet() }}>Delete Sheet</button>
 
+      {message.length !== 0 && <div className="bg-red-100 w-max  align-middle ml-auto mr-auto rounded-lg text-center border border-blue-500 text-blue-700 px-4 py-3 m-10" role="alert">
+        <p className="text-sm">{message}</p>
+      </div>}
     </div>
 
   </>)

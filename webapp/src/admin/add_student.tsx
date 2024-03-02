@@ -276,6 +276,7 @@ const SpreadsheetInterface = () => {
   async function submitData(sdatarows: DataRow_Student[]) {
 
     set_loading(true);
+    setMessage([])
     try {
       if (!isValidData(sdatarows)) {
         throw new Error("Error:Fill the Form");
@@ -283,106 +284,82 @@ const SpreadsheetInterface = () => {
       }
 
 
-      //testing
-      const json = localStorage.getItem('Student_Data')//get exist data in localstorage
 
-      let upd_Student_data;
-      // merge if previous data exist with new data
-      if (json) {
-        const pre_Student_data: DataRow_Student[] = JSON.parse(json);//get previous data
-        upd_Student_data = [...pre_Student_data, ...sdatarows];
-      }
-      //mean no data exist in localstorage then add new data
-      else {
-        upd_Student_data = sdatarows
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        sessionStorage.clear();
+        setTimeout(() =>
+          navigate('/login')
+          , 5000);
+        throw new Error('Error : No Token Found')
       }
 
+      const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_data_student`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify({ Student_dataRows, token }),
+      });
 
-      //update local storage
-      const ujson = JSON.stringify(upd_Student_data)
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
 
-      localStorage.setItem('Student_Data', ujson);
-      console.log(upd_Student_data)
-      return;
 
-      /*
-      
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-              sessionStorage.clear();
-              setTimeout(() =>
-                navigate('/login')
-                , 5000);
-              throw new Error('Error : No Token Found')
-            }
-      
-            const response = await fetch(`api?page=admin&action=add_data_student`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ Student_dataRows, token }),
-            });
-      
-            if (!response.ok) {
-              throw new Error('Network response was not ok')
-            }
-      
-      
-            const data = await response.json(); // convert json to object
-      
-      
-            if (data.hasOwnProperty('error')) {
-              throw new Error("Server Error");
-            }
-      
-            if (data.hasOwnProperty('sheet_invalid')) {
-              sessionStorage.clear();
-              setTimeout(() => {
-                navigate('/login')
-              }, 5000);
-            }
-      
-            if (data.hasOwnProperty('is_data_added')) {
-              if (data.is_data_added === 'yes' && data.hasOwnProperty('Sheet_Column_Length')) {
-      
-                const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
-      
-                let upd_Student_data;
-                // merge if previous data exist with new data
-                if (tjson) {
-                  const pre_Student_data: DataRow_Student[] = JSON.parse(tjson);//get previous data
-                  upd_Student_data = [...pre_Student_data, ...sdatarows];
-                }
-                //mean no data exist in localstorage then add new data
-                else {
-                  upd_Student_data = sdatarows
-                }
-                //get length of updata coloum
-                const upd_length = upd_Student_data.length;
-      
-                //if length of colum on database and locastorgae same then save
-                if (upd_Student_data === data.Sheet_Column_Length) {
-                  //update local storage
-                  const ujson = JSON.stringify(upd_Student_data)
-                  localStorage.setItem('Student_Data', ujson);
-                  setloading(false)
-                  return;
-                }
-                else {
-                  //error column not equal 
-                  //run syncing funtion of student data
-                }
-                
-                set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
-              }
-              else {
-                setMessage((p) => [...p, 'Data Not Added'])
-              }
-            }
-      
-            throw new Error(data.message)
-            */
+      const data = await response.json(); // convert json to object
+
+
+
+      if (data.hasOwnProperty('sheet_invalid')) {
+        sessionStorage.removeItem('sheet_exist')
+        setTimeout(() => {
+          navigate('/sheet invalid')
+        }, 500);
+      }
+
+      if (data.hasOwnProperty('data_added')) {
+
+        const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
+
+        let upd_Student_data;
+
+        const saved_data_ids: { id: number | false }[] = data.data_added;//added data contain unique id 
+        const saved_data: { [key: number]: DataRow_Student; } = {}
+        sdatarows.map((row, index) => {
+          const id = saved_data_ids[index].id;
+          if (id !== false) {
+            saved_data[id] = row;
+            return
+          }
+        })
+        // merge if previous data exist with new data
+        if (tjson) {
+          const pre_Student_data: { [key: number]: DataRow_Student; } = JSON.parse(tjson);//get previous data
+
+          upd_Student_data = { ...pre_Student_data, ...saved_data };
+        }
+        //mean no data exist in localstorage then add new data
+        else {
+
+          upd_Student_data = saved_data
+        }
+
+        //if length of colum on database and locastorgae same then save
+
+        //update local storage
+        const ujson = JSON.stringify(upd_Student_data)
+        localStorage.setItem('Student_Data', ujson);
+        set_loading(false)
+
+
+        set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
+        return;
+
+      }
+
+      throw new Error(data.message)
+
 
     } catch (error: any) {
       set_loading(false)

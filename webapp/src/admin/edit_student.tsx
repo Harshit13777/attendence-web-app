@@ -8,6 +8,7 @@ import minus_icon from '../.icons/minus.png';
 import { debounce, last } from 'lodash';
 import { paste } from '@testing-library/user-event/dist/paste';
 import { Form, useNavigate } from 'react-router-dom';
+import { file } from 'googleapis/build/src/apis/file';
 
 
 
@@ -18,23 +19,27 @@ interface DataRow_Student {
     [key: string]: string; // Index signature to allow dynamic properties
 }
 type HistoryItem = {
-    studentRows: DataRow_Student[];
-    error_row: DataRow_Student[];
-    update_row: { [key: string]: string; }[]
+    studentRows: Store_Student_Data;
+    error_row: Store_Student_Data;
+    update_row: Store_Student_Data
 
 };
+
+type Store_Student_Data = {
+    [key: string]: DataRow_Student;
+}
 
 
 const SpreadsheetInterface = () => {
     const Empty_data_Student = { Student_Name: '', Student_Roll_No: '', Student_Email: '' };
 
-    const [storage_dataRows, set_storage_dataRows] = useState<DataRow_Student[] | null>(null)
+    const [storage_dataRows, set_storage_dataRows] = useState<Store_Student_Data>({})
 
-    const [Student_dataRows, set_studentDatarows] = useState<DataRow_Student[]>([]);
-    const [Datarow_error_message, set_Datarow_error_message] = useState<DataRow_Student[]>([])
+    const [Student_dataRows, set_studentDatarows] = useState<Store_Student_Data>({});
+    const [Datarow_error_message, set_Datarow_error_message] = useState<Store_Student_Data>({})
 
-    const [Student_updatedRows, set_student_updatedRows] = useState<{ [key: string]: string; }[]>([])
-    const [student_deleteRows, set_student_deleteRows] = useState<{ deleted: boolean }[]>([]);
+    const [Student_updatedRows, set_student_updatedRows] = useState<Store_Student_Data>({})
+    const [student_deleteRows, set_student_deleteRows] = useState<{ [key: string]: {} }>({});
 
     const [message, setMessage] = useState<string[]>([]);
     const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
@@ -56,7 +61,7 @@ const SpreadsheetInterface = () => {
             const error_mes = JSON.parse(JSON.stringify(Datarow_error_message));
             const edit_med = JSON.parse(JSON.stringify(Student_updatedRows));
             //console.log(Student_dataRows[0]['Student_Email'], ' ', Datarow_error_message[0]['Student_Email']);
-            const newHistory = [...history.current.slice(0, currentIndex.current + 1), { studentRows: [...Student_dataRows], error_row: error_mes, update_row: edit_med }].slice(-MAX_HISTORY_LENGTH);
+            const newHistory = [...history.current.slice(0, currentIndex.current + 1), { studentRows: { ...Student_dataRows }, error_row: error_mes, update_row: edit_med }].slice(-MAX_HISTORY_LENGTH);
             history.current = (newHistory);
             //console.log(newHistory)
             currentIndex.current = (newHistory.length - 1);
@@ -70,60 +75,67 @@ const SpreadsheetInterface = () => {
     }, [Student_dataRows]);
 
 
-    useEffect(() => {//get data form localstorge
+    useEffect(() => {//get data form localstorgebh
         const sjson = localStorage.getItem('Student_Data');
         if (sjson) {
-            const Student_data: DataRow_Student[] = JSON.parse(sjson);
-            set_studentDatarows(Student_data);
-            set_storage_dataRows(Student_data);
-            //make datarow for error message
-            const newErrorRow = new Array(Student_data.length).fill('').map(() => ({ ...Empty_data_Student }));
-            set_Datarow_error_message(newErrorRow)
-            //make update datarow 
-            const updateRowEMpty = new Array(Student_data.length).fill('').map(() => ({}));
-            set_student_updatedRows(updateRowEMpty);
-            //make delete datarow 
-            const deleteRowEMpty = new Array(Student_data.length).fill('').map(() => ({ deleted: false }));
-            set_student_deleteRows(deleteRowEMpty);
+            const Student_data: Store_Student_Data = {
+                '1': {
+                    Student_Name: 'Ram',
+                    Student_Roll_No: "RamRam",
+                    Student_Email: 'sfdsihf@gmail.com'
+                }
+            }//JSON.parse(sjson);//{34:{StudentName:string,}}
+            const datalength = Object.keys(Student_data).length;
+            set_studentDatarows({ ...Student_data });
+            set_storage_dataRows({ ...Student_data });
+
             //set history
-            history.current = ([{ studentRows: Student_data, error_row: newErrorRow, update_row: updateRowEMpty }])
+            history.current = ([{ studentRows: Student_data, error_row: {}, update_row: {} }])
 
         }
     }, [])
 
-    const handleInputChange_Teacher = (index: number, field: string, value: string) => {
+    const handleInputChange_Teacher = (index: string, field: string, value: string) => {
         //add data change in dataRows 
 
 
-        const datarowerror = Datarow_error_message;
+        const datarowerror = { ...Datarow_error_message };
 
+        datarowerror[index] = { ...datarowerror[index], [field]: '' }
 
-        datarowerror[index][field] = ''
         if (storage_dataRows)
             if (value !== storage_dataRows[index][field]) {
-                Student_updatedRows[index][field] = value;
+                set_student_updatedRows({
+                    ...Student_updatedRows,
+                    [index]: {
+                        ...Student_updatedRows[index],
+                        [field]: value
+                    }
+                });
             }
             else {
                 delete Student_updatedRows[index][field];
+
             }
 
 
         if (field === 'Student_Roll_No') {
             const Namevalue = Student_dataRows[index]['Student_Name'] === '';
             if (Namevalue) {
-                datarowerror[index]['Student_Name'] = 'Fill this'
+
+                datarowerror[index] = { ...datarowerror[index], ['Student_Name']: 'Fill this' }
             }
         }
         if (field === 'Student_Email') {
             //if name is empty then make border red
             const Namevalue = Student_dataRows[index]['Student_Name'] === '';
             if (Namevalue) {
-                datarowerror[index]['Student_Name'] = 'Fill this'
+                datarowerror[index] = { ...datarowerror[index], ['Student_Name']: 'Fill this' }
             }
 
             const Rollvalue = Student_dataRows[index]['Student_Roll_No'] === ''
             if (Rollvalue) {
-                datarowerror[index]['Student_Roll_No'] = 'Fill this'
+                datarowerror[index] = { ...datarowerror[index], ['Student_Roll_No']: 'Fill this' }
 
             }
             const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -131,29 +143,32 @@ const SpreadsheetInterface = () => {
 
             // Update the border color based on email validity
             if (!isValidEmail) {
-                datarowerror[index]['Student_Email'] = 'Email Not valid'
+                datarowerror[index] = { ...datarowerror[index], ['Student_Email']: 'Email Not valid' }
             }
             //check if email update then check if already exist 
-            if (storage_dataRows && Student_updatedRows[index].hasOwnProperty(field))//check if email exist already
+            if (storage_dataRows && Student_updatedRows.hasOwnProperty(index) && Student_updatedRows[index].hasOwnProperty(field))//check if email exist already
                 CheckEmailExist(value, index);
 
 
         }
 
-        const newDataRows = Student_dataRows.map((row, rowIndex) =>
-            rowIndex === index ? { ...row, [field]: value } : row
-        );
-
+        const updatedStudentDataRows = {
+            ...Student_dataRows,
+            [index]: {
+                ...Student_dataRows[index],
+                [field]: value
+            }
+        };
         set_Datarow_error_message(datarowerror);
-        set_studentDatarows(newDataRows);
+        set_studentDatarows(updatedStudentDataRows);
 
 
     };
 
-    const CheckEmailExist = async (input_email: string, index: number) => {
-        const exist = storage_dataRows?.find((row) => row.Student_Email === input_email);
+    const CheckEmailExist = async (input_email: string, index: string) => {
+        const exist = storage_dataRows[index].Student_Email === input_email;
         if (exist) {
-            Datarow_error_message[index]['Student_Email'] = 'Email already Added'
+            Datarow_error_message[index] = { ...Datarow_error_message[index], ['Student_Email']: 'Email already Added' }
         }
     }
 
@@ -164,36 +179,28 @@ const SpreadsheetInterface = () => {
             }, 7000);
     }, [message])
 
-    const handleColumnSelection = (columnName: string) => {//choose coloum for clipboard
-        if (selectedColumn === columnName) {
-            setSelectedColumn('');
-        }
-        else
-            setSelectedColumn(columnName);
-    };
+
 
 
     //by delete button
-    const handleDeleteRow_student = (index: number) => {
-        if (Student_dataRows.length > 1) {
-            if (student_deleteRows[index]['deleted'] === false) {
+    const handleDeleteRow_student = (index: string) => {
+        if (Object.keys(Student_dataRows).length > 0) {
+            if (!student_deleteRows.hasOwnProperty(index)) {
+                // Delete row if not already marked as deleted
+                const updatedDeleteRows = {
+                    ...student_deleteRows,
+                    [index]: {}
+                };
+                set_student_deleteRows(updatedDeleteRows);
+            } else {
+                // Undelete row if already marked as deleted
+                const { [index]: deletedKey, ...updatedDeleteRows } = student_deleteRows;
 
-                const deleterow = student_deleteRows.map((row, rowIndex) =>
-                    rowIndex === index ? { ...row, ['deleted']: true } : row
-                );
-                set_student_deleteRows(deleterow)
+                set_student_deleteRows(updatedDeleteRows);
             }
-            else {
-
-                const deleterow = student_deleteRows.map((row, rowIndex) =>
-                    rowIndex === index ? { ...row, ['deleted']: false } : row
-                );
-
-                set_student_deleteRows(deleterow)
-            }
-
         }
     };
+
 
     const handleUndo = () => {
         if (currentIndex.current > 1) {
@@ -219,18 +226,19 @@ const SpreadsheetInterface = () => {
     }
 
 
-    const isValidData = (sdatarows: DataRow_Student[], updatedRows: { [key: string]: string; }[], deleteRows: { deleted: boolean; }[]) => {
+    const isValidData = (sdatarows: Store_Student_Data, updatedRows: Store_Student_Data, deleteRows: { [key: string]: {} }) => {
         let res = true;
+        console.log(updatedRows, deleteRows)
         //console.log(updatedRows, deleteRows);
-        const error_data = Datarow_error_message;
+        const error_data: Store_Student_Data = {};
         //check all updated row are filled because all row in storage are already filled
         for (let i in updatedRows) {
             let obj = updatedRows[i];
-            if (!deleteRows[i]['deleted'] && Object.keys(obj).length !== 0) {
+            if (!deleteRows.hasOwnProperty(i) && Object.keys(obj).length !== 0) {
 
                 Object.keys(obj).map((key) => {
                     if (obj[key] === '') {
-                        error_data[i][key] = 'Fill this'
+                        error_data[i] = { ...error_data[i], [key]: 'Fill this' }
                     }
                 })
             }
@@ -246,23 +254,25 @@ const SpreadsheetInterface = () => {
                 //if email is in updated array and it duplicate
                 if (seen[sdatarows[i].Teacher_Email] && updatedRows[i].hasOwnProperty('Teacher_Email')) {
                     setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
-                    error_data[i]['Student_Email'] = 'Email repeated'
+                    error_data[i] = { ...error_data[i], ['Student_Email']: 'Email repeated' }
                 }
                 if (sdatarows[i].Teacher_Email !== '')
                     seen[sdatarows[i].Teacher_Email] = true; // Record the string as seen
             } else {
-                error_data[i]['Student_Email'] = 'Email Not valid'
+                error_data[i] = { ...error_data[i], ['Student_Email']: 'Email not valid' }
             }
         }
 
         //console.log(error_data)
         //check if all length are 0 in Datarow_error_message 
-        error_data.map((row, index) => {
-            if (row.Student_Name !== "" || row.Student_Email !== "" || row.Student_Roll_No !== "") {
-                setMessage((p) => [...p, `Fix Error in ${index + 1}th row`])
-                //console.log(row);
-                res = false;
-            }
+        Object.values(error_data).map((row, i) => {
+            Object.values(row).map((value, i) => {
+                if (value !== '') {
+                    setMessage((p) => [...p, `Fix Error in ${i + 1}th row`])
+                    res = false;
+                }
+            })
+
         })
 
         set_Datarow_error_message(error_data);
@@ -272,7 +282,7 @@ const SpreadsheetInterface = () => {
 
     }
 
-    async function submitData(sdatarows: DataRow_Student[], updatedRows: { [key: string]: string; }[], deleteRows: { deleted: boolean; }[]) {
+    async function submitData(sdatarows: Store_Student_Data, updatedRows: Store_Student_Data, deleteRows: { [key: string]: {} }) {
 
         set_loading(true);
         try {
@@ -281,19 +291,20 @@ const SpreadsheetInterface = () => {
             }
 
             //preprocess updated row and deleted row 
-            const UpdatedRows_byDelete = [...updatedRows];
-            const Delted_rows_send: number[] = []
-            const UpdatedRows_send: { id: number, update: { [key: string]: string; } }[] = []
+            const UpdatedRows_byDelete = { ...updatedRows };
+            const Delted_rows_send: string[] = []
+            const UpdatedRows_send: { id: string, update: { [key: string]: string; } }[] = []
             //delte row which are in deletedRows array from updatedRows array
-            deleteRows.map((row, index) => {
-                if (row.deleted) {
-                    Delted_rows_send.push(index)//add index in array which will delted
-                    UpdatedRows_byDelete[index] = {};//null updatedrow which is deleted
-                }
+            Object.keys(deleteRows).map((id, index) => {
+
+                Delted_rows_send.push(id)//add index in array which will delted
+                delete UpdatedRows_byDelete[index]//null updatedrow which is deleted
+
             })
-            UpdatedRows_byDelete.map((row, index) => {
+
+            Object.entries(UpdatedRows_byDelete).map(([id, row]) => {
                 if (Object.keys(row).length !== 0) {
-                    UpdatedRows_send.push({ id: index, update: row });
+                    UpdatedRows_send.push({ id, update: row });
                 }
             })
 
@@ -302,41 +313,8 @@ const SpreadsheetInterface = () => {
 
             }
 
-            //testing
-            const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
-            if (tjson) {
-
-                const _oldData: DataRow_Student[] = JSON.parse(tjson);
-                UpdatedRows_send.map((row, index) => {
-                    const target_row = _oldData[row.id];//select updated row in old data
-                    Object.keys(row.update).map((key) => {//get key of upated data  'Student_Name'|'Student_Roll_No'|'Student_Email'
-                        target_row[key] = row.update[key];//fill in target key
-                    })
-                })
-
-                const updated_data = _oldData.filter((_, index) => !Delted_rows_send.includes(index));
-
-                const sjson = JSON.stringify(updated_data);
-                localStorage.setItem('Student_Data', sjson);
-                localStorage.setItem('Student_Data', sjson);
-                set_studentDatarows(updated_data);
-                set_storage_dataRows(updated_data);
-
-                const newErrorRow = new Array(updated_data.length).fill('').map(() => ({ ...Empty_data_Student }));
-                set_Datarow_error_message(newErrorRow)
-                const updateRowEmpty = new Array(updated_data.length).fill('').map(() => ({}))
-                set_student_updatedRows(updateRowEmpty)
-                set_student_deleteRows(new Array(updated_data.length).fill('').map(() => ({ deleted: false })));
-                history.current = ([{ studentRows: updated_data, error_row: newErrorRow, update_row: updateRowEmpty }])
-                set_loading(false);
-                setMessage(['Sheet added'])
-                return
 
 
-
-            }
-
-            /*
             const token = sessionStorage.getItem('token');
             if (!token) {
                 sessionStorage.clear();
@@ -367,50 +345,44 @@ const SpreadsheetInterface = () => {
             }
 
             if (data.hasOwnProperty('sheet_invalid')) {
-                sessionStorage.clear();
+                sessionStorage.removeItem('sheet_exist')
                 setTimeout(() => {
-                    navigate('/login')
-                }, 5000);
+                    navigate('/sheet invalid')
+                }, 50);
             }
 
-            if (data.hasOwnProperty('is_data_edited')) {
-                if (data.is_data_edited === 'yes' && data.hasOwnProperty('Sheet_Column_Length')) {
+            if (data.hasOwnProperty('data_edited')) {
 
-                    const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
-                    if (tjson) {
+                const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
+                if (tjson) {
 
-                        const _oldData: DataRow_Student[] = JSON.parse(tjson);
-                        UpdatedRows_send.map((row, index) => {
-                            const target_row = _oldData[row.id];//select updated row in old data
-                            Object.keys(row.update).map((key) => {//get key of upated data  'Student_Name'|'Student_Roll_No'|'Student_Email'
-                                target_row[key] = row.update[key];//fill in target key
-                            })
+                    const _oldData: Store_Student_Data = JSON.parse(tjson);
+                    UpdatedRows_send.map((row, index) => {
+                        const target_row = _oldData[row.id];//select updated row in old data
+                        Object.keys(row.update).map((key) => {//get key of upated data  'Student_Name'|'Student_Roll_No'|'Student_Email'
+                            target_row[key] = row.update[key];//fill in target key
                         })
+                    })
 
-                        const updated_data = _oldData.filter((_, index) => !Delted_rows_send.includes(index));
-                        if (updated_data.length === data.Sheet_Column_Length) {
-                            const sjson = JSON.stringify(updated_data);
-                            localStorage.setItem('Student_Data', sjson);
-                            set_studentDatarows(updated_data);
-                            set_storage_dataRows(updated_data);
+                    Delted_rows_send.map((id, index) => delete _oldData[id])
+                    const updated_data = _oldData;
+                    const sjson = JSON.stringify(updated_data);
+                    localStorage.setItem('Student_Data', sjson);
+                    set_studentDatarows(updated_data);
+                    set_storage_dataRows(updated_data);
 
-                            const newErrorRow=new Array(updated_data.length).fill('').map(() => ({ ...Empty_data_Student }));
-                            set_Datarow_error_message(newErrorRow)
-                            const updateRowEmpty=new Array(updated_data.length).fill('').map(() => ({}))
-                            set_student_updatedRows(updateRowEmpty)
-                            set_student_deleteRows(new Array(updated_data.length).fill('').map(() => ({ deleted: false })));
-                            history.current = ([{ studentRows: updated_data, error_row: newErrorRow, update_row: updateRowEMpty }])
+                    set_Datarow_error_message({})
+                    set_student_updatedRows({})
+                    set_student_deleteRows({});
+                    history.current = ([{ studentRows: updated_data, error_row: {}, update_row: {} }])
 
-                            set_loading(false);
-                            setMessage(data.message)
-                            return
-                        }
-                        else {
-                            //error column not equal 
-                            //run syncing funtion of student data
-                        }
+                    set_loading(false);
+                    setMessage(data.message)
+                    return
 
-                    }
+
+
+
                 }
                 else {
                     throw new Error("Data not Added");
@@ -418,7 +390,7 @@ const SpreadsheetInterface = () => {
             }
 
             throw new Error(data.message);
-*/
+
         } catch (error: any) {
             set_loading(false)
             console.error('An error occurred:', error.message);
@@ -437,7 +409,7 @@ const SpreadsheetInterface = () => {
                 </span>
             </h1>
             {
-                Student_dataRows.length !== 0
+                Object.keys(Student_dataRows).length !== 0
                     ?
                     <>
                         <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
@@ -479,33 +451,35 @@ const SpreadsheetInterface = () => {
                                         </tr>
                                     </thead>
                                     <tbody >
-                                        {Student_dataRows.map((row, rowIndex) => (
-                                            <tr key={rowIndex} id={`input-${rowIndex}`} className={`${student_deleteRows[rowIndex]['deleted'] ? 'bg-red-200' : ''}`}>
-                                                {Object.keys(row).map((key) => (
-                                                    <td key={key} className={`px-4 py-2 ${student_deleteRows[rowIndex]['deleted'] ? 'opacity-50 pointer-events-none' : ''}`}>
+                                        {Object.entries(Student_dataRows).map(([id, value]) => (
+                                            <tr key={id} id={`input-${id}`} className={`${student_deleteRows.hasOwnProperty(id) ? 'bg-red-200' : ''}`}>
+                                                {Object.keys(value).map((key) => (
+                                                    <td key={key} className={`px-4 py-2 ${student_deleteRows.hasOwnProperty(id) ? 'opacity-50 pointer-events-none' : ''}`}>
                                                         <input
                                                             maxLength={50}
-                                                            id={`input-${rowIndex}-${key}`}
-                                                            value={row[key]}
+                                                            id={`input-${id}-${key}`}
+                                                            value={value[key]} // Use value[key] instead of row[key]
                                                             placeholder={`Enter ${key}`}
                                                             onChange={(e) =>
-                                                                handleInputChange_Teacher(rowIndex, key, e.target.value)
+                                                                handleInputChange_Teacher(id, key, e.target.value)
                                                             }
-                                                            className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows[rowIndex].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                                                            className={`${Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows.hasOwnProperty(id) && Student_updatedRows[id].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
                                                         />
-                                                        {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
+                                                        {Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] &&
+                                                            Datarow_error_message[id][key].length !== 0 && <h5 className=''>{Datarow_error_message[id][key]}</h5>}
                                                     </td>
                                                 ))}
                                                 <td className="px-4 py-2">
                                                     <button
-                                                        onClick={() => handleDeleteRow_student(rowIndex)}
-                                                        className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows[rowIndex]['deleted'] !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
+                                                        onClick={() => handleDeleteRow_student(id)}
+                                                        className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows.hasOwnProperty(id) !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
                                                     >
-                                                        {student_deleteRows[rowIndex]['deleted'] !== true ? 'Delete' : 'UnDelete'}
+                                                        {!student_deleteRows.hasOwnProperty(id) ? 'Delete' : 'UnDelete'}
                                                     </button>
                                                 </td>
                                             </tr>
                                         ))}
+
                                     </tbody>
                                 </table>
 
