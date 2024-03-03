@@ -19,7 +19,7 @@ const App: React.FC = () => {
   //set all local storage item in session
   useEffect(() => {
     //set admin api
-    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbyxY6NoH9EcQrPNMqz2RIMY12X6geKJiViFv-HbarNnsyKOp1XugDQpKASob3Ii886Jcg/exec')
+    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbxiWo3l5xpgQEuXxvx4Tk6UL7RG4Ua0Fo6T6dxTjJVXphoYKoUhzWNV-x3Z9BLIlps/exec')
 
     const obj = localStorage.getItem('User_data');
     if (obj) {

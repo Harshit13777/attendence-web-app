@@ -300,6 +300,7 @@ const SpreadsheetInterface = () => {
 
       const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_data_student`, {
         method: 'POST',
+
         headers: {
           'Content-Type': 'text/plain',
         },

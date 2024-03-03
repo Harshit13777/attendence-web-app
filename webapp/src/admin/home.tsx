@@ -187,6 +187,7 @@ type Store_Student_Data = {
 export const HomePage: React.FC = () => {
     const navigate = useNavigate();
     const [wdth, setWdth] = useState(window.innerWidth);//width of scroll bar 16
+    const [is_sync, set_issync] = useState(false)
 
     useEffect(() => {
         setWdth(window.innerWidth)
@@ -194,10 +195,11 @@ export const HomePage: React.FC = () => {
     }, [window.innerWidth])
 
     useEffect(() => {
-        const syncing_student = async () => {
+        const syncing_student = () => {
 
             const sync_student_data = async (all_store_ids: string[]) => {
                 try {
+                    set_issync(true)
                     const token = sessionStorage.getItem('token');
                     if (!token) {
                         sessionStorage.clear();
@@ -207,7 +209,7 @@ export const HomePage: React.FC = () => {
                         throw new Error('Error : No Token Found')
                     }
 
-                    const response: Response = await fetch(`${sessionStorage.getItem('api')}?page=teacher&action=sync_student_data`, {
+                    const response: Response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=sync_student_data`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'text/plain',
@@ -223,7 +225,7 @@ export const HomePage: React.FC = () => {
 
                     const data = await response.json();
 
-
+                    console.log("response", data)
 
                     if (data.hasOwnProperty('sheet_invalid')) {
                         sessionStorage.removeItem('sheet_exist')
@@ -269,8 +271,15 @@ export const HomePage: React.FC = () => {
                         }
                         localStorage.setItem('Student_Data', JSON.stringify(updated_data))
                     }
+                    else {
+                        throw new Error("Not Received data");
+
+                    }
+                    set_issync(false)
+
 
                 } catch (error) {
+                    set_issync(false)
                     //setMessage('Error. Please try again later.');
                     console.error(error);
                 }
@@ -283,9 +292,11 @@ export const HomePage: React.FC = () => {
                 const Student_data = JSON.parse(dataJson);
                 all_store_ids = Object.keys(Student_data)
             }
+            console.log((all_store_ids))
             sync_student_data(all_store_ids)
 
         };
+        console.log('syncing...')
         syncing_student();
 
     }, [])
@@ -297,17 +308,23 @@ export const HomePage: React.FC = () => {
                 <div className=''>
                     <NavBar />
                 </div>
-
-                <div className='ml-16' style={{ width: `${((wdth - 64) / wdth) * 100}%` }}>
-                    <Routes>
-                        <Route index path="/add_teacher" element={<Add_data_teacher />} />
-                        <Route path="/add_student" element={<Add_data_student />} />
-                        <Route path="/edit_student" element={<Edit_student />} />
-                        <Route path="/edit_teacher" element={<Edit_teacher />} />
-                        <Route path="/login_email_status" element={<Login_Email_Status />} />
-                        <Route path="/student_img_status" element={<Student_Img_Status />} />
-                    </Routes>
-                </div>
+                {
+                    is_sync ?
+                        <h1 className=" absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+                            Syncing...
+                        </h1>
+                        :
+                        <div className='ml-16' style={{ width: `${((wdth - 64) / wdth) * 100}%` }}>
+                            <Routes>
+                                <Route index path="/add_teacher" element={<Add_data_teacher />} />
+                                <Route path="/add_student" element={<Add_data_student />} />
+                                <Route path="/edit_student" element={<Edit_student />} />
+                                <Route path="/edit_teacher" element={<Edit_teacher />} />
+                                <Route path="/login_email_status" element={<Login_Email_Status />} />
+                                <Route path="/student_img_status" element={<Student_Img_Status />} />
+                            </Routes>
+                        </div>
+                }
             </div>
 
         </>

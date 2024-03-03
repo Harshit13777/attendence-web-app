@@ -467,7 +467,6 @@ const SpreadsheetInterface = () => {
                                         </tr>
                                         <tr className=' '>
                                             <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
-                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
                                             <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
                                             {/* Add more column headers */}
                                         </tr>

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
 import { useNavigate } from 'react-router-dom';
+import dataset from "../.icons/face_detection.json";
 
 export const Upload_Img = () => {
   const webcamRef = useRef<Webcam | null>(null);
@@ -31,8 +32,57 @@ export const Upload_Img = () => {
       await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
       await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
     };
+
+    let totalPredictions: { x1: number; y1: number; x2: number; y2: number; }[][] = [];
+    let totalGroundTruths: { x1: any; y1: any; x2: any; y2: any; }[][] = [];
+
     setMessage('Loading...');
-    loadModels().then(() => setMessage('Capture your img'));
+    loadModels().then(async () => {
+      /*
+            const imageUrl = dataset[0]['content'];
+            const annotations = dataset[0]['annotation']
+            const response = await fetch(imageUrl).catch((e) => { console.log(e.message) });
+            console.log('response', response)
+            const blob = await response;
+            const image = new Image();
+            image.src = URL.createObjectURL(blob);
+            // Load image and perform face detection
+      
+            // Perform face detection using Face API.js
+            const detections = await faceapi.detectAllFaces(image);
+      
+            // Initialize arrays to store predictions and ground truths for this image
+            let predictions: { x1: number; y1: number; x2: number; y2: number; }[] = [];
+            let groundTruths: { x1: any; y1: any; x2: any; y2: any; }[] = [];
+      
+            // Extract bounding boxes from detections
+            detections.map((detection, i) => {
+              const { x, y, width, height } = detection.box;
+      
+              // Store bounding box coordinates as prediction
+              predictions.push({ x1: x, y1: y, x2: x + width, y2: y + height });
+      
+              // Extract ground truth bounding box coordinates from annotation
+              const points = annotations[i].points;
+              const x1 = points[0].x * annotations[i].imageWidth;
+              const y1 = points[0].y * annotations[i].imageHeight;
+              const x2 = points[1].x * annotations[i].imageWidth;
+              const y2 = points[1].y * annotations[i].imageHeight;
+      
+      
+              // Assuming you want to use the ground truth annotations as is
+              groundTruths.push({ x1, y1, x2, y2 }); // You need to adjust this part based on your dataset structure
+            });
+      
+            // Store predictions and ground truths for this image
+            totalPredictions.push(predictions);
+            totalGroundTruths.push(groundTruths);
+            console.log(detections);
+            console.log(totalPredictions, totalGroundTruths)
+      
+      */
+    }
+    );
   }, []);
 
   const handleFaceSelect = (index: number) => {
@@ -97,18 +147,19 @@ export const Upload_Img = () => {
   };
 
   useEffect(() => {
-
-    setTimeout(() => {
-
-      if (webcamRef.current) {
+    /*
         setTimeout(() => {
-          start();
-        }, 10000);
-      } else {
-        setMessage('Choose your photo');
-        stopInterval();
-      }
-    }, 5000);
+    
+          if (webcamRef.current) {
+            setTimeout(() => {
+              start();
+            }, 10000);
+          } else {
+            setMessage('Choose your photo');
+            stopInterval();
+          }
+        }, 5000);
+        */
   }, []);
 
   const handleSendImage = () => {
@@ -123,6 +174,9 @@ export const Upload_Img = () => {
     setMessage('Done');
     console.log(json);
   };
+
+
+
 
   return (
     <div>

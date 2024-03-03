@@ -248,7 +248,7 @@ const SpreadsheetInterface = () => {
             //if email vaild
             if (emailPattern.test(sdatarows[i]['Student_Email'])) {
                 //if email is in updated array and it duplicate
-                if (seen[sdatarows[i].Student_Email] && updatedRows[i].hasOwnProperty('Teacher_Email')) {
+                if (seen[sdatarows[i].Student_Email] && updatedRows.hasOwnProperty(i) && updatedRows[i].hasOwnProperty('Student_Email')) {
                     setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
                     error_data[i] = { ...error_data[i], ['Student_Email']: 'Email repeated' }
                 }
@@ -387,7 +387,7 @@ const SpreadsheetInterface = () => {
                     history.current = ([{ studentRows: updated_data, error_row: {}, update_row: {} }])
 
                     set_loading(false);
-                    setMessage(data.data_edited)
+                    setMessage([data.data_edited])
                     return
                 }
                 else {
