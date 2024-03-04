@@ -34,6 +34,8 @@ const SpreadsheetInterface = () => {
     const Empty_data_Student = { Student_Name: '', Student_Roll_No: '', Student_Email: '' };
 
     const [storage_dataRows, set_storage_dataRows] = useState<Store_Student_Data>({})
+    const stored_emails = useRef<{ [key: string]: boolean }>({})
+    const stored_Rolls = useRef<{ [key: string]: boolean }>({})
 
     const [Student_dataRows, set_studentDatarows] = useState<Store_Student_Data>({});
     const [Datarow_error_message, set_Datarow_error_message] = useState<Store_Student_Data>({})
@@ -82,7 +84,9 @@ const SpreadsheetInterface = () => {
             const datalength = Object.keys(Student_data).length;
             set_studentDatarows({ ...Student_data });
             set_storage_dataRows({ ...Student_data });
-
+            //add all stored email and rolls in variable so that computation easy
+            Object.values(Student_data).map((row, i) => stored_emails.current[row.Student_Email] = true)
+            Object.values(Student_data).map((row, i) => stored_Rolls.current[row.Student_Roll_No] = true)
             //set history
             history.current = ([{ studentRows: Student_data, error_row: {}, update_row: {} }])
 
@@ -119,6 +123,10 @@ const SpreadsheetInterface = () => {
 
                 datarowerror[index] = { ...datarowerror[index], ['Student_Name']: 'Fill this' }
             }
+            if (Student_updatedRows.hasOwnProperty(index) && Student_updatedRows[index].hasOwnProperty(field))
+                if (stored_Rolls.current[value])
+                    datarowerror[index] = { ...datarowerror[index], ['Student_Roll_No']: 'already added' }
+
         }
         if (field === 'Student_Email') {
             //if name is empty then make border red
@@ -140,8 +148,10 @@ const SpreadsheetInterface = () => {
                 datarowerror[index] = { ...datarowerror[index], ['Student_Email']: 'Email Not valid' }
             }
             //check if email update then check if already exist 
-            if (storage_dataRows && Student_updatedRows.hasOwnProperty(index) && Student_updatedRows[index].hasOwnProperty(field))//check if email exist already
-                CheckEmailExist(value, index);
+            else if (storage_dataRows && Student_updatedRows.hasOwnProperty(index) && Student_updatedRows[index].hasOwnProperty(field))//check if email exist already
+                if (stored_emails.current[value])
+                    datarowerror[index] = { ...datarowerror[index], ['Student_Email']: 'Email Already Added' }
+
 
 
         }
@@ -159,12 +169,6 @@ const SpreadsheetInterface = () => {
 
     };
 
-    const CheckEmailExist = async (input_email: string, index: string) => {
-        const exist = storage_dataRows[index].Student_Email === input_email;
-        if (exist) {
-            Datarow_error_message[index] = { ...Datarow_error_message[index], ['Student_Email']: 'Email already Added' }
-        }
-    }
 
     useEffect(() => {
         if (message.length > 0)
@@ -224,7 +228,7 @@ const SpreadsheetInterface = () => {
         let res = true;
         console.log(updatedRows, deleteRows)
         //console.log(updatedRows, deleteRows);
-        const error_data: Store_Student_Data = {};
+        const error_data: Store_Student_Data = Datarow_error_message;
         //check all updated row are filled because all row in storage are already filled
         Object.entries(updatedRows).map(([i, row]) => {
 
@@ -241,21 +245,44 @@ const SpreadsheetInterface = () => {
         })
 
         //check if any email repeated or not in updated rows
-        const seen: { [key: string]: boolean } = {};
+
+        const seen_Updated_emails: { [key: string]: boolean } = { ...stored_emails.current };
         const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
-        for (let i in sdatarows) {
-            //if email vaild
-            if (emailPattern.test(sdatarows[i]['Student_Email'])) {
-                //if email is in updated array and it duplicate
-                if (seen[sdatarows[i].Student_Email] && updatedRows.hasOwnProperty(i) && updatedRows[i].hasOwnProperty('Student_Email')) {
-                    setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
-                    error_data[i] = { ...error_data[i], ['Student_Email']: 'Email repeated' }
+
+        for (let i in updatedRows) {
+            //if update email vaild 
+            if (updatedRows[i].hasOwnProperty('Student_Email'))
+                if (emailPattern.test(updatedRows[i]['Student_Email'])) {
+                    //if update email found in stored email mean that email already store
+                    const updated_email = updatedRows[i].Student_Email
+                    if (seen_Updated_emails[updated_email]) {
+                        setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
+                        error_data[i] = { ...error_data[i], ['Student_Email']: 'Email repeated' }
+                    } else if (updated_email !== '') {
+                        seen_Updated_emails[updated_email] = true//add in seen obj
+                    }
+                } else {
+                    error_data[i] = { ...error_data[i], ['Student_Email']: 'Email not valid' }
                 }
-                if (sdatarows[i].Student_Email !== '')
-                    seen[sdatarows[i].Student_Email] = true; // Record the string as seen
-            } else {
-                error_data[i] = { ...error_data[i], ['Student_Email']: 'Email not valid' }
+        }
+
+
+        //check if any RollNO repeated or not
+        const seen_Updated_Rolls: { [key: string]: boolean } = { ...stored_emails.current };
+        //put all stored emial in object
+
+        for (let i in updatedRows) {
+            //if update email vaild 
+            if (updatedRows[i].hasOwnProperty('Student_Roll_No')) {
+                //if update email found in stored email mean that email already store
+                const updated_Roll = updatedRows[i].Student_Roll_No
+                if (seen_Updated_Rolls[updated_Roll]) {
+                    setMessage((p) => [...p, `Roll repeated , it must be unique`])
+                    error_data[i] = { ...error_data[i], ['Student_Roll_No']: 'Roll repeated' }
+                } else if (updated_Roll !== '') {
+                    seen_Updated_Rolls[updated_Roll] = true//add in seen obj
+                }
             }
         }
 
@@ -366,24 +393,21 @@ const SpreadsheetInterface = () => {
                 const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
                 if (tjson) {
 
-                    const _oldData: Store_Student_Data = JSON.parse(tjson);
-                    UpdatedRows_send.map((row, index) => {
-                        const target_row = _oldData[row.id];//select updated row in old data
-                        Object.keys(row.update).map((key) => {//get key of upated data  'Student_Name'|'Student_Roll_No'|'Student_Email'
-                            target_row[key] = row.update[key];//fill in target key
-                        })
-                    })
+                    const updated_data: Store_Student_Data = Student_dataRows;
+                    //delete the row which user want
+                    Delted_rows_send.map((id, index) => delete updated_data[id])
 
-                    Delted_rows_send.map((id, index) => delete _oldData[id])
-                    const updated_data = _oldData;
                     const sjson = JSON.stringify(updated_data);
                     localStorage.setItem('Student_Data', sjson);
-                    set_studentDatarows(updated_data);
+
                     set_storage_dataRows(updated_data);
 
                     set_Datarow_error_message({})
                     set_student_updatedRows({})
                     set_student_deleteRows({});
+                    //add all stored email and rolls in variable so that computation easy
+                    Object.values(updatedRows).map((row, i) => stored_emails.current[row.Student_Email] = true)
+                    Object.values(updatedRows).map((row, i) => stored_Rolls.current[row.Student_Roll_No] = true)
                     history.current = ([{ studentRows: updated_data, error_row: {}, update_row: {} }])
 
                     set_loading(false);

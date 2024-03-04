@@ -31,6 +31,9 @@ const SpreadsheetInterface = () => {
   const [Datarow_error_message, set_Datarow_error_message] = useState<DataRow_Student[]>([{ ...Empty_data_Student }])
 
   const [storage_datarows, set_storage_dataRows] = useState<Store_Student_Data | null>(null);
+  const stored_emails = useRef<{ [key: string]: boolean }>({})
+  const stored_Rolls = useRef<{ [key: string]: boolean }>({})
+
 
   const [message, setMessage] = useState<string[]>([]);
   const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
@@ -67,7 +70,11 @@ const SpreadsheetInterface = () => {
     const sjson = localStorage.getItem('Student_Data');
     if (sjson) {
       const Student_data: Store_Student_Data = JSON.parse(sjson);
+      //add all stored email and rolls in variable so that computation easy
       set_storage_dataRows(Student_data);
+      Object.values(Student_data).map((row, i) => stored_emails.current[row.Student_Email] = true)
+      Object.values(Student_data).map((row, i) => stored_Rolls.current[row.Student_Roll_No] = true)
+
     }
   }, [])
 
@@ -83,6 +90,10 @@ const SpreadsheetInterface = () => {
       const Namevalue = Student_dataRows[index]['Student_Name'] === '';
       if (Namevalue) {
         Datarow_error_message[index]['Student_Name'] = 'Fill this'
+      }
+
+      if (storage_datarows && stored_Rolls.current[value]) {
+        Datarow_error_message[index]['Student_Roll_No'] = 'already Exist'
       }
     }
     if (field === 'Student_Email') {
@@ -109,8 +120,9 @@ const SpreadsheetInterface = () => {
         Datarow_error_message[index]['Student_Email'] = 'Email Not valid'
 
       }
-      if (storage_datarows)//check if email exist already
-        CheckEmailExist(value, index);
+      else if (storage_datarows && stored_emails.current[value])//check if email exist already
+        Datarow_error_message[index]['Student_Email'] = 'Already Exist'
+
 
 
     }
@@ -124,14 +136,6 @@ const SpreadsheetInterface = () => {
 
 
   };
-
-  const CheckEmailExist = async (input_email: string, index: number) => {
-    const exist = storage_datarows && Object.values(storage_datarows).find((row) => row.Student_Email === input_email);
-    if (exist) {
-      Datarow_error_message[index]['Student_Email'] = 'Email already Added'
-    }
-  }
-
 
   useEffect(() => {
     if (message.length > 0)
@@ -250,18 +254,43 @@ const SpreadsheetInterface = () => {
         //if email already in storage
         if (seen[sdatarows[i].Student_Email]) {
           setMessage((p) => [...p, `Email repeated in ${parseInt(i) + 1}th row, it must be unique`])
-          Datarow_error_message[i]['Student_Email'] = 'Email repeated'
+          Datarow_error_message[i]['Student_Email'] = 'repeated'
           res = false // Found a duplicate
         }
         else if (sdatarows[i].Student_Email !== '')
           seen[sdatarows[i].Student_Email] = true; // Record the string as seen
       } else {
-        Datarow_error_message[i]['Student_Email'] = 'Email Not valid'
+        Datarow_error_message[i]['Student_Email'] = 'Not valid'
       }
     }
 
     //check emial exist in storage
-    sdatarows.map((row, index) => CheckEmailExist(row['Student_Email'], index));
+    sdatarows.map((row, index) => {
+      if (stored_emails.current[row.Student_Email]) {
+        Datarow_error_message[index]['Student_Email'] = 'Already added'
+      }
+    });
+
+    //check if any RollNO repeated or not
+    const seenRolls: { [key: string]: boolean } = {};
+
+    for (let i in sdatarows) {
+
+      if (seenRolls[sdatarows[i].Student_Roll_No]) {
+        setMessage((p) => [...p, `Roll No repeated in ${parseInt(i) + 1}th row, it must be unique`])
+        Datarow_error_message[i]['Student_Roll_No'] = 'repeated'
+
+      }
+      else if (sdatarows[i].Student_Roll_No !== '')
+        seenRolls[sdatarows[i].Student_Roll_No] = true; // Record the string as seen
+
+    }
+
+    //check emial exist in storage
+    sdatarows.map((row, index) => {
+      if (stored_Rolls.current[row.Student_Roll_No])
+        Datarow_error_message[index]['Student_Roll_No'] = 'Already Added'
+    });
 
     //check if all length are 0 in Datarow_error_message 
     Datarow_error_message.map((row, index) => {
@@ -363,13 +392,16 @@ const SpreadsheetInterface = () => {
           upd_Student_data = saved_data
         }
 
-        //if length of colum on database and locastorgae same then save
-
         //update local storage
         const ujson = JSON.stringify(upd_Student_data)
         localStorage.setItem('Student_Data', ujson);
         set_loading(false)
+        //update storge var
+        set_storage_dataRows(upd_Student_data);
+        Object.values(saved_data).map((row, i) => stored_emails.current[row.Student_Email] = true)
+        Object.values(saved_data).map((row, i) => stored_Rolls.current[row.Student_Roll_No] = true)
 
+        //if some data not saved get in array
         let not_saveData: DataRow_Student[] = []
         for (let index = 0; index < saved_data_ids.length; index++) {
           const element = saved_data_ids[index];
@@ -378,8 +410,7 @@ const SpreadsheetInterface = () => {
           }
 
         }
-        //update storge var
-        set_storage_dataRows(upd_Student_data);
+
         if (not_saveData.length !== 0) {
           set_studentDatarows(not_saveData);
           throw new Error('These data not saved')
