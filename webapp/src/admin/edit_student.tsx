@@ -31,7 +31,7 @@ type HistoryItem = {
 
 
 const SpreadsheetInterface = () => {
-    const Empty_data_Student = { Student_Name: '', Student_Roll_No: '', Student_Email: '' };
+    const Empty_data_Student: DataRow_Student = { Student_Name: '', Student_Roll_No: '', Student_Email: '' };
 
     const [storage_dataRows, set_storage_dataRows] = useState<Store_Student_Data>({})
     const stored_emails = useRef<{ [key: string]: boolean }>({})
@@ -145,12 +145,12 @@ const SpreadsheetInterface = () => {
 
             // Update the border color based on email validity
             if (!isValidEmail) {
-                datarowerror[index] = { ...datarowerror[index], ['Student_Email']: 'Email Not valid' }
+                datarowerror[index] = { ...datarowerror[index], ['Student_Email']: 'Not valid' }
             }
             //check if email update then check if already exist 
             else if (storage_dataRows && Student_updatedRows.hasOwnProperty(index) && Student_updatedRows[index].hasOwnProperty(field))//check if email exist already
                 if (stored_emails.current[value])
-                    datarowerror[index] = { ...datarowerror[index], ['Student_Email']: 'Email Already Added' }
+                    datarowerror[index] = { ...datarowerror[index], ['Student_Email']: 'Already Added' }
 
 
 
@@ -443,79 +443,79 @@ const SpreadsheetInterface = () => {
                     ?
                     <>
                         <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
-                            <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
 
 
-                                <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
-                                    <div className="flex gap-x-5  md:gap-x-3  w-full  justify-center">
-                                        <img src={undo_icon}
-                                            title='Undo'
-                                            onClick={handleUndo}
-                                            className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
-                                        />
 
-                                        <img
-                                            src={redo_icon}
-                                            title='Redo'
-                                            onClick={handleRedo}
-                                            className="bg-slate-300 text-white rounded-xl hover:opacity-50"
-                                        />
+                            <div className="flex mt-4  bg-gradient-to-br from-blue-200 to-red-100 p-4 rounded-xl overflow-x-scroll">
+                                <div className="flex gap-x-5  md:gap-x-3  w-full  justify-center">
+                                    <img src={undo_icon}
+                                        title='Undo'
+                                        onClick={handleUndo}
+                                        className=" bg-slate-300 text-white  rounded-xl hover:opacity-50 "
+                                    />
 
+                                    <img
+                                        src={redo_icon}
+                                        title='Redo'
+                                        onClick={handleRedo}
+                                        className="bg-slate-300 text-white rounded-xl hover:opacity-50"
+                                    />
 
-                                    </div>
 
                                 </div>
 
-
-                                <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
-                                    <table className="table-auto w-full ">
-                                        <thead className=' text-center items-center '>
-                                            <tr className=''>
-                                                <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
-
-                                            </tr>
-                                            <tr className=' '>
-                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
-                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
-                                                <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
-                                                {/* Add more column headers */}
-                                            </tr>
-                                        </thead>
-                                        <tbody >
-                                            {Object.entries(Student_dataRows).map(([id, value]) => (
-                                                <tr key={id} id={`input-${id}`} className={`${student_deleteRows.hasOwnProperty(id) ? 'bg-red-200' : ''}`}>
-                                                    {Object.keys(value).map((key) => (
-                                                        <td key={key} className={`px-4 py-2 ${student_deleteRows.hasOwnProperty(id) ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                            <input
-                                                                maxLength={50}
-                                                                id={`input-${id}-${key}`}
-                                                                value={value[key]} // Use value[key] instead of row[key]
-                                                                placeholder={`Enter ${key}`}
-                                                                onChange={(e) =>
-                                                                    handleInputChange_Teacher(id, key, e.target.value)
-                                                                }
-                                                                className={`${Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows.hasOwnProperty(id) && Student_updatedRows[id].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
-                                                            />
-                                                            {Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] &&
-                                                                Datarow_error_message[id][key].length !== 0 && <h5 className=''>{Datarow_error_message[id][key]}</h5>}
-                                                        </td>
-                                                    ))}
-                                                    <td className="px-4 py-2">
-                                                        <button
-                                                            onClick={() => handleDeleteRow_student(id)}
-                                                            className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows.hasOwnProperty(id) !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
-                                                        >
-                                                            {!student_deleteRows.hasOwnProperty(id) ? 'Delete' : 'UnDelete'}
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-
-                                        </tbody>
-                                    </table>
-
-                                </div>
                             </div>
+
+
+                            <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+                                <table className="table-auto w-full ">
+                                    <thead className=' text-center items-center '>
+                                        <tr className=''>
+                                            <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>
+
+                                        </tr>
+                                        <tr className=' '>
+                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
+                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Roll No</th>
+                                            <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
+                                            {/* Add more column headers */}
+                                        </tr>
+                                    </thead>
+                                    <tbody >
+                                        {Object.entries(Student_dataRows).map(([id, value]) => (
+                                            <tr key={id} id={`input-${id}`} className={`${student_deleteRows.hasOwnProperty(id) ? 'bg-red-200' : ''}`}>
+                                                {Object.keys(value).map((key) => (
+                                                    <td key={key} className={`px-4 py-2 ${student_deleteRows.hasOwnProperty(id) ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                        <input
+                                                            maxLength={50}
+                                                            id={`input-${id}-${key}`}
+                                                            value={value[key]} // Use value[key] instead of row[key]
+                                                            placeholder={`Enter ${key}`}
+                                                            onChange={(e) =>
+                                                                handleInputChange_Teacher(id, key, e.target.value)
+                                                            }
+                                                            className={`${Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] !== '' ? 'border-red-300 border-4' : Student_updatedRows.hasOwnProperty(id) && Student_updatedRows[id].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                                                        />
+                                                        {Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] &&
+                                                            Datarow_error_message[id][key].length !== 0 && <h5 className=''>{Datarow_error_message[id][key]}</h5>}
+                                                    </td>
+                                                ))}
+                                                <td className="px-4 py-2">
+                                                    <button
+                                                        onClick={() => handleDeleteRow_student(id)}
+                                                        className={`  rounded-lg px-4 font-bold py-2 focus:outline-none ${student_deleteRows.hasOwnProperty(id) !== true ? 'bg-red-500 text-white hover:bg-white hover:text-red-700 hover:border-red-700' : ' bg-white text-red-700 border-red-700'}`}
+                                                    >
+                                                        {!student_deleteRows.hasOwnProperty(id) ? 'Delete' : 'UnDelete'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+
 
 
                             <button

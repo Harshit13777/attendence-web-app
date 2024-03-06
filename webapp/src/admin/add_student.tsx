@@ -286,7 +286,7 @@ const SpreadsheetInterface = () => {
 
     }
 
-    //check emial exist in storage
+    //check rolls exist in storage
     sdatarows.map((row, index) => {
       if (stored_Rolls.current[row.Student_Roll_No])
         Datarow_error_message[index]['Student_Roll_No'] = 'Already Added'

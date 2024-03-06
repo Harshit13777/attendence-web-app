@@ -22,7 +22,7 @@ export const Admin_sheet_query = () => {
                 sessionStorage.clear();
                 setTimeout(() =>
                     navigate('/login')
-                    , 5000);
+                    , 200);
                 throw new Error('Error : No Token Found')
             }
             console.log('send')
@@ -35,10 +35,8 @@ export const Admin_sheet_query = () => {
             });
 
             if (!response.ok) {
-                set_message('Network error');
-                console.log('Network response was not ok');
-                set_loading(false);
-                return;
+                throw new Error("Network Response Not Ok");
+
             }
 
             const data = await response.json(); // convert json to object
@@ -62,6 +60,7 @@ export const Admin_sheet_query = () => {
             set_loading(false);
         } catch (e: any) {
             set_loading(false);
+            set_message(e.message)
             console.error('error on calling get_sheet_info', e.message)
         }
     }
