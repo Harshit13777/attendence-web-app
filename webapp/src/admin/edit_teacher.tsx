@@ -80,6 +80,7 @@ const SpreadsheetInterface = () => {
         if (sjson) {
             const Teacher_data: Store_Teacher_Data = JSON.parse(sjson);//{34:{StudentName:string,}}
             const datalength = Object.keys(Teacher_data).length;
+            // console.log(Teacher_data)
             set_teacherDataRows({ ...Teacher_data });
             set_storage_dataRows({ ...Teacher_data });
             //add all stored email and rolls in variable so that computation easy
@@ -352,7 +353,7 @@ const SpreadsheetInterface = () => {
 
             if (data.hasOwnProperty('data_edited')) {
 
-                const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
+                const tjson = localStorage.getItem('Teacher_Data')//get exist data in localstorage
                 if (tjson) {
 
                     const updated_data: Store_Teacher_Data = Teacher_dataRows;
@@ -368,7 +369,7 @@ const SpreadsheetInterface = () => {
                     set_Teacher_updatedRows({})
                     set_teacher_deleteRows({});
                     //add all stored email and rolls in variable so that computation easy
-                    Object.values(updatedRows).map((row, i) => stored_emails.current[row.Student_Email] = true)
+                    Object.values(updatedRows).map((row, i) => stored_emails.current[row.Teacher_Email] = true)
                     history.current = ([{ teacherRows: updated_data, error_row: {}, update_row: {} }])
 
                     set_loading(false);

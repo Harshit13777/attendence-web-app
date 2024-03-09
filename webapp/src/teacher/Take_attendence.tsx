@@ -57,7 +57,7 @@ export const Take_Attendence = () => {
       setFaceMatcher(matcher);
       //console.log(matcher);
       //testing
-      await dete()
+      //await dete()
 
       console.log(faceMatcher);
 
@@ -147,72 +147,76 @@ export const Take_Attendence = () => {
     setMessage('Recapturing..')
   };
 
-  const dete = async () => {
-
-    const data: {}[] = []
-    for (let i = 1; i < 51; i++) {
-      const element = i
-      const image = require(`../.icons/images/${element}.jpg`)
-      console.log(element)
-
-
-
-      const img = new Image() as HTMLImageElement;
-      img.src = image;
-
-      const detections = await faceapi
-        .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceDescriptors();
-
-      if (detections.length > 0 && faceMatcher !== null) {
-        //draw img on canvas
-        setMessage('Detected');
-
-        const labels = detections.map((detection) => {
-          const bestmatch = faceMatcher.findBestMatch(detection.descriptor);
-          data.push({ i, p: bestmatch.distance })
-          return bestmatch.label;
-        });
-
-        labels.filter((label) => label !== 'unknown').map((label) => RollNo.add(label));
-
-
-
-        drawLandmark(img, detections, labels);
-
-
-
-        /* 
-         results.forEach((bestMatch, i) => {
-           setMessage('Face-Recognized');
-           const canvas = document.createElement('canvas');
-           const context = canvas.getContext('2d');
-           const box = detections[i].detection.box;
-           const x = box.x;
-           const y = box.y;
-           const width = box.width;
-           const height = box.height;
+  /*
+    const dete = async () => {
   
-           canvas.width = 224;
-           canvas.height = 224;
-           context?.drawImage(img, x, y, width, height, 0, 0, canvas.width, canvas.height);
+      const data: {}[] = []
+      for (let i = 1; i < 51; i++) {
+        const element = i
+        const image = require(`../.icons/images/${element}.jpg`)
+        console.log(element)
   
-           let obj = { img: canvas, id: bestMatch.label };
   
-           // Check if obj.id is not in detectedFaces before adding it
-           if (!detectedFaces.some((face) => face.id === obj.id)) {
-             setDetectedFaces((prevDetectedFaces) => {
-               return [...prevDetectedFaces, obj];
-             });
-           }
-         });*/
-      }
+  
+        const img = new Image() as HTMLImageElement;
+        img.src = image;
+  
+        const detections = await faceapi
+          .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptors();
+  
+        if (detections.length > 0 && faceMatcher !== null) {
+          //draw img on canvas
+          setMessage('Detected');
+  
+          const labels = detections.map((detection) => {
+            const bestmatch = faceMatcher.findBestMatch(detection.descriptor);
+            data.push({ i, p: bestmatch.distance })
+            return bestmatch.label;
+          });
+  
+          labels.filter((label) => label !== 'unknown').map((label) => RollNo.add(label));
+  
+  
+  
+          drawLandmark(img, detections, labels);
+  
+  
+  
+          /**
+           results.forEach((bestMatch, i) => {
+             setMessage('Face-Recognized');
+             const canvas = document.createElement('canvas');
+             const context = canvas.getContext('2d');
+             const box = detections[i].detection.box;
+             const x = box.x;
+             const y = box.y;
+             const width = box.width;
+             const height = box.height;
+    
+             canvas.width = 224;
+             canvas.height = 224;
+             context?.drawImage(img, x, y, width, height, 0, 0, canvas.width, canvas.height);
+    
+             let obj = { img: canvas, id: bestMatch.label };
+    
+             // Check if obj.id is not in detectedFaces before adding it
+             if (!detectedFaces.some((face) => face.id === obj.id)) {
+               setDetectedFaces((prevDetectedFaces) => {
+                 return [...prevDetectedFaces, obj];
+               });
+             }
+           });
+           **/
+  /*  }
 
-      setMessage('Recapturing..')
-    }
-    await console.log(data);
+
+    setMessage('Recapturing..')
   }
+  await console.log(data);
+}
+*/
 
 
   const drawLandmark = (img: HTMLImageElement, detections: faceapi.WithFaceDescriptor<faceapi.WithFaceLandmarks<{ detection: faceapi.FaceDetection; }, faceapi.FaceLandmarks68>>[], labels: string[]) => {
@@ -245,21 +249,21 @@ export const Take_Attendence = () => {
 
   }
 
-  /*
-  const start=()=>{
-    const id = setInterval(()=>{
-      if(webcamRef.current){
+
+  const start = () => {
+    const id = setInterval(() => {
+      if (webcamRef.current) {
         onDetect();
       }
-      },2000);
-      setIntervalid(id);
-      return()=>{
-        if(interval_id!==null){
-          clearInterval(interval_id);
-        }
+    }, 2000);
+    setIntervalid(id);
+    return () => {
+      if (interval_id !== null) {
+        clearInterval(interval_id);
       }
     }
-    */
+  }
+
 
   const stopInterval = () => {
     if (interval_id !== null) {

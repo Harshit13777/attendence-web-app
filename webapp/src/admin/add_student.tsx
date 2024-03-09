@@ -371,18 +371,21 @@ const SpreadsheetInterface = () => {
 
         let upd_Student_data;
 
-        const saved_data_ids: { id: number | false }[] = data.data_added;//added data contain unique id 
-        const saved_data: { [key: number]: DataRow_Student; } = {}
+        const saved_data_ids: { id: string | false }[] = data.data_added;//added data contain unique id 
+        const saved_data: { [key: string]: DataRow_Student; } = {}
         sdatarows.map((row, index) => {
           const id = saved_data_ids[index].id;
+
           if (id !== false) {
             saved_data[id] = row;
             return
           }
         })
+
+        //console.log('saved data', saved_data)
         // merge if previous data exist with new data
         if (tjson) {
-          const pre_Student_data: { [key: number]: DataRow_Student; } = JSON.parse(tjson);//get previous data
+          const pre_Student_data: { [key: string]: DataRow_Student; } = JSON.parse(tjson);//get previous data
 
           upd_Student_data = { ...pre_Student_data, ...saved_data };
         }

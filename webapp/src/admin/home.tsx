@@ -205,7 +205,7 @@ export const HomePage: React.FC = () => {
         console.log('hello')
     }, [window.innerWidth])
 
-    const syncing_student = () => {
+    const syncing_student = async () => {
 
         const sync_student_data = async (all_store_ids: string[]) => {
             try {
@@ -280,37 +280,22 @@ export const HomePage: React.FC = () => {
                         updated_data = receve_add_data
                     }
                     localStorage.setItem('Student_Data', JSON.stringify(updated_data))
+                    console.log('updated_data', updated_data)
                     set_sync_message((p) => [...p, 'Successfully Sync'])
+                    set_issync(false)
                 }
                 else {
                     throw new Error("Not Received data");
-
                 }
-                set_issync(false)
 
 
             } catch (error: any) {
-                set_issync(false)
+
                 set_sync_message((p) => [...p, error.message])
                 //setMessage('Error. Please try again later.');
                 console.error(error);
             }
         };
-
-        // Check attendance sheet name presence and sync
-        const dataJson = localStorage.getItem('Student_Data');
-        let all_store_ids: string[] = []
-        if (dataJson) {
-            const Student_data = JSON.parse(dataJson);
-            all_store_ids = Object.keys(Student_data)
-        }
-        console.log((all_store_ids))
-        set_sync_message(['Syncing Student Data'])
-        sync_student_data(all_store_ids)
-
-    };
-    const syncing_teacher = () => {
-
         const sync_teacher_data = async (all_store_ids: string[]) => {
             try {
                 set_issync(true)
@@ -383,40 +368,55 @@ export const HomePage: React.FC = () => {
                         //if no store data then no need to delete data
                         updated_data = receve_add_data
                     }
-                    localStorage.setItem('Student_Data', JSON.stringify(updated_data))
+                    localStorage.setItem('Teacher_Data', JSON.stringify(updated_data))
                     set_sync_message((p) => [...p, 'Successfully Sync'])
+                    set_issync(false)
                 }
                 else {
                     throw new Error("Not Received data");
 
                 }
-                set_issync(false)
 
 
             } catch (error: any) {
-                set_issync(false)
+
                 set_sync_message((p) => [...p, error.message])
                 //setMessage('Error. Please try again later.');
                 console.error(error);
             }
         };
-
         // Check attendance sheet name presence and sync
-        const dataJson = localStorage.getItem('Teacher_Data');
-        let all_store_ids: string[] = []
+        const dataJson = localStorage.getItem('Student_Data');
+        let S_all_store_ids: string[] = []
         if (dataJson) {
             const Student_data = JSON.parse(dataJson);
-            all_store_ids = Object.keys(Student_data)
+            S_all_store_ids = Object.keys(Student_data)
         }
-        console.log((all_store_ids))
-        set_sync_message(['Syncing Teacher Data'])
-        sync_teacher_data(all_store_ids)
+        console.log('saved ids student', S_all_store_ids)
+        set_sync_message((p) => ['Syncing Student Data'])
+        await sync_student_data(S_all_store_ids)
+
+        // Check attendance sheet name presence and sync
+        const TdataJson = localStorage.getItem('Teacher_Data');
+        let T_all_store_ids: string[] = []
+        if (TdataJson) {
+            const Teacher_data = JSON.parse(TdataJson);
+            T_all_store_ids = Object.keys(Teacher_data)
+        }
+        console.log(' teacher saved IDs', T_all_store_ids)
+        set_sync_message((p) => [...p, 'Syncing Teacher Data'])
+        await sync_teacher_data(T_all_store_ids)
+
 
     };
+
     useEffect(() => {
+
         console.log('syncing...')
+
         syncing_student();
-        syncing_teacher();
+        //testing 
+        set_issync(false)
 
     }, [])
 
@@ -430,15 +430,15 @@ export const HomePage: React.FC = () => {
                 {
                     is_sync ?
 
-                        <div className='absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center gap-y-20'>
+                        <div className='absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center gap-y-10'>
 
                             <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
                                 Syncing...
                             </h1>
                             {sync_message.length !== 0 &&
                                 sync_message.map((message, i) => (
-                                    <div className="bg-red-100 text-center mt-5 border-t border-b border-red-300 text-red-700 px-4 py-3" role="alert">
-                                        <p className="text-sm">{message}</p>
+                                    <div className="bg-blue-100 w-52 text-center mt-5 border-t border-b border-blue-300 text-blue-700 px-4 py-3" role="alert">
+                                        <p className="text-lg">{message}</p>
                                     </div>
                                 ))}
                         </div>

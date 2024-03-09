@@ -66,8 +66,9 @@ const SpreadsheetInterface = () => {
     const sjson = localStorage.getItem('Teacher_Data');
     if (sjson) {
       const Teacher_Data: Store_Teacher_Data = JSON.parse(sjson);
+      console.log('teacherdata', Teacher_Data)
       set_storage_dataRows(Teacher_Data);
-      Object.values(Teacher_Data).map((row, i) => stored_emails.current[row.Student_Email] = true)
+      Object.values(Teacher_Data).map((row, i) => stored_emails.current[row.Teacher_Email] = true)
 
     }
   }, [])
@@ -250,7 +251,7 @@ const SpreadsheetInterface = () => {
     //check if all length are 0 in Datarow_error_message 
     //check if all length are 0 in Datarow_error_message 
     Datarow_error_message.map((row, index) => {
-      if (row.Student_Name !== '' || row.Student_Email !== '' || row.Student_Roll_No !== '') {
+      if (row.Teacher_Name !== '' || row.Teacher_Email !== '') {
         setMessage((p) => [...p, `Fix Error in ${index + 1}th row`])
         res = false;
       }
@@ -322,8 +323,8 @@ const SpreadsheetInterface = () => {
 
         let upd_Teacher_data;
 
-        const saved_data_ids: { id: number | false }[] = data.data_added;//added data contain unique id 
-        const saved_data: { [key: number]: DataRow_Teacher; } = {}
+        const saved_data_ids: { id: string | false }[] = data.data_added;//added data contain unique id 
+        const saved_data: { [key: string]: DataRow_Teacher; } = {}
         //add only row which has ids 
         sdatarows.map((row, index) => {
           const id = saved_data_ids[index].id;
@@ -334,7 +335,7 @@ const SpreadsheetInterface = () => {
         })
         // merge if previous data exist with new data
         if (tjson) {
-          const pre_Teacher_data: { [key: number]: DataRow_Teacher; } = JSON.parse(tjson);//get previous data
+          const pre_Teacher_data: { [key: string]: DataRow_Teacher; } = JSON.parse(tjson);//get previous data
 
           upd_Teacher_data = { ...pre_Teacher_data, ...saved_data };
         }
@@ -350,7 +351,7 @@ const SpreadsheetInterface = () => {
         set_loading(false)
         //update storge var
         set_storage_dataRows(upd_Teacher_data);
-        Object.values(saved_data).map((row, i) => stored_emails.current[row.Student_Email] = true)
+        Object.values(saved_data).map((row, i) => stored_emails.current[row.Teacher_Email] = true)
 
         //if some data not saved get in array
         let not_saveData: DataRow_Teacher[] = []
