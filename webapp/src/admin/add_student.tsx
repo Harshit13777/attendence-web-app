@@ -382,7 +382,7 @@ const SpreadsheetInterface = () => {
           }
         })
 
-        //console.log('saved data', saved_data)
+        console.log('saved data', saved_data_ids, saved_data)
         // merge if previous data exist with new data
         if (tjson) {
           const pre_Student_data: { [key: string]: DataRow_Student; } = JSON.parse(tjson);//get previous data
@@ -406,21 +406,28 @@ const SpreadsheetInterface = () => {
 
         //if some data not saved get in array
         let not_saveData: DataRow_Student[] = []
+        let Error_datarow: DataRow_Student[] = []
         for (let index = 0; index < saved_data_ids.length; index++) {
           const element = saved_data_ids[index];
-          if (!element) {
+          //mean email not valid 
+          if (element.id == false) {
             not_saveData.push(Student_dataRows[index])
+            Error_datarow.push({
+              Student_Email: 'Email not valid',
+              Student_Name: '',
+              Student_Roll_No: ''
+            })
           }
-
         }
 
         if (not_saveData.length !== 0) {
           set_studentDatarows(not_saveData);
+          set_Datarow_error_message(Error_datarow);
           throw new Error('These data not saved')
         }
         else {
           set_studentDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
-
+          set_Datarow_error_message(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
           setMessage(['Data added'])
           set_loading(false)
           return

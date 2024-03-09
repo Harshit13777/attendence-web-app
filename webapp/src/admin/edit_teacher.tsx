@@ -31,7 +31,7 @@ type HistoryItem = {
 const SpreadsheetInterface = () => {
     const Empty_data_Teacher: DataRow_Teacher = { Teacher_Name: '', Teacher_Email: '' };
 
-    const [storage_dataRows, set_storage_dataRows] = useState<Store_Teacher_Data | null>(null)
+    const [storage_dataRows, set_storage_dataRows] = useState<Store_Teacher_Data>({})
     const stored_emails = useRef<{ [key: string]: boolean }>({})
 
 
@@ -99,20 +99,20 @@ const SpreadsheetInterface = () => {
 
         datarowerror[index] = { ...datarowerror[index], [field]: '' }
 
-        if (storage_dataRows)
-            if (value !== storage_dataRows[index][field]) {
-                set_Teacher_updatedRows({
-                    ...Teacher_updatedRows,
-                    [index]: {
-                        ...Teacher_updatedRows[index],
-                        [field]: value
-                    }
-                });
-            }
-            else {
-                delete Teacher_updatedRows[index][field];
 
-            }
+        if (value !== storage_dataRows[index][field]) {
+            set_Teacher_updatedRows({
+                ...Teacher_updatedRows,
+                [index]: {
+                    ...Teacher_updatedRows[index],
+                    [field]: value
+                }
+            });
+        }
+        else {
+            delete Teacher_updatedRows[index][field];
+
+        }
 
 
         if (field === 'Teacher_Email') {
@@ -131,7 +131,7 @@ const SpreadsheetInterface = () => {
                 datarowerror[index] = { ...datarowerror[index], ['Teacher_Email']: 'Not valid' }
             }
             //check if email update then check if already exist 
-            else if (storage_dataRows && Teacher_updatedRows.hasOwnProperty(index) && Teacher_updatedRows[index].hasOwnProperty(field))//check if email exist already
+            else if (Teacher_updatedRows.hasOwnProperty(index) && Teacher_updatedRows[index].hasOwnProperty(field))//check if email exist already
                 if (stored_emails.current[value])
                     datarowerror[index] = { ...datarowerror[index], ['Teacher_Email']: 'Already Added' }
 
@@ -351,7 +351,7 @@ const SpreadsheetInterface = () => {
 
             }
 
-            if (data.hasOwnProperty('data_edited')) {
+            if (data.hasOwnProperty('data_edited') && data.hasOwnProperty('Invalid_Emails')) {
 
                 const tjson = localStorage.getItem('Teacher_Data')//get exist data in localstorage
                 if (tjson) {
@@ -360,17 +360,29 @@ const SpreadsheetInterface = () => {
                     //delete the row which user want
                     Delted_rows_send.map((id, index) => delete updated_data[id])
 
-                    const sjson = JSON.stringify(updated_data);
+                    //so if some email not valid then we store all rest of data with old email in storage and show updated data with curreent invalid email on screen with error
+
+                    //email invalid 
+                    const invalid_emial_id: string[] = data.Invalid_Emails;
+                    const save_updated_data = updated_data;
+                    const datarow_error: any = {}
+                    invalid_emial_id.map((id, i) => {
+                        //so email not updated so we save updated data with student email data from previous store data
+                        save_updated_data[id] = { ...save_updated_data[id], ['Teacher_Email']: storage_dataRows[id].Teacher_Email }
+                        datarow_error[id] = { 'Teacher_Email': 'Email Not Valid' }
+                    })
+
+                    const sjson = JSON.stringify(save_updated_data);
                     localStorage.setItem('Teacher_Data', sjson);
 
-                    set_storage_dataRows(updated_data);
+                    set_storage_dataRows(save_updated_data);
 
-                    set_Datarow_error_message({})
+                    set_Datarow_error_message(datarow_error)
                     set_Teacher_updatedRows({})
                     set_teacher_deleteRows({});
                     //add all stored email and rolls in variable so that computation easy
-                    Object.values(updatedRows).map((row, i) => stored_emails.current[row.Teacher_Email] = true)
-                    history.current = ([{ teacherRows: updated_data, error_row: {}, update_row: {} }])
+                    Object.values(save_updated_data).map((row, i) => stored_emails.current[row.Student_Email] = true)
+                    history.current = ([{ teacherRows: save_updated_data, error_row: datarow_error, update_row: {} }])
 
                     set_loading(false);
                     setMessage([data.data_edited])

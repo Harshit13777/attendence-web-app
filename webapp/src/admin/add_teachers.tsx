@@ -98,7 +98,7 @@ const SpreadsheetInterface = () => {
         Datarow_error_message[index]['Teacher_Email'] = 'Email Not valid'
 
       }
-      else if (storage_datarows)//check if email exist already
+      else if (stored_emails.current[value])//check if email exist already
         Datarow_error_message[index]['Teacher_Email'] = 'Already Exist'
 
 
@@ -355,20 +355,30 @@ const SpreadsheetInterface = () => {
 
         //if some data not saved get in array
         let not_saveData: DataRow_Teacher[] = []
+        let Error_datarow: DataRow_Teacher[] = []
+
         for (let index = 0; index < saved_data_ids.length; index++) {
           const element = saved_data_ids[index];
-          if (!element) {
+          //means email not valid
+          if (element.id == false) {
             not_saveData.push(Teacher_dataRows[index])
+            Error_datarow.push({
+              Teacher_Email: 'Email not valid',
+              Teacher_Name: '',
+            })
           }
 
         }
 
+
         if (not_saveData.length !== 0) {
           set__teacherDatarows(not_saveData);
+          set_Datarow_error_message(Error_datarow)
           throw new Error('These data not saved')
         }
         else {
           set__teacherDatarows(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Teacher })))
+          set_Datarow_error_message(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Teacher })))
 
           setMessage(['Data added'])
           set_loading(false)
