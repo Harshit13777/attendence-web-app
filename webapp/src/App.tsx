@@ -40,6 +40,7 @@ const App: React.FC = () => {
       */}
         <Route index path="/login" element={<Login />} />
         <Route path="/test" element={<Upload_Img />} />
+        <Route index path='/take_attendance' element={<Take_Attendence />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget_password" element={<Forget_password />} />
         <Route path="/sheet invalid" element={<Sheet_invalid />} />

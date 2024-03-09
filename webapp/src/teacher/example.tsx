@@ -2,7 +2,9 @@ import React, { useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
 import { useNavigate } from 'react-router-dom';
-import dataset from "../.icons/face_detection.json";
+
+import path from 'path';
+
 
 export const Upload_Img = () => {
   const webcamRef = useRef<Webcam | null>(null);
@@ -38,6 +40,7 @@ export const Upload_Img = () => {
 
     setMessage('Loading...');
     loadModels().then(async () => {
+      // await onDete()
       /*
             const imageUrl = dataset[0]['content'];
             const annotations = dataset[0]['annotation']
@@ -114,6 +117,45 @@ export const Upload_Img = () => {
     setMessage('Recapturing...');
   };
 
+  const onDete = async () => {
+    for (let i = 5; i < 10; i++) {
+      const element = i * 5 + 1
+      const image = require(`../.icons/images/${element}.jpg`)
+      console.log(element)
+
+
+
+      const img = new Image() as HTMLImageElement;
+      img.src = image;
+      //console.log(img)
+      setMessage('Detecting...');
+      const detections = await faceapi
+        .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptors();
+
+      if (detections.length > 0) {
+        setMessage('Detected');
+        const canvasDescriptor = detections
+          .filter((detection) => detection.detection.score > 0.7 && detection.detection.classScore > 0.7)
+          .map((detection) => ({
+            img: drawResizedImage(img, detection.detection.box),
+            descriptor: detection.descriptor,
+          }));
+        setDetectedFaces((prev) => [...prev, ...canvasDescriptor]);
+      }
+      else {
+        console.log('Not detected')
+      }
+
+      setMessage('Recapturing...');
+    }
+    await console.log(detectedFaces.length, detectedFaces)
+  };
+
+
+
+
   const drawResizedImage = (img: HTMLImageElement, box: faceapi.Box) => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -163,8 +205,8 @@ export const Upload_Img = () => {
   }, []);
 
   const handleSendImage = () => {
-    const label = ['1'];
-
+    const label = ['1', '2', '3', '4', '5'];
+    //1modi ,2 elon ,3 mark 4 tony 5 bill
     const objs = selectedFaces.map((index, i) => {
       return { label: label[i], descriptor: Array.from(detectedFaces[index].descriptor) };
     });
@@ -172,7 +214,7 @@ export const Upload_Img = () => {
 
     sessionStorage.setItem('Students_Dataset', json);
     setMessage('Done');
-    console.log(json);
+    console.log(json, objs.length);
   };
 
 
