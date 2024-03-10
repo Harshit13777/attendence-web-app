@@ -34,6 +34,10 @@ const SpreadsheetInterface = () => {
   const stored_emails = useRef<{ [key: string]: boolean }>({})
   const stored_Rolls = useRef<{ [key: string]: boolean }>({})
 
+  //key to access localstorage of student data and teacher data
+  const student_storage_key = sessionStorage.getItem('student_data_key') as string
+  const teacher_storage_key = sessionStorage.getItem('teacher_data_key') as string
+
 
   const [message, setMessage] = useState<string[]>([]);
   const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
@@ -67,7 +71,7 @@ const SpreadsheetInterface = () => {
   }, [Student_dataRows])
 
   useEffect(() => {//get data form localstorge
-    const sjson = localStorage.getItem('Student_Data');
+    const sjson = localStorage.getItem(student_storage_key);
     if (sjson) {
       const Student_data: Store_Student_Data = JSON.parse(sjson);
       //add all stored email and rolls in variable so that computation easy
@@ -353,10 +357,10 @@ const SpreadsheetInterface = () => {
       }
       if (data.hasOwnProperty('sheet_Erased')) {
         if (data.sheet_Erased.includes('Student')) {
-          localStorage.removeItem('Student_Data')
+          localStorage.removeItem(student_storage_key)
         }
         else if (data.sheet_Erased.includes('Teacher')) {
-          localStorage.removeItem('Teacher_Data')
+          localStorage.removeItem(teacher_storage_key)
         }
         setTimeout(() => {
           navigate('/admin')
@@ -367,7 +371,7 @@ const SpreadsheetInterface = () => {
 
       if (data.hasOwnProperty('data_added')) {
 
-        const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
+        const tjson = localStorage.getItem(student_storage_key)//get exist data in localstorage
 
         let upd_Student_data;
 
@@ -397,7 +401,7 @@ const SpreadsheetInterface = () => {
 
         //update local storage
         const ujson = JSON.stringify(upd_Student_data)
-        localStorage.setItem('Student_Data', ujson);
+        localStorage.setItem(student_storage_key, ujson);
         set_loading(false)
         //update storge var
         set_storage_dataRows(upd_Student_data);

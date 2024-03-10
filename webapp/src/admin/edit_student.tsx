@@ -40,6 +40,11 @@ const SpreadsheetInterface = () => {
     const [Student_dataRows, set_studentDatarows] = useState<Store_Student_Data>({});
     const [Datarow_error_message, set_Datarow_error_message] = useState<Store_Student_Data>({})
 
+    //key to access localstorage of student data and teacher data
+    const student_storage_key = sessionStorage.getItem('student_data_key') as string
+    const teacher_storage_key = sessionStorage.getItem('teacher_data_key') as string
+
+
     const [Student_updatedRows, set_student_updatedRows] = useState<Store_Student_Data>({})
     const [student_deleteRows, set_student_deleteRows] = useState<{ [key: string]: {} }>({});
 
@@ -78,7 +83,7 @@ const SpreadsheetInterface = () => {
 
 
     useEffect(() => {//get data form localstorgebh
-        const sjson = localStorage.getItem('Student_Data');
+        const sjson = localStorage.getItem(student_storage_key);
         if (sjson) {
             const Student_data: Store_Student_Data = JSON.parse(sjson);//{34:{StudentName:string,}}
             const datalength = Object.keys(Student_data).length;
@@ -376,10 +381,10 @@ const SpreadsheetInterface = () => {
 
             if (data.hasOwnProperty('sheet_Erased')) {
                 if (data.sheet_Erased.includes('Student')) {
-                    localStorage.removeItem('Student_Data')
+                    localStorage.removeItem(student_storage_key)
                 }
                 else if (data.sheet_Erased.includes('Teacher')) {
-                    localStorage.removeItem('Teacher_Data')
+                    localStorage.removeItem(teacher_storage_key)
                 }
                 setTimeout(() => {
                     navigate('/admin')
@@ -390,7 +395,7 @@ const SpreadsheetInterface = () => {
 
             if (data.hasOwnProperty('data_edited') && data.hasOwnProperty('Invalid_Emails')) {
 
-                const tjson = localStorage.getItem('Student_Data')//get exist data in localstorage
+                const tjson = localStorage.getItem(student_storage_key)//get exist data in localstorage
                 if (tjson) {
 
                     const updated_data: Store_Student_Data = Student_dataRows;
@@ -410,7 +415,7 @@ const SpreadsheetInterface = () => {
                     })
 
                     const sjson = JSON.stringify(save_updated_data);
-                    localStorage.setItem('Student_Data', sjson);
+                    localStorage.setItem(student_storage_key, sjson);
 
                     set_storage_dataRows(save_updated_data);
 

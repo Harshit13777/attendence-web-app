@@ -19,15 +19,20 @@ const App: React.FC = () => {
   //set all local storage item in session
   useEffect(() => {
     //set admin api
-    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbwxBnvNuoY_LyCD7KHRRMzcIAWMtwSvKmdtYYtmtb0NZgOcXsKIZpnGRux150ZO11cYCA/exec')
+    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbzLTaDfkBPIRvv3X5_v9fpSdy7G-6lK1X79upH_idqQKOhS5jWsTyZrYevqVV1AckF3/exec')
 
     const obj = localStorage.getItem('User_data');
     if (obj) {
       const user_data: { user: string, username: string, token: string, email: string } = JSON.parse(obj);
       sessionStorage.setItem('token', user_data.token)
-      sessionStorage.setItem('user', 'admin');
+      sessionStorage.setItem('user', user_data.user);
       sessionStorage.setItem('username', user_data.username);
       sessionStorage.setItem('email', user_data.email);
+      if (user_data.user === 'admin') {
+        //key , we get data from localstorage by key
+        sessionStorage.setItem('student_data_key', `${user_data.email}_Student_Data`)
+        sessionStorage.setItem('teacher_data_key', `${user_data.email}_Teacher_Data`)
+      }
     }
   }, [])
 

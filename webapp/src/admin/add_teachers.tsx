@@ -30,6 +30,11 @@ const SpreadsheetInterface = () => {
   const [storage_datarows, set_storage_dataRows] = useState<Store_Teacher_Data | null>(null);
   const stored_emails = useRef<{ [key: string]: boolean }>({})
 
+  //key to access localstorage of student data and teacher data
+  const student_storage_key = sessionStorage.getItem('student_data_key') as string
+  const teacher_storage_key = sessionStorage.getItem('teacher_data_key') as string
+
+
   const [message, setMessage] = useState<string[]>([]);
   const MAX_HISTORY_LENGTH = 10; // Set a suitable limit
   const history = useRef([{ teacherRows: Teacher_dataRows, error_row: Datarow_error_message }]);
@@ -63,7 +68,7 @@ const SpreadsheetInterface = () => {
   }, [Teacher_dataRows])
 
   useEffect(() => {//get data form localstorge
-    const sjson = localStorage.getItem('Teacher_Data');
+    const sjson = localStorage.getItem(teacher_storage_key);
     if (sjson) {
       const Teacher_Data: Store_Teacher_Data = JSON.parse(sjson);
       console.log('teacherdata', Teacher_Data)
@@ -304,11 +309,11 @@ const SpreadsheetInterface = () => {
       }
       if (data.hasOwnProperty('sheet_Erased')) {
         //mean sheet not found in spreadsheet 
-        if (data.sheet_Erased.includes('Teacher')) {
-          localStorage.removeItem('Teacher_Data')
+        if (data.sheet_Erased.includes('Student')) {
+          localStorage.removeItem(student_storage_key)
         }
         else if (data.sheet_Erased.includes('Teacher')) {
-          localStorage.removeItem('Teacher_Data')
+          localStorage.removeItem(teacher_storage_key)
         }
         setTimeout(() => {
           navigate('/admin')
@@ -319,7 +324,7 @@ const SpreadsheetInterface = () => {
       //if data added on sheet
       if (data.hasOwnProperty('data_added')) {
 
-        const tjson = localStorage.getItem('Teacher_Data')//get exist data in localstorage
+        const tjson = localStorage.getItem(teacher_storage_key)//get exist data in localstorage
 
         let upd_Teacher_data;
 
@@ -347,7 +352,7 @@ const SpreadsheetInterface = () => {
 
         //update local storage
         const ujson = JSON.stringify(upd_Teacher_data)
-        localStorage.setItem('Teacher_Data', ujson);
+        localStorage.setItem(teacher_storage_key, ujson);
         set_loading(false)
         //update storge var
         set_storage_dataRows(upd_Teacher_data);
