@@ -178,54 +178,7 @@ const Login: React.FC = () => {
         throw new Error('Fix the Error');
       }
 
-      /*
-      sessionStorage.setItem('Admin_Sheet_Id','113ynMauHpX_XTgu9tP9PPJieVS90qZK8Y_P1t1NUtKo');
-      sessionStorage.setItem('sheet_exist','Y');
-      sessionStorage.setItem('email','Ram');
-      setTimeout(() => {
-        navigat('/teacher');
-      }, 3000);
-      */
-
-
-      //for testing
-      /*
-      if (selectedRole === 'admin') {
-
-        sessionStorage.setItem('email', 'email');
-        sessionStorage.setItem('user', 'admin');
-        sessionStorage.setItem('username', 'ram');
-        sessionStorage.setItem('token', 'hghghjtoken');
-        sessionStorage.setItem('Admin_Sheet_Id', '113ynMauHpX_XTgu9tP9PPJieVS90qZK8Y_P1t1NUtKo');
-        sessionStorage.setItem('sheet_exist', 'T');
-        setTimeout(() => {
-          navigat('/admin');
-        }, 300);
-      }
-
-      if (selectedRole === 'teacher') {
-        sessionStorage.setItem('user', 'teacher');
-        sessionStorage.setItem('email', email);
-        sessionStorage.setItem('sheet_exist', 'T');
-        sessionStorage.setItem('Admin_Sheet_Id', '113ynMauHpX_XTgu9tP9PPJieVS90qZK8Y_P1t1NUtKo');
-        sessionStorage.setItem('Token', 'ffjlksjf')
-        setTimeout(() => navigat('/teacher'), 300);
-      }
-      //if(data.admin_sheet_Exists){
-
-
-      // }
-      //if(data.admin_sheet_access_valid){
-
-      //}
-
-
-      return;
-      //
-
-      */
-
-      const response = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=login`, {
+      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'admin' ? 'api' : 'student_api')}?page=${selectedRole}&action=login`, {
         method: 'post',
         //headers: {
         // 
@@ -253,49 +206,65 @@ const Login: React.FC = () => {
         set_opensetpassword_comp(true);
       }
 
-      if (data.hasOwnProperty('token')) {//mean sheet exit and all data received
 
+      //for admin handle
+      if (selectedRole === 'admin') {
+        if (!data.hasOwnProperty('username') || !data.hasOwnProperty('token' || !data.hasOwnProperty('sheet_exist'))) {
+          throw new Error("Items not received");
+        }
+        sessionStorage.setItem('user', 'admin');
+        sessionStorage.setItem('username', data.username);
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('email', email);
+        //set all user data in localstorage
+        const obj: { user: string, username: string, token: string, email: string } = { 'user': 'admin', username: data.username, token: data.token, email }
+        localStorage.setItem('User_data', JSON.stringify(obj));
 
+        //if sheet valid then add sheet_exist in session so then it can go to home screen
+        if (data.sheet_status === 'valid') {
+          sessionStorage.setItem('sheet_exist', 'Y');
+        }
 
-        //for admin handle
-        if (selectedRole === 'admin') {
-          if (!data.hasOwnProperty('username')) {
-            throw new Error("Items not received");
-          }
-          sessionStorage.setItem('user', 'admin');
-          sessionStorage.setItem('username', data.username);
-          sessionStorage.setItem('token', data.token);
-          sessionStorage.setItem('email', email);
-          //set all user data in localstorage
-          const obj: { user: string, username: string, token: string, email: string } = { 'user': 'admin', username: data.username, token: data.token, email }
-          localStorage.setItem('User_data', JSON.stringify(obj));
+        setTimeout(() => {
+          navigat('/admin');
+        }, 300);
+      }
 
-          //if sheet valid then add sheet_exist in session so then it can go to home screen
-          if (data.sheet_status === 'valid') {
-            sessionStorage.setItem('sheet_exist', 'Y');
-          }
+      //for teacher and student handle
 
+      if (selectedRole === 'teacher') {
+        sessionStorage.setItem('user', 'teacher');
+        sessionStorage.setItem('email', email);
+        sessionStorage.setItem('sheet_exist', 'T');
+        sessionStorage.setItem('Admin_Sheet_Id', data.Admin_Sheet_Id);
+        sessionStorage.setItem('Token', data.token)
+        setTimeout(() => navigat('/teacher'), 300);
+      }
+
+      if (selectedRole === 'student') {
+        //check if sheet db has student img or not if not then take him to upload comp 
+        if (!data.hasOwnProperty('token') || !data.hasOwnProperty('set_Password')) {
+          throw new Error('Server Error : Items not received')
+        }
+        sessionStorage.setItem('user', 'student');
+        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('email', email);
+        //login only when sheet exist
+        sessionStorage.setItem('sheet_exist', 'Y');
+        //set all user data in localstorage
+        const obj: { user: string, username: string, token: string, email: string } = { 'user': 'student', username: username, token: data.token, email }
+        localStorage.setItem('User_data', JSON.stringify(obj));
+        if (data.set_password === true) {
+          set_opensetpassword_comp(true)
+        } else {
           setTimeout(() => {
-            navigat('/admin');
+            navigat('/student');
           }, 300);
         }
 
-        //for teacher and student handle
-
-        if (selectedRole === 'teacher') {
-          sessionStorage.setItem('user', 'teacher');
-          sessionStorage.setItem('email', email);
-          sessionStorage.setItem('sheet_exist', 'T');
-          sessionStorage.setItem('Admin_Sheet_Id', data.Admin_Sheet_Id);
-          sessionStorage.setItem('Token', data.token)
-          setTimeout(() => navigat('/teacher'), 300);
-        }
-
-        if (selectedRole === 'student') {
-          //check if sheet db has student img or not if not then take him to upload comp 
-
-        }
       }
+
 
       set_loading(false);
 
@@ -350,40 +319,48 @@ const Login: React.FC = () => {
     setMessage([]);
     try {
 
-      const { email, password, username } = formData;
-      const adminsheetid = sessionStorage.getItem('Admin_Sheet_Id');
-
-      if (!validatesetpasswdform(email, password, selectedRole, username, spassword, s_conformpassword, adminsheetid)) {
-        throw new Error();
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        sessionStorage.clear();
+        set_opensetpassword_comp(false)
+        throw new Error('Error : No Token Found')
       }
-
-      const response = await fetch(`${sessionStorage.getItem('api')}?page=${selectedRole}&action=set_password`, {
+      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'student' ? 'student_api' : 'teacher_api')}?page=${selectedRole}&action=set_password`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify({ newpassword: spassword, prepassword: password, Admin_Sheet_Id: adminsheetid, email, selectedRole }),
+        body: JSON.stringify({ newpassword: spassword, token }),
       })
       if (!response.ok) {
-        setMessage(['Network error']);
         throw new Error('Network error');
       }
 
       const data = await response.json(); //convert json to object
 
-      if (data.hasOwnProperty('error')) {
-        setMessage(['server rrror']);
-        throw new Error('server error');
+      if (data.hasOwnProperty('sheet_invalid')) {
+        setTimeout(() => {
+          navigat('/sheet invalid')
+        }, 2000);
+        throw new Error("Sheet Invalid: Contact to Admin");
+      }
+      if (data.hasOwnProperty('sheet_Erased')) {
+        setTimeout(() => {
+          navigat('/sheet invalid')
+        }, 2000);
+        throw new Error(data.sheet_Erased);
       }
 
+
+      if (data.hasOwnProperty('message'))
+        setMessage((p) => [...p, data.message]);
+
       if (data.hasOwnProperty('password_set')) {
-        sessionStorage.setItem('user', selectedRole as string);
-        sessionStorage.setItem('email', email);//admin ,student
-        sessionStorage.setItem('sheet_exist', 'T');
-        sessionStorage.setItem('token', data.token)
-        setTimeout(() => navigat(`/${selectedRole}`), 5000);
+        setTimeout(() => {
+          navigat(`/${selectedRole}`);
+        }, 2000);
+        setMessage([data.password_set])
       }
-      setMessage([data.message]);
       set_loading(false);
 
     }

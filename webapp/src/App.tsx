@@ -20,6 +20,9 @@ const App: React.FC = () => {
   useEffect(() => {
     //set admin api
     sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbzLTaDfkBPIRvv3X5_v9fpSdy7G-6lK1X79upH_idqQKOhS5jWsTyZrYevqVV1AckF3/exec')
+    //set student api
+    sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbxADpbL9EOA-lOtZbVj8a3tV_UN3P45NbDw1Ex2wE-9MKGRBMLTJFSSS5Zniw7v-s4/exec')
+
 
     const obj = localStorage.getItem('User_data');
     if (obj) {

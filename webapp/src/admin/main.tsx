@@ -34,7 +34,7 @@ export const Main = () => {
 
     return (
       <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
-        <p className="text-sm">User not verified</p>
+        <p className="text-sm">User not valid</p>
       </div>
     )
   }
@@ -45,7 +45,7 @@ export const Main = () => {
     if (!sessionStorage.getItem('sheet_exist')) {
       setTimeout(() => {
         navigate('/sheet invalid')
-      }, 5000);
+      }, 500);
       return (
 
         <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
