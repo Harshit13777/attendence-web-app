@@ -3,89 +3,134 @@ import { Route, Routes, useNavigate, Link } from 'react-router-dom';
 import logout from "../.icons/logout.png";
 import navbar_open from "../.icons/navbar.png";
 import overview from "../.icons/overview.png";
+import { Upload_Img } from "./Upload_Img";
 
-const NavBar = () => {
 
-    const [open, setOpen] = useState(false);
-    const [datamenuopen, setdatamenuOpen] = useState(false);
-    const navigate = useNavigate()
 
-    const handleOnClick = () => setOpen((prevState) => !prevState);
-    const handleOndatamenu = (e: any) => {
-        e.stopPropagation();
-        setdatamenuOpen((prevState) => !prevState);
-    }
 
-    const handlelogout = () => {
-        sessionStorage.clear();
-        localStorage.removeItem('User_data')
-        setTimeout(() => {
-            navigate('/login')
-        }, 300);
-    }
-    return (
-        <>
-            <div className={`  contain h-screen  `} onMouseEnter={handleOnClick} onMouseLeave={handleOnClick}>
-                <div className={`${open ? 'w-64' : ' w-16'} h-screen p-2 pt-8 bg-slate-900 fixed transition-all duration-300 top-0`}
-                    style={{
-                        backgroundImage: `url('your-favicon-image-url')`,
-                        backgroundSize: open ? 'auto' : 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                    }}    >
-                    <div className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
-                                        mt-2 menu-items `}>
-                        <img src={navbar_open} alt="" onClick={handleOnClick} />
-                    </div>
-
-                    <ul className="pt-6 h-screen menu">
-
-                        <li
-                            className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
-                                        mt-2 menu-items `}>
-                            <img src={overview} className='' alt="" />
-                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                                Overview
-                            </span>
-                        </li>
-
-                        <li onClick={() => handlelogout()}
-                            className={`flex pt-2 pb-2 cursor-pointer  text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
-                                        mt-10 menu-items `} >
-                            <img src={logout} className=' ' alt="" />
-                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                                Log-out
-                            </span>
-                        </li>
-                        {/* Item5 */}
-
-                    </ul>
-                </div>
-                <div>
-                </div>
-            </div>
-        </>
-    )
-}
-
-export const HomePage = () => {
+export const HomePage: React.FC = () => {
     const navigate = useNavigate();
+    const [wdth, setWdth] = useState(window.innerWidth);//width of scroll bar 16
+    const [is_sync, set_issync] = useState(false)
+    const [sync_message, set_sync_message] = useState<string[]>([])
+    const [uploaded_img, set_uploaded_img] = useState(false)
+
+    useEffect(() => {
+        setWdth(window.innerWidth)
+        console.log('hello')
+    }, [window.innerWidth])
+
+
+    const sync_student_img_status = async () => {
+        try {
+            set_issync(true)
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                sessionStorage.clear();
+                setTimeout(() =>
+                    navigate('/login')
+                    , 5000);
+                throw new Error('Error : No Token Found')
+            }
+
+            const response: Response = await fetch(`${sessionStorage.getItem('student_api')}?page=student&action=sync_student_img_status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+                body: JSON.stringify({
+                    token
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok')
+            }
+
+            const data = await response.json();
+
+
+            if (data.hasOwnProperty('sheet_invalid') || data.hasOwnProperty('sheet_Erased')) {
+                setTimeout(() => {
+                    navigate('/sheet invalid')
+                }, 2000);
+                throw new Error("Sheet Invalid: Contact to Admin");
+            }
+
+
+            if (data.hasOwnProperty('is_img_uploaded')) {
+                const is_img_uploaded = data.is_img_uploaded;
+                if (is_img_uploaded === true) {
+                    set_uploaded_img(true);
+                }
+                else if (is_img_uploaded === false) {
+                    set_uploaded_img(false)
+                }
+                set_issync(false)
+                return;
+            }
+            //else 
+            set_sync_message(['Server Error'])
+
+
+
+        } catch (error: any) {
+
+            set_sync_message((p) => [...p, error.message])
+            //setMessage('Error. Please try again later.');
+            console.error(error);
+        }
+    };
+
+
+
+    useEffect(() => {
+
+        console.log('syncing...')
+
+        sync_student_img_status();
+        //testing 
+        set_issync(false)
+
+    }, [])
+
     return (
         <>
 
-            <div className='flex'>
-                <div className='w-1/7'>
-                    <NavBar />
-                </div>
+            <div className='flex flex-row bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
+                {
+                    is_sync ?
 
-                <div className='w-6/7 ml-16'>
-                    <Routes>
+                        <div className='absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center gap-y-10'>
 
-                    </Routes>
-                </div>
+                            <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
+                                Syncing...
+                            </h1>
+                            {sync_message.length !== 0 &&
+                                sync_message.map((message, i) => (
+                                    <div className="bg-blue-100 w-52 text-center mt-5 border-t border-b border-blue-300 text-blue-700 px-4 py-3" role="alert">
+                                        <p className="text-lg">{message}</p>
+                                    </div>
+                                ))}
+                        </div>
+
+                        :
+
+                        uploaded_img
+                            ?
+
+                            <div>
+                                Attendance info
+                            </div>
+                            :
+                            <Upload_Img set_uploaded_img_status={set_uploaded_img} />
+
+                }
             </div>
 
         </>
     )
-}
+};
+
+
 export default HomePage;

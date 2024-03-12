@@ -255,7 +255,7 @@ const Login: React.FC = () => {
         //set all user data in localstorage
         const obj: { user: string, username: string, token: string, email: string } = { 'user': 'student', username: username, token: data.token, email }
         localStorage.setItem('User_data', JSON.stringify(obj));
-        if (data.set_password === true) {
+        if (data.set_Password === true) {
           set_opensetpassword_comp(true)
         } else {
           setTimeout(() => {
@@ -281,7 +281,7 @@ const Login: React.FC = () => {
 
     let isvalid = true;
 
-    if (email === '' || password === '' || selectedRole === null || username === '' || !adminsheetid) {
+    if (email === '' || password === '' || selectedRole === null || username === '') {
       setMessage((p) => ['Error'])
       return false;
     }
@@ -338,18 +338,13 @@ const Login: React.FC = () => {
 
       const data = await response.json(); //convert json to object
 
-      if (data.hasOwnProperty('sheet_invalid')) {
+      if (data.hasOwnProperty('sheet_invalid') || data.hasOwnProperty('sheet_Erased')) {
         setTimeout(() => {
           navigat('/sheet invalid')
         }, 2000);
         throw new Error("Sheet Invalid: Contact to Admin");
       }
-      if (data.hasOwnProperty('sheet_Erased')) {
-        setTimeout(() => {
-          navigat('/sheet invalid')
-        }, 2000);
-        throw new Error(data.sheet_Erased);
-      }
+
 
 
       if (data.hasOwnProperty('message'))

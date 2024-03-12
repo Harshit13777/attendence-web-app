@@ -21,7 +21,7 @@ const App: React.FC = () => {
     //set admin api
     sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbzLTaDfkBPIRvv3X5_v9fpSdy7G-6lK1X79upH_idqQKOhS5jWsTyZrYevqVV1AckF3/exec')
     //set student api
-    sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbxADpbL9EOA-lOtZbVj8a3tV_UN3P45NbDw1Ex2wE-9MKGRBMLTJFSSS5Zniw7v-s4/exec')
+    sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbyQnCuDY-rM5FsfUwne3YgmcvrfYNM3LwdEy6Dtv9FzEaLHfHrcjKkaa4MPVFPLi6h8/exec')
 
 
     const obj = localStorage.getItem('User_data');
@@ -29,7 +29,7 @@ const App: React.FC = () => {
       const user_data: { user: string, username: string, token: string, email: string } = JSON.parse(obj);
       sessionStorage.setItem('token', user_data.token)
       sessionStorage.setItem('user', user_data.user);
-      sessionStorage.setItem('username', user_data.username);
+      sessionStorage.setItem('username', user_data.username);//unique name to get admin info from my sheet
       sessionStorage.setItem('email', user_data.email);
       if (user_data.user === 'admin') {
         //key , we get data from localstorage by key
