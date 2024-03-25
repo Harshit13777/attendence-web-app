@@ -3,57 +3,63 @@ import HomePage from './home';
 import React, { useState, useEffect } from 'react';
 import { datacatalog } from 'googleapis/build/src/apis/datacatalog';
 
-export const Main = () => {
+export const Main: React.FC = () => {
+
   //check the 
   const navigate = useNavigate();
-  const [message, setMessage] = useState<any>('loading...');
-  const [loading_comp, setloading] = useState(true);
-  const user = sessionStorage.getItem('user');
 
 
-  //if  teacher not login in 
-  if (!sessionStorage.getItem('email')) {//token + email 
+
+  //if  student not login in 
+  if (!sessionStorage.getItem('token')) {//token + email 
 
     setTimeout(() => {
-      navigate('/login');
-    }, 10000);
+      navigate('/login')
+    }, 5000);
 
     return (
       <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
         <p className="text-sm">Account Not Login in</p>
       </div>)
   }
-
-  //if user not teacher 
-  else if (!user || user !== 'teacher') {
-    return (
-      <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
-        <p className="text-sm">User not verified</p>
-      </div>
-    )
-  }
-
-
-  //if sheet invalid
-  else if (!sessionStorage.getItem('sheet_exist')) {
-    setTimeout(() => {
-      navigate('/sheet invalid')
-    }, 5000);
+  //if user not admin
+  else if (!sessionStorage.getItem('user') || sessionStorage.getItem('user') !== 'teacher') {
 
     return (
       <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
-        <p className="text-sm">Sheet not valid</p>
+        <p className="text-sm">User not valid</p>
       </div>
     )
   }
+  else {
 
-  else
-    return (<>
+    if (!sessionStorage.getItem('sheet_exist')) {
+      setTimeout(() => {
+        navigate('/sheet invalid')
+      }, 500);
+      return (
 
-      <HomePage />
-    </>);
+        <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+          <p className="text-sm">Validating Sheet...</p>
+        </div>
+      )
 
-}
+    }
+    else
+
+      return (
+        <>
+          <HomePage />
+        </>
+      );
+
+
+  }
+
+
+};
+
+
 /*
 const Sync = ({ setloading }: { setloading: React.Dispatch<React.SetStateAction<boolean>> }) => {
   const navigate = useNavigate();

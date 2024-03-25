@@ -23,6 +23,9 @@ const App: React.FC = () => {
     //set student api
     sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbyQnCuDY-rM5FsfUwne3YgmcvrfYNM3LwdEy6Dtv9FzEaLHfHrcjKkaa4MPVFPLi6h8/exec')
 
+    //set teacher api
+    sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbzd4-E7wpabtN2yHw35M9qwaC1A0ysVz9pOWOWetETt-4AC8XA9-0SthF2Bm9ab3KLqEA/exec')
+
 
     const obj = localStorage.getItem('User_data');
     if (obj) {
@@ -36,6 +39,11 @@ const App: React.FC = () => {
         sessionStorage.setItem('student_data_key', `${user_data.email}_Student_Data`)
         sessionStorage.setItem('teacher_data_key', `${user_data.email}_Teacher_Data`)
       }
+      else if (user_data.user === 'teacher') {
+        //key , we get data from localstorage by key
+        sessionStorage.setItem('student_imgs_key', `${user_data.email}_Student_Img_Data`)
+        sessionStorage.setItem('subject_names_key', `${user_data.email}_Subject_Name_Data`)
+      }
     }
   }, [])
 
@@ -48,7 +56,7 @@ const App: React.FC = () => {
       */}
         <Route index path="/login" element={<Login />} />
         <Route path="/test" element={<Upload_Img />} />
-        <Route index path='/take_attendance' element={<Take_Attendence />} />
+        <Route path='/take_attendance' element={<Take_Attendence />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget_password" element={<Forget_password />} />
         <Route path="/sheet invalid" element={<Sheet_invalid />} />

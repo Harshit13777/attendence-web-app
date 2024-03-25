@@ -94,38 +94,53 @@ export const HomePage: React.FC = () => {
 
     }, [])
 
+    const Logout = () => {
+        sessionStorage.clear();
+        localStorage.removeItem('User_data')
+        setTimeout(() => {
+            navigate('/login')
+        }, 300);
+    }
+
     return (
         <>
 
-            <div className='flex flex-row bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
-                {
-                    is_sync ?
+            <div className='flex flex-col bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
+                <div className="relative">
+                    <button className='bg-red-500 right-0 absolute text-2xl border-2 text-white px-4 py-2 from-red-600 to-red-900 bg-gradient-to-r hover:from-red-800 hover:to-red-400 rounded-3xl ' onClick={() => { Logout() }}>Logout</button>
+                </div>
+                <div>
 
-                        <div className='absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center gap-y-10'>
 
-                            <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
-                                Syncing...
-                            </h1>
-                            {sync_message.length !== 0 &&
-                                sync_message.map((message, i) => (
-                                    <div className="bg-blue-100 w-52 text-center mt-5 border-t border-b border-blue-300 text-blue-700 px-4 py-3" role="alert">
-                                        <p className="text-lg">{message}</p>
-                                    </div>
-                                ))}
-                        </div>
+                    {
+                        is_sync ?
 
-                        :
+                            <div className='absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center gap-y-10'>
 
-                        uploaded_img
-                            ?
-
-                            <div>
-                                Attendance info
+                                <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
+                                    Syncing...
+                                </h1>
+                                {sync_message.length !== 0 &&
+                                    sync_message.map((message, i) => (
+                                        <div className="bg-blue-100 w-52 text-center mt-5 border-t border-b border-blue-300 text-blue-700 px-4 py-3" role="alert">
+                                            <p className="text-lg">{message}</p>
+                                        </div>
+                                    ))}
                             </div>
-                            :
-                            <Upload_Img set_uploaded_img_status={set_uploaded_img} />
 
-                }
+                            :
+
+                            uploaded_img
+                                ?
+
+                                <div>
+                                    Attendance info
+                                </div>
+                                :
+                                <Upload_Img set_uploaded_img_status={set_uploaded_img} />
+
+                    }
+                </div>
             </div>
 
         </>

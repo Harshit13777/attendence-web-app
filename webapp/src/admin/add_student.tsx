@@ -434,8 +434,11 @@ const SpreadsheetInterface = () => {
           set_Datarow_error_message(new Array(rowsToAddCount).fill('').map(() => ({ ...Empty_data_Student })))
           setMessage(['Data added'])
           set_loading(false)
-          return
+
         }
+        //reset history
+        history.current = [{ studentRows: Student_dataRows, error_row: Datarow_error_message }]
+        return
 
       }
 
@@ -573,6 +576,7 @@ const SpreadsheetInterface = () => {
               Fill the Form
             </span>
           </h1>
+
           <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
             <table className="table-auto w-full ">
               <thead className=' text-center items-center '>

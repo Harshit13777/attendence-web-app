@@ -24,7 +24,7 @@ export const HandlecheckSheetStatusTeacher = () => {
           , 200);
         throw new Error('Error : No Token Found')
       }
-      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'student' ? 'student_api' : 'teacher_api')}?page=student&action=get_sheet_status`, {
+      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'student' ? 'student_api' : 'teacher_api')}?page=${sessionStorage.getItem('use')}&action=get_sheet_status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -76,9 +76,19 @@ export const HandlecheckSheetStatusTeacher = () => {
     fetch_check_sheet_access()
   }, [])
 
-  return (<>
-    <div>
+  const Logout = () => {
+    sessionStorage.clear();
+    localStorage.removeItem('User_data');
+    setTimeout(() => {
+      navigate('/login')
+    }, 500);
+  }
 
+  return (<>
+    <div className="gap-y-11 flex flex-col">
+      <div className="relative">
+        <button className='bg-red-500 right-0 absolute text-2xl border-2 text-white px-4 py-2 from-red-600 to-red-900 bg-gradient-to-r hover:from-red-800 hover:to-red-400 rounded-3xl ' onClick={() => { Logout() }}>Logout</button>
+      </div>
       <div className="  text-center  flex flex-col justify-center items-center">
         {
           loading

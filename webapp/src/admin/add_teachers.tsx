@@ -387,9 +387,11 @@ const SpreadsheetInterface = () => {
 
           setMessage(['Data added'])
           set_loading(false)
-          return
         }
 
+        //reset history
+        history.current = [{ teacherRows: Teacher_dataRows, error_row: Datarow_error_message }]
+        return
       }
 
       throw new Error(data.message)

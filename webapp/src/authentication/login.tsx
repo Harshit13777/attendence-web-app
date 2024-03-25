@@ -177,8 +177,8 @@ const Login: React.FC = () => {
       if (!validateloginform(email, password, selectedRole, username)) {
         throw new Error('Fix the Error');
       }
-
-      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'admin' ? 'api' : 'student_api')}?page=${selectedRole}&action=login`, {
+      console.log(selectedRole)
+      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'admin' ? 'api' : selectedRole === 'teacher' ? 'teacher_api' : 'student_api')}?page=${selectedRole}&action=login`, {
         method: 'post',
         //headers: {
         // 
@@ -216,6 +216,10 @@ const Login: React.FC = () => {
         sessionStorage.setItem('username', data.username);
         sessionStorage.setItem('token', data.token);
         sessionStorage.setItem('email', email);
+
+        sessionStorage.setItem('student_data_key', `${email}_Student_Data`)
+        sessionStorage.setItem('teacher_data_key', `${email}_Teacher_Data`)
+
         //set all user data in localstorage
         const obj: { user: string, username: string, token: string, email: string } = { 'user': 'admin', username: data.username, token: data.token, email }
         localStorage.setItem('User_data', JSON.stringify(obj));
@@ -233,12 +237,30 @@ const Login: React.FC = () => {
       //for teacher and student handle
 
       if (selectedRole === 'teacher') {
+        if (!data.hasOwnProperty('token') || !data.hasOwnProperty('set_Password')) {
+          throw new Error('Server Error : Items not received')
+        }
         sessionStorage.setItem('user', 'teacher');
+        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('token', data.token);
         sessionStorage.setItem('email', email);
-        sessionStorage.setItem('sheet_exist', 'T');
-        sessionStorage.setItem('Admin_Sheet_Id', data.Admin_Sheet_Id);
-        sessionStorage.setItem('Token', data.token)
-        setTimeout(() => navigat('/teacher'), 300);
+        //login only when sheet exist
+        sessionStorage.setItem('sheet_exist', 'Y');
+        //key , we get data from localstorage by key
+        sessionStorage.setItem('student_imgs_key', `${email}_Student_Img_Data`)
+        sessionStorage.setItem('subject_names_key', `${email}_Subject_Name_Data`)
+
+        //set all user data in localstorage
+        const obj: { user: string, username: string, token: string, email: string } = { 'user': 'teacher', username: username, token: data.token, email }
+        localStorage.setItem('User_data', JSON.stringify(obj));
+        if (data.set_Password === true) {
+          set_opensetpassword_comp(true)
+        } else {
+          setTimeout(() => {
+            navigat('/teacher');
+          }, 300);
+        }
+
       }
 
       if (selectedRole === 'student') {

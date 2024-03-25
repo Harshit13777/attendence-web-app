@@ -40,7 +40,7 @@ export const Upload_Img = () => {
 
     setMessage('Loading...');
     loadModels().then(async () => {
-      //await onDete()
+      await onDete()
       /*
             const imageUrl = dataset[0]['content'];
             const annotations = dataset[0]['annotation']

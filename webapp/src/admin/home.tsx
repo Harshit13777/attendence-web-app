@@ -62,14 +62,16 @@ const NavBar = () => {
 
                 <ul className="pt-6  menu">
 
-                    <li
-                        className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
+                    <Link to="/admin/">
+                        <li
+                            className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
                                         mt-2 menu-items `}>
-                        <img src={overview} className='' alt="" />
-                        <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                            Overview
-                        </span>
-                    </li>
+                            <img src={overview} className='' alt="" />
+                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
+                                Overview
+                            </span>
+                        </li>
+                    </Link>
 
 
                     <li
