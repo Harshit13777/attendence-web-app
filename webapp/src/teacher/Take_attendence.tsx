@@ -6,6 +6,14 @@ import { Set } from 'typescript';
 import { arrayBuffer } from 'stream/consumers';
 import { error } from 'console';
 
+interface store_student_imgs {
+  [key: string]: number[];
+}
+
+interface store_subjects {
+  [key: string]: string;
+}
+
 export const Take_Attendence = () => {
   const webcamRef = useRef<Webcam | null>(null);
   const imgref = useRef<HTMLImageElement | null>(null);
@@ -16,9 +24,12 @@ export const Take_Attendence = () => {
   const [faceMatcher, setFaceMatcher] = useState<faceapi.FaceMatcher | null>(null);
   const [RollNo, setRollNo] = useState<Set<String>>(new Set<String>());
   const [selectedSheet, setSelectedSheet] = useState<{ subject: string, id: string } | null>(null);
-  const [subject_names, set_subject_names] = useState<{ [subject: string]: string; } | null>(null);
+  const [subject_names, set_subject_names] = useState<string[] | null>(null);
   const [loading, setloading] = useState(false);
   const [selectedAttend, set_selectedAttend] = useState('');
+  const student_imgs_key = sessionStorage.getItem('student_imgs_key') as string;
+  const subject_names_key = sessionStorage.getItem('subject_names_key') as string;
+  const start_detecting = useRef(false)
 
 
   const handleSelectChange = (e: any) => {
@@ -45,12 +56,12 @@ export const Take_Attendence = () => {
       await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
 
       //parse json into object array
-      const json = sessionStorage.getItem('Students_Dataset');
-      if (!json) { console.log('not json'); return }
-      let imgs = JSON.parse(json);
-      const labeledFaceDescriptors = imgs.map((item: { label: number, descriptor: number[] }) => {
+      const json = localStorage.getItem(student_imgs_key)
+      if (!json) { console.log('Student Img not found'); setMessage('Error'); return }
+      let student_id_imgs: store_student_imgs = JSON.parse(json);
+      const labeledFaceDescriptors = Object.entries(student_id_imgs).map(([id, img]) => {
         //console.log(new Float32Array(item.img));   
-        return new faceapi.LabeledFaceDescriptors(item.label + '', [new Float32Array(item.descriptor)]);
+        return new faceapi.LabeledFaceDescriptors(id + '', [new Float32Array(img)]);
       });
       // Initialize the face matcher
       const matcher = new faceapi.FaceMatcher(labeledFaceDescriptors, .5);
@@ -58,35 +69,34 @@ export const Take_Attendence = () => {
       //console.log(matcher);
       //testing
       //await dete()
-      setMessage('HEllo')
-
-      console.log(faceMatcher);
-
+      console.log('Face Matcher loaded');
+      setMessage('')
     }
     setMessage('loading...');
     loadModels();
-    setMessage('');
 
   }, []);
 
 
   useEffect(() => {//get subject names
-    const sheet_name_json = localStorage.getItem('Subject_Names')
-    if (sheet_name_json) {
-      const sheet_arr = JSON.parse(sheet_name_json);
-      set_subject_names(sheet_arr)
+    const subject_json = localStorage.getItem(subject_names_key)
+    if (subject_json) {
+      const subjects_obj: store_subjects = JSON.parse(subject_json);
+      set_subject_names(Object.keys(subjects_obj))
     }
-    else
+    else {
+      setMessage('Error: No Subjects Found')
       setTimeout(() =>
         navigate('/teacher/add_subject')
         , 5000)
+    }
   }, [])
+
 
   const onDetect = async () => {
 
+    console.log('irun')
     if (webcamRef.current && webcamRef.current.getScreenshot() && faceMatcher && imgref.current) {
-      setMessage('captured');
-
 
       // Capture a frame from the webcam
       const image: any = webcamRef.current.getScreenshot();
@@ -94,28 +104,27 @@ export const Take_Attendence = () => {
       // Convert the image data to an HTMLImageElement
       const img = new Image() as HTMLImageElement;
       img.src = image;
-
+      setMessage('detecting')
 
       const detections = await faceapi
         .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
         .withFaceDescriptors();
 
+      console.log('getresults')
       if (detections.length > 0 && faceMatcher !== null) {
         //draw img on canvas
-        setMessage('Detected');
 
         const labels = detections.map((detection) => {
           const bestmatch = faceMatcher.findBestMatch(detection.descriptor);
 
           return bestmatch.label;
         });
-
+        setMessage('Detected');
+        console.log('Detected')
         labels.filter((label) => label !== 'unknown').map((label) => RollNo.add(label));
 
         drawLandmark(img, detections, labels);
-
-
 
         /* 
          results.forEach((bestMatch, i) => {
@@ -142,83 +151,98 @@ export const Take_Attendence = () => {
            }
          });*/
       }
-
-
-    }
-    setMessage('Recapturing..')
-  };
-
-
-  const dete = async () => {
-
-    const data: {}[] = []
-    for (let i = 1; i < 51; i++) {
-      const element = i
-      const image = require(`../.icons/images/${element}.jpg`)
-      console.log(element)
-
-
-
-      const img = new Image() as HTMLImageElement;
-      img.src = image;
-
-      const detections = await faceapi
-        .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceDescriptors();
-
-      if (detections.length > 0 && faceMatcher !== null) {
-        //draw img on canvas
-        setMessage('Detected');
-
-        const labels = detections.map((detection) => {
-          const bestmatch = faceMatcher.findBestMatch(detection.descriptor);
-          data.push({ i, p: bestmatch.distance })
-          return bestmatch.label;
-        });
-
-        labels.filter((label) => label !== 'unknown').map((label) => RollNo.add(label));
-
-
-
-        drawLandmark(img, detections, labels);
-
-
-
-        /**
-         results.forEach((bestMatch, i) => {
-           setMessage('Face-Recognized');
-           const canvas = document.createElement('canvas');
-           const context = canvas.getContext('2d');
-           const box = detections[i].detection.box;
-           const x = box.x;
-           const y = box.y;
-           const width = box.width;
-           const height = box.height;
-  
-           canvas.width = 224;
-           canvas.height = 224;
-           context?.drawImage(img, x, y, width, height, 0, 0, canvas.width, canvas.height);
-  
-           let obj = { img: canvas, id: bestMatch.label };
-  
-           // Check if obj.id is not in detectedFaces before adding it
-           if (!detectedFaces.some((face) => face.id === obj.id)) {
-             setDetectedFaces((prevDetectedFaces) => {
-               return [...prevDetectedFaces, obj];
-             });
-           }
-         });
-         **/
+      else {
+        console.log('Not detected')
+        setMessage('Not Detected')
       }
 
 
-      setMessage('Recapturing..')
     }
-    await console.log(data);
-    setMessage('Hello')
-  }
+    else {
+      start_detecting.current = false;
+      console.log('Close Scanning')
+      setMessage('Error: No camera Found')
+      return;
+    }
 
+    if (start_detecting.current !== false) {
+      setMessage('Recapturing..')
+      console.log('recapturing')
+      await onDetect();
+    }
+  };
+
+  /*
+    const dete = async () => {
+  
+      const data: {}[] = []
+      for (let i = 1; i < 51; i++) {
+        const element = i
+        const image = require(`../.icons/images/${element}.jpg`)
+        console.log(element)
+  
+  
+  
+        const img = new Image() as HTMLImageElement;
+        img.src = image;
+  
+        const detections = await faceapi
+          .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptors();
+  
+        if (detections.length > 0 && faceMatcher !== null) {
+          //draw img on canvas
+          setMessage('Detected');
+  
+          const labels = detections.map((detection) => {
+            const bestmatch = faceMatcher.findBestMatch(detection.descriptor);
+            data.push({ i, p: bestmatch.distance })
+            return bestmatch.label;
+          });
+  
+          labels.filter((label) => label !== 'unknown').map((label) => RollNo.add(label));
+  
+  
+  
+          drawLandmark(img, detections, labels);
+  
+  
+  
+          /*
+           results.forEach((bestMatch, i) => {
+             setMessage('Face-Recognized');
+             const canvas = document.createElement('canvas');
+             const context = canvas.getContext('2d');
+             const box = detections[i].detection.box;
+             const x = box.x;
+             const y = box.y;
+             const width = box.width;
+             const height = box.height;
+    
+             canvas.width = 224;
+             canvas.height = 224;
+             context?.drawImage(img, x, y, width, height, 0, 0, canvas.width, canvas.height);
+    
+             let obj = { img: canvas, id: bestMatch.label };
+    
+             // Check if obj.id is not in detectedFaces before adding it
+             if (!detectedFaces.some((face) => face.id === obj.id)) {
+               setDetectedFaces((prevDetectedFaces) => {
+                 return [...prevDetectedFaces, obj];
+               });
+             }
+           });
+           //comments above
+        }
+  
+  
+        setMessage('Recapturing..')
+      }
+      await console.log(data);
+      setMessage('Hello')
+    }
+  */
 
 
   const drawLandmark = (img: HTMLImageElement, detections: faceapi.WithFaceDescriptor<faceapi.WithFaceLandmarks<{ detection: faceapi.FaceDetection; }, faceapi.FaceLandmarks68>>[], labels: string[]) => {
@@ -252,28 +276,27 @@ export const Take_Attendence = () => {
   }
 
 
-  const start = () => {
-    const id = setInterval(() => {
-      if (webcamRef.current) {
-        onDetect();
-      }
-    }, 2000);
-    setIntervalid(id);
-    return () => {
-      if (interval_id !== null) {
-        clearInterval(interval_id);
-      }
+
+  const handleStart = async () => {
+    setMessage('Start')
+    if (webcamRef.current && webcamRef.current.getScreenshot()) {
+      setMessage('Start Detecting ...')
+      start_detecting.current = true;
+      setDetectedFaces([]);
+      setTimeout(async () => {
+        await onDetect()
+        setMessage('Detected Faces')
+      }, 5000);
+
+    }
+    else {
+      setMessage('Error:Camera Not Found /n Retry')
     }
   }
-
-
-  const stopInterval = () => {
-    if (interval_id !== null) {
-      clearInterval(interval_id);
-      setIntervalid(null);
-    }
-  };
-
+  const handleStop = () => {
+    start_detecting.current = false;
+    setMessage('Stop Detecting')
+  }
 
   const handlesenddata = async () => {
     setloading(true);
@@ -360,134 +383,131 @@ export const Take_Attendence = () => {
 
         :
 
-        <div className=' text-center flex flex-col '>
+        <div className=' text-center p-2 md:p-8'>
 
 
           {message !== '' && (
-            <div className="bg-red-100 border-t h-6 text-center border-b border-red-500 text-red-700 px-4 " role="alert">
-              <p className="text-sm">{message}</p>
+            <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4" role="alert">
+              <p className="text-xl font-bold">{message}</p>
             </div>
           )}
 
 
 
+          <div className={` relative ${loading && 'opacity-50 pointer-events-none'}  `}>
 
 
-          <div className={`relative text-center`}>
-            {interval_id !== null &&
-              <>
-                <Webcam
-                  className={` w-full  md:h-screen  opacity-80`}
-                  ref={webcamRef}
-                  audio={false}
-                  screenshotFormat="image/jpeg"
-                // Adjust the 50 to your desired heading height
-                />
+            <div className={`${!start_detecting.current && 'opacity-0'} relative text-center`}>
+              <Webcam
+                className={` w-screen md:h-5/6 opacity-80`}
+                ref={webcamRef}
+                audio={false}
+                screenshotFormat="image/jpeg"
+              // Adjust the 50 to your desired heading height
+              />
 
-                <img
-                  ref={imgref}
-                  className={` w-full   md:h-screen  md:top-0 md:absolute`}
-                />
+              <img
+                ref={imgref}
+                className={`w-screen md:h-5/6  md:top-0 md:absolute`}
+              />
+            </div>
 
-              </>
+
+            {RollNo.size !== 0 && (
+              <div className={` text-center ${!start_detecting.current && 'absolute top-0'}`}>
+
+                <div className="p-6 bg-white text-center shadow-md">
+                  <div className="flex text-center items-center justify-center bg-lime-100 p-3 rounded-lg">
+                    <h1 className=" text-xl md:text-4xl font-bold text-gray-900">
+                      <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-950">
+                        Captured Roll No
+                      </span>
+                    </h1>
+                  </div>
+                  <div className='flex flex-row  bg-lime-50 p-3  rounded-lg'>
+
+                    {Array.from(RollNo as any).map((id, index) => (
+                      `${index + 1}. ${id}` as any
+                    ))}
+                  </div>
+
+                </div>
+
+                <div className=' text-center flex flex-col items-center   bg-lime-50 p-3 mb-4 ml-2 mr-2 rounded-xl'>
+
+                  <div className=' flex-row space-x-1 space-y-1 '>
+
+                    <select className=' p-2 rounded-md border-4 border-blue-950 font-semibold text-center md:text-lg '
+                      onChange={handleSelectChange} value={selectedSheet?.subject}>
+                      <option className='md:text-lg font-medium' value="">Select Subject</option>
+                      {subject_names.map((subject, index) => (
+                        <option className='md:text-lg font-semibold' key={index} value={subject}>
+                          {subject}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select className=' p-2 rounded-md border-4 border-blue-950 font-semibold text-center md:text-lg '
+                      onChange={handleselectAttend} value={selectedAttend}>
+
+                      <option className='md:text-lg font-semibold' key={0} value='New'>
+                        New Column
+                      </option>
+                      <option className='md:text-lg font-semibold' key={1} value='Previous'>
+                        Previous Column
+                      </option>
+
+                    </select>
+
+                  </div>
+
+
+
+
+                  <button
+                    className=" mt-2  hover:from-blue-800 hover:to-blue-400 from-blue-400 to-blue-800 md:shadow-xl bg-gradient-to-r bg-origin-padding text-white font-bold p-2   rounded-xl"
+                    onClick={handlesenddata}
+                  >
+                    Mark Attendance
+                  </button>
+
+
+                </div>
+
+                <Slideshow images={detectedFaces} />
+
+              </div>
+
+
+            )}
+
+            {
+              !start_detecting.current ?
+
+                <button
+                  className={`${interval_id !== null && 'hidden'
+                    } md:text-3xl hover:from-blue-800 hover:to-blue-400 absolute left-1/2 top-3/4 from-blue-800 to-blue-400 md:shadow-xl bg-gradient-to-r  shadow-md hover:bg-blue-700 text-white font-bold p-2  rounded-xl `}
+                  onClick={() => {
+                    handleStart()
+                  }}
+                >
+                  Start Scan
+                </button>
+                :
+                <button
+                  className={` md:text-3xl hover:from-blue-800 hover:to-blue-400 absolute left-1/2 top-3/4 from-blue-800 to-blue-400 md:shadow-xl bg-gradient-to-r  shadow-md hover:bg-blue-700 text-white font-bold p-2  rounded-xl `}
+                  onClick={() => {
+                    handleStop()
+                  }}
+                >
+                  Stop Scan
+                </button>
             }
 
           </div>
-
-          {interval_id === null && RollNo.size !== 0 && (
-            <div className=' text-center flex flex-col'>
-
-              <div className="p-6 bg-white text-center shadow-md">
-                <div className="flex text-center items-center justify-center bg-lime-100 p-3 rounded-lg">
-                  <h1 className=" text-xl md:text-4xl font-bold text-gray-900">
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-950">
-                      Captured Roll No
-                    </span>
-                  </h1>
-                </div>
-                <div className='flex flex-row  bg-lime-50 p-3  rounded-lg'>
-
-                  {Array.from(RollNo as any).map((id, index) => (
-                    `${index + 1}. ${id}` as any
-                  ))}
-                </div>
-
-              </div>
-
-              <div className=' text-center flex flex-col items-center   bg-lime-50 p-3 mb-4 ml-2 mr-2 rounded-xl'>
-
-                <div className=' flex-row space-x-1 space-y-1 '>
-
-                  <select className=' p-2 rounded-md border-4 border-blue-950 font-semibold text-center md:text-lg '
-                    onChange={handleSelectChange} value={selectedSheet?.subject}>
-                    <option className='md:text-lg font-medium' value="">Select Subject</option>
-                    {Object.entries(subject_names).map(([sheetName, id], index) => (
-                      <option className='md:text-lg font-semibold' key={index} value={sheetName}>
-                        {sheetName}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select className=' p-2 rounded-md border-4 border-blue-950 font-semibold text-center md:text-lg '
-                    onChange={handleselectAttend} value={selectedAttend}>
-
-                    <option className='md:text-lg font-semibold' key={0} value='New'>
-                      New Column
-                    </option>
-                    <option className='md:text-lg font-semibold' key={1} value='Previous'>
-                      Previous Column
-                    </option>
-
-                  </select>
-
-                </div>
-
-
-
-
-                {
-                  loading
-                    ?
-                    <div className="animate-spin rounded-xl border-blue-500 border-solid  border-8 h-10 w-10 mt-2 "></div>
-                    :
-                    <button
-                      className=" mt-2  hover:from-blue-800 hover:to-blue-400 from-blue-400 to-blue-800 md:shadow-xl bg-gradient-to-r bg-origin-padding text-white font-bold p-2   rounded-xl"
-                      onClick={handlesenddata}
-                    >
-                      Mark Attendance
-                    </button>
-                }
-
-              </div>
-
-              <Slideshow images={detectedFaces} />
-
-            </div>
-
-
-          )}
-
-
-          <button
-            className={`${interval_id !== null && 'hidden'
-              } md:text-3xl hover:from-blue-800 hover:to-blue-400 absolute left-1/2 top-3/4 from-blue-800 to-blue-400 md:shadow-xl bg-gradient-to-r  shadow-md hover:bg-blue-700 text-white font-bold p-2  rounded-xl `}
-            onClick={() => {
-              start()
-            }}
-          >
-            Start Scan
-          </button>
-          <button
-            className={`${!interval_id && 'hidden'
-              }   md:text-3xl hover:from-blue-800 hover:to-blue-400 absolute left-1/2 top-3/4 from-blue-800 to-blue-400 md:shadow-xl bg-gradient-to-r  shadow-md hover:bg-blue-700 text-white font-bold p-2  rounded-xl `}
-            onClick={() => {
-              stopInterval()
-            }}
-          >
-            Stop Scan
-          </button>
-
-
+          {loading &&
+            <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
+          }
 
         </div>
   );

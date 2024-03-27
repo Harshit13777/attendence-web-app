@@ -346,7 +346,7 @@ const HomePage = () => {
                     </div>
 
                     :
-                    <div className={` ml-16 items-center w-screen `}>
+                    <div className={` ml-16 items-center `} style={{ width: `${((wdth - 64) / wdth) * 100}%` }}>
                         <Routes>
                             <Route path="/add_subject" element={<AddAttendanceSheet />} />
                             <Route path="/get_attendance_sheet" element={<GetAttendanceSheet />} />
