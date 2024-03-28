@@ -28,6 +28,7 @@ const App: React.FC = () => {
 
 
     const obj = localStorage.getItem('User_data');
+    console.log('obj', obj)
     if (obj) {
       const user_data: { user: string, username: string, token: string, email: string } = JSON.parse(obj);
       sessionStorage.setItem('token', user_data.token)

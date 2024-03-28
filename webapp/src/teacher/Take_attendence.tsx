@@ -383,7 +383,7 @@ export const Take_Attendence = () => {
 
         :
 
-        <div className=' text-center p-2 md:p-8'>
+        <div className=' relative text-center p-2 md:p-8'>
 
 
           {message !== '' && (
@@ -399,7 +399,7 @@ export const Take_Attendence = () => {
 
             <div className={`${!start_detecting.current && 'opacity-0'} relative text-center`}>
               <Webcam
-                className={` w-screen md:h-5/6 opacity-80`}
+                className={` w-screen md:h-5/6 opacity-5`}
                 ref={webcamRef}
                 audio={false}
                 screenshotFormat="image/jpeg"
@@ -408,7 +408,7 @@ export const Take_Attendence = () => {
 
               <img
                 ref={imgref}
-                className={`w-screen md:h-5/6  md:top-0 md:absolute`}
+                className={`w-screen md:h-5/6  top-0 absolute`}
               />
             </div>
 
@@ -416,49 +416,39 @@ export const Take_Attendence = () => {
             {RollNo.size !== 0 && (
               <div className={` text-center ${!start_detecting.current && 'absolute top-0'}`}>
 
-                <div className="p-6 bg-white text-center shadow-md">
-                  <div className="flex text-center items-center justify-center bg-lime-100 p-3 rounded-lg">
+                <div className="p-6 ">
+                  <div className="flex flex-col gap-y-4 text-center items-center justify-center  bg-gradient-to-br from-blue-200 to-red-100 p-3 rounded-lg">
                     <h1 className=" text-xl md:text-4xl font-bold text-gray-900">
-                      <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-950">
-                        Captured Roll No
-                      </span>
-                    </h1>
-                  </div>
-                  <div className='flex flex-row  bg-lime-50 p-3  rounded-lg'>
+                      Captured Roll No
 
-                    {Array.from(RollNo as any).map((id, index) => (
-                      `${index + 1}. ${id}` as any
-                    ))}
+                    </h1>
+                    <div className=' bg-gradient-to-r from-blue-300 to-red-200 p-3 pl-7 font-semibold rounded-lg'>
+                      <ul className='flex flex-wrap gap-x-4 list-disc '>
+                        {Array.from(RollNo as any).map((id, index) => (
+                          <li className='pr-5' key={index}>
+                            <h3>{id as any}</h3>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
                   </div>
 
                 </div>
 
-                <div className=' text-center flex flex-col items-center   bg-lime-50 p-3 mb-4 ml-2 mr-2 rounded-xl'>
+                <div className=' bg-gradient-to-br from-blue-200 to-red-100 text-center flex flex-col items-center  p-3 mb-4 ml-2 mr-2 rounded-xl'>
 
-                  <div className=' flex-row space-x-1 space-y-1 '>
+                  <div className=' flex-row space-x-1 space-y-1'>
 
-                    <select className=' p-2 rounded-md border-4 border-blue-950 font-semibold text-center md:text-lg '
+                    <select className=' p-2 rounded-lg border-2 border-blue-950 font-semibold text-center md:text-lg '
                       onChange={handleSelectChange} value={selectedSheet?.subject}>
-                      <option className='md:text-lg font-medium' value="">Select Subject</option>
+                      <option className='md:text-lg font-medium text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200' value="">Select Subject</option>
                       {subject_names.map((subject, index) => (
-                        <option className='md:text-lg font-semibold' key={index} value={subject}>
+                        <option className='md:text-lg font-semibold text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200' key={index} value={subject}>
                           {subject}
                         </option>
                       ))}
                     </select>
-
-                    <select className=' p-2 rounded-md border-4 border-blue-950 font-semibold text-center md:text-lg '
-                      onChange={handleselectAttend} value={selectedAttend}>
-
-                      <option className='md:text-lg font-semibold' key={0} value='New'>
-                        New Column
-                      </option>
-                      <option className='md:text-lg font-semibold' key={1} value='Previous'>
-                        Previous Column
-                      </option>
-
-                    </select>
-
                   </div>
 
 
@@ -486,7 +476,7 @@ export const Take_Attendence = () => {
 
                 <button
                   className={`${interval_id !== null && 'hidden'
-                    } md:text-3xl hover:from-blue-800 hover:to-blue-400 absolute left-1/2 top-3/4 from-blue-800 to-blue-400 md:shadow-xl bg-gradient-to-r  shadow-md hover:bg-blue-700 text-white font-bold p-2  rounded-xl `}
+                    } fixed top-2/3 left-1/3 right-1/3  bg-blue-700 hover:bg-blue-300 hover:text-blue-700  p-10  md:text-2xl text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2`}
                   onClick={() => {
                     handleStart()
                   }}
@@ -495,7 +485,7 @@ export const Take_Attendence = () => {
                 </button>
                 :
                 <button
-                  className={` md:text-3xl hover:from-blue-800 hover:to-blue-400 absolute left-1/2 top-3/4 from-blue-800 to-blue-400 md:shadow-xl bg-gradient-to-r  shadow-md hover:bg-blue-700 text-white font-bold p-2  rounded-xl `}
+                  className={` fixed top-3/4 left-1/3 right-1/3  bg-blue-700 hover:bg-blue-300 hover:text-blue-700  p-10  md:text-2xl text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2`}
                   onClick={() => {
                     handleStop()
                   }}

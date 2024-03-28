@@ -24,7 +24,8 @@ export const HandlecheckSheetStatusTeacher = () => {
           , 200);
         throw new Error('Error : No Token Found')
       }
-      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'student' ? 'student_api' : 'teacher_api')}?page=${sessionStorage.getItem('use')}&action=get_sheet_status`, {
+      console.log('selected role', selectedRole)
+      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'student' ? 'student_api' : 'teacher_api')}?page=${sessionStorage.getItem('user')}&action=get_sheet_status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

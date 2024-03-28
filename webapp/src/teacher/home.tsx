@@ -55,7 +55,7 @@ const NavBar = () => {
                         </li>
                     </Link>
                     <Link to='/teacher/add_subject'>
-                        <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm md:text-xl items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                        <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm  items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
                             <img src={addDataIcon} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
@@ -326,7 +326,7 @@ const HomePage = () => {
     return (
 
         <div className='flex flex-row bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
-            <div className=''>
+            <div className='z-50'>
                 <NavBar />
             </div>
             {
