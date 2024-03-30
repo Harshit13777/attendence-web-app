@@ -19,12 +19,12 @@ const App: React.FC = () => {
   //set all local storage item in session
   useEffect(() => {
     //set admin api
-    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbzLTaDfkBPIRvv3X5_v9fpSdy7G-6lK1X79upH_idqQKOhS5jWsTyZrYevqVV1AckF3/exec')
+    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbwxYY1sqCu1J_BrZCnrvuWKdU5swicPXY2ZcOzs7GHjy0DqAcZYfat7dU-oWVsj6gT0Qg/exec')
     //set student api
     sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbyQnCuDY-rM5FsfUwne3YgmcvrfYNM3LwdEy6Dtv9FzEaLHfHrcjKkaa4MPVFPLi6h8/exec')
 
     //set teacher api
-    sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbzd4-E7wpabtN2yHw35M9qwaC1A0ysVz9pOWOWetETt-4AC8XA9-0SthF2Bm9ab3KLqEA/exec')
+    sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbyvkDTUwI8u53I354VzWDzVra9mWlnNM_4JpuWwMnhR01s3D_FVvVxN93LrfZoPh5loFQ/exec')
 
 
     const obj = localStorage.getItem('User_data');

@@ -23,7 +23,8 @@ export const Take_Attendence = () => {
   const [interval_id, setIntervalid] = useState<NodeJS.Timer | null>(null);
   const [faceMatcher, setFaceMatcher] = useState<faceapi.FaceMatcher | null>(null);
   const [RollNo, setRollNo] = useState<Set<String>>(new Set<String>());
-  const [selectedSheet, setSelectedSheet] = useState<{ subject: string, id: string } | null>(null);
+  const [selectedSheet, setSelectedSheet] = useState<{ subject: string, sheet_name: string } | null>(null);
+  const subject_sheet_obj = useRef<store_subjects | null>(null)
   const [subject_names, set_subject_names] = useState<string[] | null>(null);
   const [loading, setloading] = useState(false);
   const [selectedAttend, set_selectedAttend] = useState('');
@@ -37,9 +38,9 @@ export const Take_Attendence = () => {
       setSelectedSheet(null);
       return;
     }
-    if (subject_names) {
-      const id = subject_names[e.target.value];
-      setSelectedSheet({ subject: e.target.value, id: id });
+    if (subject_names && subject_sheet_obj.current) {
+      const sheet_name = subject_sheet_obj.current[e.target.value];
+      setSelectedSheet({ subject: e.target.value, sheet_name });
     }
   };
 
@@ -82,6 +83,7 @@ export const Take_Attendence = () => {
     const subject_json = localStorage.getItem(subject_names_key)
     if (subject_json) {
       const subjects_obj: store_subjects = JSON.parse(subject_json);
+      subject_sheet_obj.current = subjects_obj;
       set_subject_names(Object.keys(subjects_obj))
     }
     else {
@@ -302,7 +304,15 @@ export const Take_Attendence = () => {
     setloading(true);
 
     try {
-      const email = sessionStorage.getItem('email');
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        sessionStorage.clear();
+        setTimeout(() =>
+          navigate('/login')
+          , 5000);
+        throw new Error('Error : No Token Found')
+      }
+
       if (!selectedSheet) {
         setMessage('Select subject name')
         throw new Error('Select subject name');
@@ -318,12 +328,13 @@ export const Take_Attendence = () => {
 
 
 
-      const response = await fetch(`${sessionStorage.getItem('api')}?page=teacher&action=upload_attendance`, {
+
+      const response = await fetch(`${sessionStorage.getItem('teacher_api')}?page=teacher&action=upload_attendance`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify({ email, Admin_Sheet_Id: sessionStorage.getItem('Admin_Sheet_Id'), Roll_Numbers: rollarr, Subject: selectedSheet, Column: selectedAttend }),
+        body: JSON.stringify({ token, Roll_Numbers: rollarr, Subject: selectedSheet }),
       });
 
       if (!response.ok) {
@@ -333,28 +344,29 @@ export const Take_Attendence = () => {
 
       const data = await response.json();
 
-      if (data.hasOwnProperty('error')) {
-        setMessage('Server Error')
-        throw new Error('Server Error');
-      }
+      console.log(data)
+      setMessage(data.message);
 
-      if (data.hasOwnProperty('sheet_invalid')) {
-        sessionStorage.removeItem('sheet_exist');
-        setMessage(data.message);
+      if (data.hasOwnProperty('sheet_invalid') || data.hasOwnProperty('sheet_Erased')) {
+        sessionStorage.removeItem('sheet_exist')
         setTimeout(() => {
           navigate('/sheet invalid')
-        }, 5000);
-        return;
+        }, 500);
       }
 
-      if (data.hasOwnProperty('attendance_added')) {
+      if (data.hasOwnProperty('attendance_added') && data.hasOwnProperty('Not_Rolls')) {
+        const not_rolls: string[] = data.Not_Rolls;
+        setMessage(data.attendance_added);
+
+        if (not_rolls.length > 0) {
+          setMessage(`These Rolls not exist- ${not_rolls}`)
+        }
         setDetectedFaces([]);
         setSelectedSheet(null);
         setRollNo(new Set<String>());
       }
 
       setloading(false);
-      setMessage(data.message);
     } catch (error: any) {
       setloading(false);
       console.log(error.message);
@@ -399,7 +411,7 @@ export const Take_Attendence = () => {
 
             <div className={`${!start_detecting.current && 'opacity-0'} relative text-center`}>
               <Webcam
-                className={` w-screen md:h-5/6 opacity-5`}
+                className={` w-screen md:h-5/6 opacity-50`}
                 ref={webcamRef}
                 audio={false}
                 screenshotFormat="image/jpeg"
