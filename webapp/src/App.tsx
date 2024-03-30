@@ -51,11 +51,10 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <Routes>
+      <Routes >
 
         {/* for admin 
       */}
-        <Route index path="/login" element={<Login />} />
         <Route path="/test" element={<Upload_Img />} />
         <Route path='/take_attendance' element={<Take_Attendence />} />
         <Route path="/signup" element={<Signup />} />
@@ -65,6 +64,7 @@ const App: React.FC = () => {
         <Route path="/admin/*" element={<Admin />} />
         <Route path="/teacher/*" element={<Teacher />} />
         <Route path="/student/*" element={<Student />} />
+        <Route index path="*" element={<Login />} />
       </Routes>
     </Router>
   );
