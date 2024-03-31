@@ -64,7 +64,7 @@ const App: React.FC = () => {
         <Route path="/admin/*" element={<Admin />} />
         <Route path="/teacher/*" element={<Teacher />} />
         <Route path="/student/*" element={<Student />} />
-        <Route index path="*" element={<Login />} />
+        <Route path="*" element={<Login />} />
       </Routes>
     </Router>
   );
