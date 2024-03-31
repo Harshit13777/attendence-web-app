@@ -22,7 +22,6 @@ const App: React.FC = () => {
     sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbwxYY1sqCu1J_BrZCnrvuWKdU5swicPXY2ZcOzs7GHjy0DqAcZYfat7dU-oWVsj6gT0Qg/exec')
     //set student api
     sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbyQnCuDY-rM5FsfUwne3YgmcvrfYNM3LwdEy6Dtv9FzEaLHfHrcjKkaa4MPVFPLi6h8/exec')
-
     //set teacher api
     sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbyvkDTUwI8u53I354VzWDzVra9mWlnNM_4JpuWwMnhR01s3D_FVvVxN93LrfZoPh5loFQ/exec')
 
