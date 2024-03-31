@@ -1,7 +1,8 @@
 {
   "name": "webapp",
   "version": "0.1.0",
-  "private": true,
+  "homepage": ".",
+  "private": false,
   "dependencies": {
     "@leecheuk/react-google-login": "^5.4.1",
     "@react-oauth/google": "^0.11.1",
