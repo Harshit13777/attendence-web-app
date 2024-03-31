@@ -431,7 +431,9 @@ export const Take_Attendence = () => {
 
 
             <div className={`${!start_detecting.current && 'opacity-0'} relative text-center`}>
-              <button className=' absolute z-30' onClick={handleswitch}>Switch camera</button>
+              <div className={`absolute z-30 right-0 left-full' ${facingMode !== FACING_MODE_USER && 'rotate-180'}`} onClick={handleswitch}>
+                <img src={require('../.icons/switch_camera.png')}></img>
+              </div>
               <Webcam
                 videoConstraints={{
                   ...videoConstraints,
@@ -452,9 +454,9 @@ export const Take_Attendence = () => {
 
 
             {RollNo.size !== 0 && (
-              <div className={` text-center ${!start_detecting.current && 'absolute top-0'}`}>
+              <div className={` text-center ${!start_detecting.current && 'absolute top-0 w-full'}`}>
 
-                <div className="p-6 ">
+                <div className="p-6">
                   <div className="flex flex-col gap-y-4 text-center items-center justify-center  bg-gradient-to-br from-blue-200 to-red-100 p-3 rounded-lg">
                     <h1 className=" text-xl md:text-4xl font-bold text-gray-900">
                       Captured Roll No
