@@ -38,9 +38,9 @@ const NavBar = () => {
 
                     {
                         !open ?
-                            <img src={navbarIcon} onTouchStart={() => setOpen(true)} alt="" />
+                            <img src={navbarIcon} className=' w-12' onTouchStart={() => setOpen(true)} alt="" />
                             :
-                            <img src={navbarIcon} className=' rotate-180  translate-x-28' onTouchStart={() => setOpen(false)} alt="" />
+                            <img src={navbarIcon} className=' rotate-180  translate-x-28 w-12' onTouchStart={() => setOpen(false)} alt="" />
                     }
                 </div>
 
@@ -48,7 +48,7 @@ const NavBar = () => {
                     <Link to='/teacher/'>
                         <li className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm  items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
                                         mt-2 menu-items `}>
-                            <img src={overviewIcon} className='' alt="" />
+                            <img src={require('../.icons/overview.png')} className={`${open ? 'w-8 h-8' : ''}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Overview
                             </span>
@@ -57,7 +57,7 @@ const NavBar = () => {
                     <Link to='/teacher/add_subject'>
                         <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm  items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
-                            <img src={addDataIcon} alt="" />
+                            <img src={require('../.icons/add_sheet.png')} className={`${open && 'w-8 h-8'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Add Attendance Sheet
                             </span>
@@ -67,7 +67,7 @@ const NavBar = () => {
                     <Link to='/teacher/take_attendance'>
                         <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
-                            <img src='' alt="" />
+                            <img src={require('../.icons/add_attendance.png')} className={`${open && 'w-8 h-8'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Take Attendance
                             </span>
@@ -77,7 +77,7 @@ const NavBar = () => {
                     <Link to='/teacher/get_attendance_sheet'>
                         <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
-                            <img src='' alt="" />
+                            <img src={require('../.icons/get_sheet.png')} className={`${open && 'w-8 h-8'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Get Attendance Sheet
                             </span>
@@ -88,7 +88,7 @@ const NavBar = () => {
 
                     <li className={`flex pt-2 pb-2 cursor-pointer  text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-10 menu-items `} >
-                        <img src={logoutIcon} className=' ' alt="" />
+                        <img src={require('../.icons/logout.png')} className={`${open && 'w-8 h-8'}`} alt="" />
                         <span className={` origin-left duration-200 ${!open && "hidden"}`} onClick={logout}>
                             Log-out
                         </span>
@@ -112,6 +112,7 @@ const HomePage = () => {
     const [is_sync, set_issync] = useState(false)
     const [sync_message, set_sync_message] = useState<string[]>([])
     const navigate = useNavigate();
+    const innerwidth = window.innerWidth;
 
     useEffect(() => {
         setWdth(window.innerWidth)
@@ -346,7 +347,7 @@ const HomePage = () => {
                     </div>
 
                     :
-                    <div className={` ml-16 items-center `} style={{ width: `${((wdth - 64) / wdth) * 100}%` }}>
+                    <div className={` ml-16 items-center `} style={{ width: '100%', maxWidth: 'calc(100% - 64px)' }}>
                         <Routes>
                             <Route path="/add_subject" element={<AddAttendanceSheet />} />
                             <Route path="/get_attendance_sheet" element={<GetAttendanceSheet />} />

@@ -578,7 +578,7 @@ const SpreadsheetInterface = () => {
           </h1>
 
           <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
-            <table className="table-auto w-full ">
+            <table className="table-auto w-full rounded-2xl ">
               <thead className=' text-center items-center '>
                 <tr className=''>
                   <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Student</th>

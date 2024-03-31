@@ -456,7 +456,7 @@ export const HomePage: React.FC = () => {
                         </div>
 
                         :
-                        <div className='ml-16' style={{ width: `${((wdth - 64) / wdth) * 100}%` }}>
+                        <div className='ml-16' style={{ width: '100%', maxWidth: 'calc(100% - 64px)' }}>
                             <Routes>
                                 <Route index path="/add_teacher" element={<Add_data_teacher />} />
                                 <Route path="/add_student" element={<Add_data_student />} />

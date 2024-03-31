@@ -23,7 +23,7 @@ const App: React.FC = () => {
     //set student api
     sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbyQnCuDY-rM5FsfUwne3YgmcvrfYNM3LwdEy6Dtv9FzEaLHfHrcjKkaa4MPVFPLi6h8/exec')
     //set teacher api
-    sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbyvkDTUwI8u53I354VzWDzVra9mWlnNM_4JpuWwMnhR01s3D_FVvVxN93LrfZoPh5loFQ/exec')
+    sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbzA1iY8Q3lGxU_x8PWzZeOkKz4YIaTckMO3PdXL4OxqHN0JuFBo3d_GkwHsALGuCAdvDA/exec')
 
 
     const obj = localStorage.getItem('User_data');

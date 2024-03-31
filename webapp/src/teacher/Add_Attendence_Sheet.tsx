@@ -308,9 +308,9 @@ const Add_Attendence_Sheet = () => {
     <div className=" text-center p-2 md:p-8">
 
 
-      <h1 className="flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+      <h1 className="flex  mb-4 text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
         <span className="bg-clip-text text-transparent bg-gradient-to-tl from-slate-300 to-gray-300 bg-lime-50 p-3 rounded-lg">
-          Add New Attendance Sheet
+          Add Attendance Sheet
         </span>
       </h1>
 
@@ -373,7 +373,7 @@ const Add_Attendence_Sheet = () => {
             </div>
           </div>
 
-          <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+          <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-xl md:text-3xl font-extrabold text-gray-900 ">
             <span className="bg-clip-text text-transparent bg-gradient-to-tl from-blue-800 to-red-500 bg-lime-50 rounded-lg">
               Fill the Form
             </span>
