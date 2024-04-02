@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes, Link, useNavigate } from 'react-router-dom';
+import { Route, Routes, Link, useNavigate, useLocation } from 'react-router-dom';
 import AddAttendanceSheet from './Add_Attendence_Sheet';
 import TakeAttendance from './Take_attendence';
 import GetAttendanceSheet from './Get_attendance';
@@ -15,11 +15,22 @@ import systemControlIcon from "../.icons/system_control.png";
 const NavBar = () => {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
-
+    const location = useLocation()
+    const [route, set_route] = useState<string>('')
     const handleOnClick = () => {
         setOpen(prevState => !prevState);
     };
 
+    useEffect(() => {//get current route
+        const pathname = location.pathname;
+        const routes = pathname.split('/');
+        const current_route = routes.pop()
+        if (current_route)
+            set_route(current_route)
+        else set_route('teacher')
+
+    }
+    )
     const logout = () => {
         sessionStorage.clear();
         localStorage.removeItem('User_data')
@@ -48,7 +59,7 @@ const NavBar = () => {
                     <Link to='/teacher/'>
                         <li className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm  items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
                                         mt-2 menu-items `}>
-                            <img src={require('../.icons/overview.png')} className={`${open ? 'w-8 h-8' : ''}`} alt="" />
+                            <img src={require('../.icons/overview.png')} className={`${open ? 'w-8 h-8' : ''} ${route === 'teacher' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Overview
                             </span>
@@ -57,7 +68,7 @@ const NavBar = () => {
                     <Link to='/teacher/add_subject'>
                         <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm  items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
-                            <img src={require('../.icons/add_sheet.png')} className={`${open && 'w-8 h-8'}`} alt="" />
+                            <img src={require('../.icons/add_sheet.png')} className={`${open && 'w-8 h-8'} ${route === 'add_subject' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Add Attendance Sheet
                             </span>
@@ -65,9 +76,9 @@ const NavBar = () => {
                     </Link>
 
                     <Link to='/teacher/take_attendance'>
-                        <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                        <li className={`flex pt-2 pb-2 cursor-pointer text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
-                            <img src={require('../.icons/add_attendance.png')} className={`${open && 'w-8 h-8'}`} alt="" />
+                            <img src={require('../.icons/add_attendance.png')} className={`${open && 'w-8 h-8'} ${route === 'take_attendance' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Take Attendance
                             </span>
@@ -77,18 +88,16 @@ const NavBar = () => {
                     <Link to='/teacher/get_attendance_sheet'>
                         <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
-                            <img src={require('../.icons/get_sheet.png')} className={`${open && 'w-8 h-8'}`} alt="" />
+                            <img src={require('../.icons/get_sheet.png')} className={`${open && 'w-8 h-8'} ${route === 'get_attendance_sheet' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Get Attendance Sheet
                             </span>
                         </li>
                     </Link>
 
-
-
                     <li className={`flex pt-2 pb-2 cursor-pointer  text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-10 menu-items `} >
-                        <img src={require('../.icons/logout.png')} className={`${open && 'w-8 h-8'}`} alt="" />
+                        <img src={require('../.icons/logout.png')} className={`${open && 'w-8 h-8'} `} alt="" />
                         <span className={` origin-left duration-200 ${!open && "hidden"}`} onClick={logout}>
                             Log-out
                         </span>

@@ -34,7 +34,7 @@ export const Take_Attendence = () => {
   const [RollNo, setRollNo] = useState<Set<String>>(new Set<String>());
   const [selectedSheet, setSelectedSheet] = useState<{ subject: string, sheet_name: string } | null>(null);
   const subject_sheet_obj = useRef<store_subjects | null>(null)
-  const [subject_names, set_subject_names] = useState<string[] | null>(null);
+  const subject_names = useRef<string[] | null>(null);
   const [loading, setloading] = useState(false);
   const [selectedAttend, set_selectedAttend] = useState('');
   const student_imgs_key = sessionStorage.getItem('student_imgs_key') as string;
@@ -60,6 +60,7 @@ export const Take_Attendence = () => {
     if (subject_names && subject_sheet_obj.current) {
       const sheet_name = subject_sheet_obj.current[e.target.value];
       setSelectedSheet({ subject: e.target.value, sheet_name });
+
     }
   };
 
@@ -105,7 +106,8 @@ export const Take_Attendence = () => {
     if (subject_json) {
       const subjects_obj: store_subjects = JSON.parse(subject_json);
       subject_sheet_obj.current = subjects_obj;
-      set_subject_names(Object.keys(subjects_obj))
+      subject_names.current = (Object.keys(subjects_obj))
+      setMessage('Subjects Found')
     }
     else {
       setMessage('Error: No Subjects Found')
@@ -396,7 +398,7 @@ export const Take_Attendence = () => {
 
 
   return (
-    subject_names === null
+    subject_names.current === null
       ?
       <div className="flex flex-col items-center justify-center h-20 bg-lime-50 pb-2 ">
         <h1 className="text-4xl font-bold text-gray-900">
@@ -483,7 +485,7 @@ export const Take_Attendence = () => {
                     <select className=' p-2 rounded-lg border-2 border-blue-950 font-semibold text-center md:text-lg '
                       onChange={handleSelectChange} value={selectedSheet?.subject}>
                       <option className='md:text-lg font-medium text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200' value="">Select Subject</option>
-                      {subject_names.map((subject, index) => (
+                      {subject_names.current.map((subject, index) => (
                         <option className='md:text-lg font-semibold text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200' key={index} value={subject}>
                           {subject}
                         </option>
@@ -517,7 +519,7 @@ export const Take_Attendence = () => {
 
                 <button
                   className={`${interval_id !== null && 'hidden'
-                    } fixed top-2/3 left-1/3 right-1/3  bg-blue-700 hover:bg-blue-300 hover:text-blue-700  p-10  md:text-2xl text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2`}
+                    } fixed top-3/4 left-1/3 right-1/3  bg-blue-700 hover:bg-blue-300 hover:text-blue-700  p-10  md:text-2xl text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2`}
                   onClick={() => {
                     handleStart()
                   }}

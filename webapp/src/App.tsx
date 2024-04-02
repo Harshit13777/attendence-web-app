@@ -12,7 +12,7 @@ import { Upload_Img } from './teacher/example';
 import Take_Attendence from "./teacher/Take_attendence";
 import Add_Attendence_Sheet from "./teacher/Add_Attendence_Sheet";
 import { Sheet_invalid } from "./authentication/sheetinvalid";
-
+import { main_screen as Overview } from "./overview/main_screen";
 
 const App: React.FC = () => {
 
@@ -56,6 +56,7 @@ const App: React.FC = () => {
       */}
         <Route path="/test" element={<Upload_Img />} />
         <Route path='/take_attendance' element={<Take_Attendence />} />
+        <Route path="/Login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget_password" element={<Forget_password />} />
         <Route path="/sheet invalid" element={<Sheet_invalid />} />
@@ -63,7 +64,8 @@ const App: React.FC = () => {
         <Route path="/admin/*" element={<Admin />} />
         <Route path="/teacher/*" element={<Teacher />} />
         <Route path="/student/*" element={<Student />} />
-        <Route path="*" element={<Login />} />
+        <Route path="*" element={<Overview />} />
+
       </Routes>
     </Router>
   );
