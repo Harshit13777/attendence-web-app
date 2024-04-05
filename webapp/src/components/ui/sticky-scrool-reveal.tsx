@@ -57,6 +57,8 @@ export const StickyScroll = ({
             0
         );
         setActiveCard(closestBreakpointIndex);
+        //mean scroll 
+        stopAutoScroll();
     });
 
 
@@ -117,9 +119,7 @@ export const StickyScroll = ({
             animate={{
                 backgroundColor: backgroundColors[activeCard % backgroundColors.length],
             }}
-            onMouseEnter={(e) => { scrollToTop(e.nativeEvent.offsetY, e.nativeEvent.pageY); }}
-            onMouseMove={stopAutoScroll}
-            onMouseLeave={startautoscoll}
+
             className="h-screen scroll-my-0 max-w-screen overflow-hidden no-scrollbar relative  md:h-[30rem] rounded-xl pt-2  md:p-10 pb-12 space-x-10">
             {/*this comp only visible for mobile*/}
             <motion.div
@@ -146,10 +146,10 @@ export const StickyScroll = ({
 
 
                 <div
-                    className="div relative flex items-start md:px-4">
-                    <div className="md:max-w-2xl">
+                    className="div relative flex items-start md:px-4 ">
+                    <div className="md:max-w-2xl ">
                         {content.map((item, index) => (
-                            <div key={item.title + index} className="my-20">
+                            <div key={item.title + index} className="md:my-20 my-10">
                                 <motion.h2
                                     initial={{
                                         opacity: 0,
@@ -174,6 +174,7 @@ export const StickyScroll = ({
                                 </motion.p>
                             </div>
                         ))}
+                        <div className="md:h-40 h-20  "></div>
                         <div />
                     </div>
 
