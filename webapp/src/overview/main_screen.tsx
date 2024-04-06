@@ -11,7 +11,7 @@ import { useState } from "react";
 export const main_screen = () => {
 
     return (
-        <div className="relative items-center justify-center  ">
+        <div className="relative items-center justify-center overflow-y-hidden">
             <TracingBeam className=" z-50">
                 <div className="ml-2 z-40 min-h-fit">
 
@@ -52,7 +52,7 @@ const Introduction = () => {
 }
 
 const HowWorks = () => {
-    const [open_step, set_openStep] = useState(true);
+    const [open_step, set_openStep] = useState(false);
 
     const stepsData = [
         {
@@ -92,8 +92,8 @@ const HowWorks = () => {
 
     return (
 
-        <div className="bg-gray-900 shadow-md min-h-screen  rounded-lg p-2  m-5">
-            <div className=" relative md:p-10 text-center">
+        <div className="bg-gray-900 shadow-md min-h-screen rounded-lg p-2  m-5">
+            <div className=" relative md:p-10 pt-10 text-center">
 
                 <h1 className="text-3xl font-bold text-white opacity-80 mb-8">How it Works</h1>
                 <p className="text-gray-400 text-center items-center mt-5">
@@ -103,19 +103,22 @@ const HowWorks = () => {
                 <div>
                     <div className="flex items-center justify-center flex-col mt-10">
 
-                        <h1 className="text-xl font-bold text-gray-400 mb-2">
-                            Steps to Capture Face-Attendance
-                        </h1>
-                        <div className="flex items-center flex-col" onClick={() => set_openStep((p) => !p)}>
-                            <p className=" font-semibold text-sm text-gray-200">{open_step ? 'Show' : 'Hide'} Steps</p>
-                            <div className="w-10 h-10">
+                        <div className={`${open_step ? ' translate-y-full' : ''} duration-1000`}>
 
-                                {
-                                    !open_step ?
-                                        <img src={require('../.icons/show_eye.png')} alt="icon" />
-                                        :
-                                        <img src={require('../.icons/hide_eye.png')} alt="icon"></img>
-                                }
+                            <h1 className="text-xl font-bold text-gray-400 mb-2">
+                                Steps to Capture Face-Attendance
+                            </h1>
+                            <div className="flex items-center flex-col" onClick={() => set_openStep((p) => !p)}>
+                                <p className=" font-semibold text-sm text-gray-200">{open_step ? 'Show' : 'Hide'} Steps</p>
+                                <div className="w-10 h-10">
+
+                                    {
+                                        !open_step ?
+                                            <img src={require('../.icons/show_eye.png')} alt="icon" />
+                                            :
+                                            <img src={require('../.icons/hide_eye.png')} alt="icon"></img>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
