@@ -174,7 +174,7 @@ export const StickyScroll = ({
                                 </motion.p>
                             </div>
                         ))}
-                        <div className="md:h-40 h-30  "></div>
+                        <div className="h-40 "></div>
                         <div />
                     </div>
 

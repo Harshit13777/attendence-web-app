@@ -11,7 +11,7 @@ import { useState } from "react";
 export const main_screen = () => {
 
     return (
-        <div className="relative items-center justify-center overflow-y-hidden">
+        <div className="relative items-center justify-center overflow-y-hidden">{/** over flow hidden beacuse tracing bean is absolute and if steps show are close then height of screen is very large*/}
             <TracingBeam className=" z-50">
                 <div className="ml-2 z-40 min-h-fit">
 
@@ -52,7 +52,7 @@ const Introduction = () => {
 }
 
 const HowWorks = () => {
-    const [open_step, set_openStep] = useState(false);
+    const [open_step, set_openStep] = useState(false);//this false then all step are shown,this is because tracing bean calculate all height
 
     const stepsData = [
         {
