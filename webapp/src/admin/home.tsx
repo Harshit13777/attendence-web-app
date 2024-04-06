@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes, useNavigate, Link } from 'react-router-dom';
+import { Route, Routes, useNavigate, Link, useLocation } from 'react-router-dom';
 import { Add_data_teacher } from './add_teachers';
 import { Login_Email_Status } from './home_login_email_staus';
 import { Student_Img_Status } from './home_student_img_status';
@@ -25,12 +25,28 @@ const NavBar = () => {
     const [open, setOpen] = useState(false);
     const [datamenuopen, setdatamenuOpen] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const handleOnClick = () => setOpen((prevState) => !prevState);
     const [isfetching, set_isfetching] = useState(false);
     const handleOndatamenu = (e: any) => {
         e.stopPropagation();
         setdatamenuOpen((prevState) => !prevState);
     }
+
+
+    const [route, set_route] = useState<string>('')
+
+
+    useEffect(() => {//get current route
+        const pathname = location.pathname;
+        const routes = pathname.split('/');
+        const current_route = routes.pop()
+        if (current_route)
+            set_route(current_route)
+        else set_route('admin')
+
+    }
+    )
 
     const handlelogout = () => {
         sessionStorage.clear();
@@ -60,13 +76,13 @@ const NavBar = () => {
 
                 </div>
 
-                <ul className="pt-6  menu">
+                <ul className="pt-6 overflow-y-auto menu">
 
                     <Link to="/admin/">
                         <li
                             className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
                                         mt-2 menu-items `}>
-                            <img src={overview} className='' alt="" />
+                            <img src={overview} className={`${open ? 'w-8 h-8' : ''} ${route === 'admin' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Overview
                             </span>
@@ -80,7 +96,7 @@ const NavBar = () => {
 
 
                         <div className='flex origin-left gap-x-4'>
-                            <img src={add_data_icon} className='' alt='' />
+                            <img src={add_data_icon} className={`${open ? 'w-8 h-8' : ''} ${/^(add_teacher|add_student|edit_student|edit_teacher)$/.test(route) && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` ${!open && "hidden"}   duration-200 `} onClick={handleOndatamenu}>
                                 Data Management
                                 <span className={` hover:text-slate-500  ml-10`} >
@@ -117,50 +133,54 @@ const NavBar = () => {
 
                     </li>
 
-                    <Link to='/admin/login_email_status'>
-                        <li
-                            className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
-                                        mt-2 menu-items `} >
-                            <img src={check_email} alt="" />
-                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                                Check Email Login Status
-                            </span>
-                        </li>
-                    </Link>
-                    <Link to='student_img_status'>
-                        <li
-                            className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
-                                        mt-2 menu-items `} >
-                            <img src='' alt="" />
-                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                                Check Student img status
-                            </span>
-                        </li>
-                    </Link>
-
+                    {
+                        /*
+                <Link to='/admin/login_email_status'>
                     <li
                         className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
-                                        mt-2 menu-items `} >
-                        <img src={system_control} alt="" />
+                                    mt-2 menu-items `} >
+                        <img src={check_email} className={`${open ? 'w-8 h-8' : ''} ${route === 'login_email_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                         <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                            System Control
+                            Check Email Login Status
                         </span>
                     </li>
-
-
-
+                </Link>
+                <Link to='student_img_status'>
                     <li
                         className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
-                                        mt-10 menu-items `} >
-                        <img src={setting} alt="" />
+                                    mt-2 menu-items `} >
+                        <img className={`${open ? 'w-8 h-8' : ''} ${route === 'student_img_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                         <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                            Settings
+                            Check Student img status
                         </span>
                     </li>
+                </Link>
+
+                <li
+                    className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                                    mt-2 menu-items `} >
+                    <img src={system_control}  className={`${open ? 'w-8 h-8' : ''} ${route === '' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
+                    <span className={` origin-left duration-200 ${!open && "hidden"}`}>
+                        System Control
+                    </span>
+                </li>
+
+
+
+                <li
+                    className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                                    mt-10 menu-items `} >
+                    <img src={setting}  className={`${open ? 'w-8 h-8' : ''} ${route === 'setting' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
+                    <span className={` origin-left duration-200 ${!open && "hidden"}`}>
+                        Settings
+                    </span>
+                </li>
+                        */
+                    }
                     <li
                         className={`flex pt-2 pb-2 cursor-pointer  text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-10 menu-items `} onClick={() => handlelogout()} >
-                        <img src={logout} className=' ' alt="" />
+                        <img src={logout} className={`${open ? 'w-8 h-8' : ''}`} alt="" />
                         <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                             Log-out
                         </span>

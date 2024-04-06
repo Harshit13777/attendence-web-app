@@ -13,7 +13,7 @@ export const main_screen = () => {
     return (
         <div className="relative items-center justify-center  ">
             <TracingBeam className=" z-50">
-                <div className="ml-2">
+                <div className="ml-2 z-40">
 
                     <TypewriterEffect_comp />
                     <Introduction />
@@ -43,9 +43,6 @@ const Introduction = () => {
                     <p className="text-base text-slate-300 font-medium mb-4 relative">
                         {story}
                     </p>
-
-
-
                     <Meteors number={20} />
                 </div>
             </div>
@@ -57,121 +54,120 @@ const Introduction = () => {
 const HowWorks = () => {
     const [open_step, set_openStep] = useState(false);
 
+    const stepsData = [
+        {
+            image: require('../screenshots/signup.png'),
+            header: 'Admin Account Creation',
+            description:
+                'The first step is for the admin to create an account. They will provide necessary details such as name, email, and password to set up their account.',
+        },
+        {
+            image: require('../screenshots/add teacher .png'),
+            header: 'Add Teachers and Students',
+            description:
+                'After creating the account, the admin can add teachers and students to the system. They will input details such as name, email, and role (teacher/student) for each user.',
+        },
+        {
+            image: require('../screenshots/student upload.jpg'),
+            header: 'Student Login and Photo Upload',
+            description:
+                'Students will receive a welcome email with login credentials (email and password) provided by the admin. They can log in to the platform using these credentials. Upon logging in, students will be prompted to upload their photo using a designated photo upload feature. This photo will be used for facial recognition during attendance tracking.',
+        },
+        {
+            image: require('../screenshots/login.png'),
+            header: 'Teacher Login and Classroom Setup',
+            description:
+                'Teachers will also receive login credentials from the admin. They can log in to the platform using their email and password. Once logged in, teachers can set up their classrooms or subjects within the system. This includes adding class schedules, subject names, and any other relevant details.',
+        },
+        {
+            image: require('../extra_res/teacher_photo click 2.png'),
+            header: 'Taking Face Attendance',
+            description:
+                "When it's time to take attendance, teachers can access the attendance feature from their dashboard. The system will prompt the teacher to capture an image or video of the classroom using a webcam or mobile device. This image will be used for face detection and recognition. The system will automatically detect faces in the captured image and compare them against the stored student photos uploaded earlier. If a match is found, the system will mark the student as present. If not, the system will mark them as absent or prompt the teacher for manual input. The attendance data is then recorded and stored securely in the system for future reference and reporting.",
+        },
+
+    ];
+
+
+
     return (
 
-        <div className="bg-gray-900 relative shadow-md  rounded-lg p-2  m-5">
-            <div className=" relativep-10 p-3">
+        <div className="bg-gray-900 shadow-md min-h-screen  rounded-lg p-2  m-5">
+            <div className=" relative p-10 text-center">
 
-                <h1 className="text-3xl font-bold text-white opacity-80 mb-4">How it Works</h1>
-                <p className="text-gray-400">
-                    AI Attend has three types of users: admins, teachers, and students.
+                <h1 className="text-3xl font-bold text-white opacity-80 mb-8">How it Works</h1>
+                <p className="text-gray-400 text-center items-center mt-5">
+                    AI Attend has three types of users: <p className=" font-semibold m-5 space-x-5"><span className="">Admins</span> <span>Teachers</span> <span>Students</span></p>
                 </p>
-                <ul className="list-disc list-inside text-gray-400">
-                    <li>
-                        <strong>Admins:</strong> Admins have access to all features of AI
-                        Attend and can manage users, courses, and attendance records.
-                    </li>
-                    <li>
-                        <strong>Teachers:</strong> Teachers can take attendance for their
-                        classes, view attendance records, and communicate with students.
-                    </li>
-                    <li>
-                        <strong>Students:</strong> Students can check their attendance records
-                        and receive notifications about their attendance status.
-                    </li>
-                </ul>
+
                 <div>
-                    <button className=" text-gray-200" onClick={() => set_openStep((p) => !p)}>{!open_step ? 'Show' : 'Hide'} Steps</button>
-                    <div className={`shadow-md p-8 rounded-lg ${open_step && 'hidden'}`}>
-                        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                            Taking Face Attendance in React
+                    <div className="flex items-center justify-center flex-col mt-10">
+
+                        <h1 className="text-xl font-bold text-gray-400 mb-2">
+                            Steps to Capture Face-Attendance
                         </h1>
-                        <ol className="list-decimal list-inside text-gray-200">
-                            <li className="mb-4">
-                                <img
-                                    src="https://example.com/admin-account-creation.png"
-                                    alt="Admin Account Creation"
-                                    className="inline-block h-16 w-16 mr-4"
-                                />
-                                <strong>Admin Account Creation:</strong> The first step is for the
-                                admin to create an account on the attendance management platform.
-                                They will provide necessary details such as name, email, and password
-                                to set up their account.
-                            </li>
-                            <li className="mb-4">
-                                <img
-                                    src="https://example.com/add-teachers-and-students.png"
-                                    alt="Add Teachers and Students"
-                                    className="inline-block h-16 w-16 mr-4"
-                                />
-                                <strong>Add Teachers and Students:</strong> After creating the
-                                account, the admin can add teachers and students to the system.
-                                They will input details such as name, email, and role (teacher/student)
-                                for each user.
-                            </li>
-                            <li className="mb-4">
-                                <img
-                                    src="https://example.com/student-login-and-photo-upload.png"
-                                    alt="Student Login and Photo Upload"
-                                    className="inline-block h-16 w-16 mr-4"
-                                />
-                                <strong>Student Login and Photo Upload:</strong> Students will
-                                receive a welcome email with login credentials (email and password)
-                                provided by the admin. They can log in to the platform using these
-                                credentials. Upon logging in, students will be prompted to upload
-                                their photo using a designated photo upload feature. This photo will
-                                be used for facial recognition during attendance tracking.
-                            </li>
-                            <li className="mb-4">
-                                <img
-                                    src="https://example.com/teacher-login-and-classroom-setup.png"
-                                    alt="Teacher Login and Classroom Setup"
-                                    className="inline-block h-16 w-16 mr-4"
-                                />
-                                <strong>Teacher Login and Classroom Setup:</strong> Teachers will
-                                also receive login credentials from the admin. They can log in to
-                                the platform using their email and password. Once logged in, teachers
-                                can set up their classrooms or subjects within the system. This
-                                includes adding class schedules, subject names, and any other relevant
-                                details.
-                            </li>
-                            <li className="mb-4">
-                                <img
-                                    src="https://example.com/taking-face-attendance.png"
-                                    alt="Taking Face Attendance"
-                                    className="inline-block h-16 w-16 mr-4"
-                                />
-                                <strong>Taking Face Attendance:</strong> When it's time to take
-                                attendance, teachers can access the attendance feature from their
-                                dashboard. The system will prompt the teacher to capture an image or
-                                video of the classroom using a webcam or mobile device. This image will
-                                be used for face detection and recognition. The system will automatically
-                                detect faces in the captured image and compare them against the stored
-                                student photos uploaded earlier. If a match is found, the system will
-                                mark the student as present. If not, the system will mark them as absent
-                                or prompt the teacher for manual input. The attendance data is then
-                                recorded and stored securely in the system for future reference and
-                                reporting.
-                            </li>
-                            <li className="mb-4">
-                                <img
-                                    src="https://example.com/attendance-reports-and-analytics.png"
-                                    alt="Attendance Reports and Analytics"
-                                    className="inline-block h-16 w-16 mr-4"
-                                />
-                                <strong>Attendance Reportsand Analytics:</strong> After the
-                                attendance session, teachers and admins can access detailed attendance
-                                reports and analytics. This includes data such as attendance percentages,
-                                trends, and individual student attendance records. The platform may
-                                also provide insights and recommendations based on the attendance
-                                data, helping educators make informed decisions.
-                            </li>
+                        <div className="flex items-center flex-col" onClick={() => set_openStep((p) => !p)}>
+                            <p className=" font-semibold text-sm text-gray-200">{open_step ? 'Show' : 'Hide'} Steps</p>
+                            <div className="w-10 h-10">
+
+                                {
+                                    !open_step ?
+                                        <img src={require('../.icons/show_eye.png')} alt="icon" />
+                                        :
+                                        <img src={require('../.icons/hide_eye.png')} alt="icon"></img>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div className={`shadow-md p-8 rounded-lg  ${open_step ? 'hidden' : ''}`}>
+                        <ol className=" list-none list-inside text-gray-200">
+                            {
+                                stepsData.map((obj, i) => (
+
+                                    <motion.div
+                                        initial={{ opacity: 0.5, y: 100 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{
+                                            delay: 0.3,
+                                            duration: 0.8,
+                                            ease: "easeInOut",
+                                        }}>
+                                        <li className={`mb-4 shadow-xl border-2 border-blue-200 rounded-xl p-10`}>
+
+
+
+
+                                            <img
+                                                src={obj.image}
+                                                alt={obj.header}
+                                                className=""
+                                            />
+
+                                            <p className=" text-left font-medium mt-2">
+                                                Step {i + 1}.
+                                            </p>
+                                            <div className="flex items-center">
+                                                <div className=" space-y-5">
+
+                                                    <strong>{obj.header}</strong>
+                                                    <p>
+                                                        {obj.description}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </motion.div>
+                                ))
+                            }
+
+
+
                         </ol>
                     </div>
 
                 </div>
 
-                <Meteors number={20} />
+
             </div>
         </div>
     );
