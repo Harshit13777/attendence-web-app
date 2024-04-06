@@ -13,7 +13,7 @@ export const main_screen = () => {
     return (
         <div className="relative items-center justify-center  ">
             <TracingBeam className=" z-50">
-                <div className="ml-2 z-40">
+                <div className="ml-2 z-40 min-h-fit">
 
                     <TypewriterEffect_comp />
                     <Introduction />
@@ -52,7 +52,7 @@ const Introduction = () => {
 }
 
 const HowWorks = () => {
-    const [open_step, set_openStep] = useState(false);
+    const [open_step, set_openStep] = useState(true);
 
     const stepsData = [
         {
@@ -71,19 +71,19 @@ const HowWorks = () => {
             image: require('../screenshots/student upload.jpg'),
             header: 'Student Login and Photo Upload',
             description:
-                'Students will receive a welcome email with login credentials (email and password) provided by the admin. They can log in to the platform using these credentials. Upon logging in, students will be prompted to upload their photo using a designated photo upload feature. This photo will be used for facial recognition during attendance tracking.',
+                'Students will receive a welcome email with login credentials (email and password) provided by the admin. Upon logging in, students will be prompted to upload their photo using a designated photo upload feature. This photo will be used for facial recognition during attendance tracking.',
         },
         {
             image: require('../screenshots/login.png'),
             header: 'Teacher Login and Classroom Setup',
             description:
-                'Teachers will also receive login credentials from the admin. They can log in to the platform using their email and password. Once logged in, teachers can set up their classrooms or subjects within the system. This includes adding class schedules, subject names, and any other relevant details.',
+                'Teachers receive login credentials on their email from the admin. They can log in to the platform using their email and password. Once logged in, teachers can set up their classrooms or subjects within the system.',
         },
         {
             image: require('../extra_res/teacher_photo click 2.png'),
             header: 'Taking Face Attendance',
             description:
-                "When it's time to take attendance, teachers can access the attendance feature from their dashboard. The system will prompt the teacher to capture an image or video of the classroom using a webcam or mobile device. This image will be used for face detection and recognition. The system will automatically detect faces in the captured image and compare them against the stored student photos uploaded earlier. If a match is found, the system will mark the student as present. If not, the system will mark them as absent or prompt the teacher for manual input. The attendance data is then recorded and stored securely in the system for future reference and reporting.",
+                "The system will automatically detect faces in the captured image and system will mark the student as present. If not, the system will mark them as absent . The attendance data is then recorded and stored securely in the system for future reference and reporting.",
         },
 
     ];
@@ -93,7 +93,7 @@ const HowWorks = () => {
     return (
 
         <div className="bg-gray-900 shadow-md min-h-screen  rounded-lg p-2  m-5">
-            <div className=" relative p-10 text-center">
+            <div className=" relative md:p-10 text-center">
 
                 <h1 className="text-3xl font-bold text-white opacity-80 mb-8">How it Works</h1>
                 <p className="text-gray-400 text-center items-center mt-5">
