@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { get_api } from "../static_api";
 
 export const HandlecheckSheetStatusTeacher = () => {
 
@@ -25,7 +26,7 @@ export const HandlecheckSheetStatusTeacher = () => {
         throw new Error('Error : No Token Found')
       }
       console.log('selected role', selectedRole)
-      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'student' ? 'student_api' : 'teacher_api')}?page=${sessionStorage.getItem('user')}&action=get_sheet_status`, {
+      const response = await fetch(`${selectedRole === 'student' ? get_api().student_api : get_api().teacher_api}?page=${sessionStorage.getItem('user')}&action=get_sheet_status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

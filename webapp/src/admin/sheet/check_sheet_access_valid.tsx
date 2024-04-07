@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Link, Route, Routes, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { HomePage } from '../home';
+import { get_api } from '../../static_api';
 
 export const Admin_sheet_access_valid: React.FC<{ get_sheet_status: () => Promise<void> }> = ({ get_sheet_status }) => {
   const [show_instruction, set_show] = useState(false);
@@ -29,7 +30,7 @@ export const Admin_sheet_access_valid: React.FC<{ get_sheet_status: () => Promis
         throw new Error('Error : No Token Found')
       }
       console.log('send')
-      const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=delete_admin_sheet`, {
+      const response = await fetch(`${get_api().admin_api}?page=admin&action=delete_admin_sheet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

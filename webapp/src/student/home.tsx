@@ -4,6 +4,7 @@ import logout from "../.icons/logout.png";
 import navbar_open from "../.icons/navbar.png";
 import overview from "../.icons/overview.png";
 import { Upload_Img } from "./Upload_Img";
+import { get_api } from '../static_api';
 
 
 
@@ -33,7 +34,7 @@ export const HomePage: React.FC = () => {
                 throw new Error('Error : No Token Found')
             }
 
-            const response: Response = await fetch(`${sessionStorage.getItem('student_api')}?page=student&action=sync_student_img_status`, {
+            const response: Response = await fetch(`${get_api().student_api}?page=student&action=sync_student_img_status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',

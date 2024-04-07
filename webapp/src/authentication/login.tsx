@@ -1,8 +1,9 @@
 import { admin } from 'googleapis/build/src/apis/admin';
-import { throttle } from 'lodash';
+import { get, throttle } from 'lodash';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { setFlagsFromString } from 'v8';
+import { get_api } from '../static_api';
 
 interface FormData {
   email: string;
@@ -91,6 +92,9 @@ const Login: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    //set api link 
+
+
     const token = sessionStorage.getItem('token')
     if (token) {
       setTimeout(() => {
@@ -178,7 +182,8 @@ const Login: React.FC = () => {
         throw new Error('Fix the Error');
       }
       console.log(selectedRole)
-      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'admin' ? 'api' : selectedRole === 'teacher' ? 'teacher_api' : 'student_api')}?page=${selectedRole}&action=login`, {
+
+      const response = await fetch(`${selectedRole === 'admin' ? get_api().admin_api : selectedRole === 'teacher' ? get_api().teacher_api : get_api().student_api}?page=${selectedRole}&action=login`, {
         method: 'post',
         //headers: {
         // 
@@ -347,7 +352,7 @@ const Login: React.FC = () => {
         set_opensetpassword_comp(false)
         throw new Error('Error : No Token Found')
       }
-      const response = await fetch(`${sessionStorage.getItem(selectedRole === 'student' ? 'student_api' : 'teacher_api')}?page=${selectedRole}&action=set_password`, {
+      const response = await fetch(`${selectedRole === 'student' ? get_api().student_api : get_api().teacher_api}?page=${selectedRole}&action=set_password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

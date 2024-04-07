@@ -14,6 +14,7 @@ import check_email from '../.icons/check_email_status.png';
 import Add_data_student from './add_student';
 import { Edit_student } from './edit_student';
 import { Edit_teacher } from './edit_teacher';
+import { get_api } from '../static_api';
 
 
 // HomePage.tsx
@@ -250,7 +251,7 @@ export const HomePage: React.FC = () => {
                         throw new Error('Error : No Token Found')
                     }
 
-                    const response: Response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=sync_student_data`, {
+                    const response: Response = await fetch(`${get_api().admin_api}?page=admin&action=sync_student_data`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'text/plain',
@@ -339,7 +340,7 @@ export const HomePage: React.FC = () => {
                         throw new Error('Error : No Token Found')
                     }
 
-                    const response: Response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=sync_teacher_data`, {
+                    const response: Response = await fetch(`${get_api().admin_api}?page=admin&action=sync_teacher_data`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'text/plain',

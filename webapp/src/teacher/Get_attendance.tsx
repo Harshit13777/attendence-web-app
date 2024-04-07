@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { get_api } from "../static_api";
 
 
 
@@ -49,7 +50,7 @@ const Get_Attendence_Sheet = () => {
         throw new Error('Error : No Token Found')
       }
 
-      const response = await fetch(`${sessionStorage.getItem('teacher_api')}?page=teacher&action=get_subject_sheet_data`, {
+      const response = await fetch(`${get_api().teacher_api}?page=teacher&action=get_subject_sheet_data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

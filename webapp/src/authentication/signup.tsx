@@ -1,6 +1,7 @@
 import { localservices } from 'googleapis/build/src/apis/localservices';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { get_api } from '../static_api';
 
 
 interface FormData {
@@ -142,7 +143,7 @@ const Signup: React.FC = () => {
 
       console.log('sending')
 
-      const response = await fetch(`https://script.google.com/macros/s/AKfycbwnKtKrHysKZUSsnewKaVlGo_lyyUheu044ey4aa_jobBgR3f9LdnutSC_LrBU4G7W58w/exec?page=admin&action=signup`, {
+      const response = await fetch(`${get_api().admin_api}/exec?page=admin&action=signup`, {
         method: 'post',
         headers: {
           'Content-Type': 'text/plain',

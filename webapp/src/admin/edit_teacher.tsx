@@ -8,6 +8,7 @@ import minus_icon from '../.icons/minus.png';
 import { debounce, last } from 'lodash';
 import { paste } from '@testing-library/user-event/dist/paste';
 import { Form, useNavigate } from 'react-router-dom';
+import { get_api } from '../static_api';
 
 
 
@@ -315,7 +316,7 @@ const SpreadsheetInterface = () => {
                 throw new Error('Error : No Token Found')
             }
 
-            const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=edit_data_teacher`, {
+            const response = await fetch(`${get_api().admin_api}?page=admin&action=edit_data_teacher`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',

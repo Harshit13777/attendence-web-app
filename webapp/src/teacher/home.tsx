@@ -11,6 +11,7 @@ import navbarIcon from "../.icons/navbar.png";
 import settingIcon from "../.icons/setting.png";
 import checkEmailIcon from '../.icons/check_email_status.png';
 import systemControlIcon from "../.icons/system_control.png";
+import { get_api } from '../static_api';
 
 const NavBar = () => {
     const [open, setOpen] = useState(false);
@@ -157,7 +158,7 @@ const HomePage = () => {
                             throw new Error('Error : No Token Found')
                         }
 
-                        const response: Response = await fetch(`${sessionStorage.getItem('teacher_api')}?page=teacher&action=sync_students_imgs`, {
+                        const response: Response = await fetch(`${get_api().teacher_api}?page=teacher&action=sync_students_imgs`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'text/plain',
@@ -233,7 +234,7 @@ const HomePage = () => {
                             throw new Error('Error : No Token Found')
                         }
 
-                        const response: Response = await fetch(`${sessionStorage.getItem('teacher_api')}?page=teacher&action=sync_subjects_data`, {
+                        const response: Response = await fetch(`${get_api().teacher_api}?page=teacher&action=sync_subjects_data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'text/plain',

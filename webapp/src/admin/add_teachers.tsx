@@ -8,6 +8,7 @@ import { last } from 'lodash';
 import { paste } from '@testing-library/user-event/dist/paste';
 import { useNavigate } from 'react-router-dom';
 import Add_data_student from './add_student';
+import { get_api } from '../static_api';
 
 interface DataRow_Teacher {
   Teacher_Name: string;
@@ -283,7 +284,7 @@ const SpreadsheetInterface = () => {
         throw new Error('Error : No Token Found')
       }
 
-      const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_data_teacher`, {
+      const response = await fetch(`${get_api().admin_api}?page=admin&action=add_data_teacher`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

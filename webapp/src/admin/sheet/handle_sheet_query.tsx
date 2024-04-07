@@ -3,6 +3,7 @@ import Create_sheet_Main from "./create_sheet_main";
 import Admin_sheet_access_valid from "./check_sheet_access_valid";
 import { useNavigate } from "react-router-dom";
 import { setEmitFlags } from "typescript";
+import { get_api } from "../../static_api";
 
 
 export const Admin_sheet_query = () => {
@@ -26,7 +27,7 @@ export const Admin_sheet_query = () => {
                 throw new Error('Error : No Token Found')
             }
             console.log('send')
-            const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=get_sheet_status`, {
+            const response = await fetch(`${get_api().admin_api}?page=admin&action=get_sheet_status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',

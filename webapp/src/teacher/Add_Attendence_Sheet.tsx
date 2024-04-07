@@ -6,6 +6,7 @@ import redo_icon from '../.icons/redo.png';
 import add_icon from "../.icons/add.png";
 import minus_icon from '../.icons/minus.png';
 import { loadavg } from 'os';
+import { get_api } from '../static_api';
 
 
 interface store_subjects {
@@ -213,7 +214,7 @@ const Add_Attendence_Sheet = () => {
         throw new Error('Error : No Token Found')
       }
 
-      const response = await fetch(`${sessionStorage.getItem('teacher_api')}?page=teacher&action=add_subjects`, {
+      const response = await fetch(`${get_api().teacher_api}?page=teacher&action=add_subjects`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { get_api } from '../static_api';
 
 
 interface Response_Data {
@@ -21,7 +22,7 @@ export const Login_Email_Status = () => {
   const fetchdata: any = () => {
     let Admin_Sheet_Id = sessionStorage.getItem('Admin_Sheet_Id');
 
-    fetch(`${sessionStorage.getItem('api')}?page=admin&action=check_login_email_status`, {
+    fetch(`${get_api().admin_api}?page=admin&action=check_login_email_status`, {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain',

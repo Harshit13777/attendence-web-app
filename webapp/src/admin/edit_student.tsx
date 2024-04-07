@@ -9,6 +9,7 @@ import { debounce, last } from 'lodash';
 import { paste } from '@testing-library/user-event/dist/paste';
 import { Form, useNavigate } from 'react-router-dom';
 import { file } from 'googleapis/build/src/apis/file';
+import { get_api } from '../static_api';
 
 
 
@@ -352,7 +353,7 @@ const SpreadsheetInterface = () => {
                 throw new Error('Error : No Token Found')
             }
 
-            const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=edit_data_student`, {
+            const response = await fetch(`${get_api().admin_api}?page=admin&action=edit_data_student`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',

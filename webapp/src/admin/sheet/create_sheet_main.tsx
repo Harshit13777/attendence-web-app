@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useLocation, useNavigate } from 'react-router-dom';
 import navbar_open from "../../.icons/navbar.png";
+import { get_api } from '../../static_api';
 
 export const Create_sheet_Main = () => {
   const [autoset, setauto] = useState(false);
@@ -79,7 +80,7 @@ const AutoSheetCreator = () => {
         throw new Error('Error:token not found')
       }
       console.log(accessToken, token)
-      const response = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=create_admin_sheet`, {
+      const response = await fetch(`${get_api().admin_api}?page=admin&action=create_admin_sheet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -187,7 +188,7 @@ const UserCreatedSheet = () => {
 
       set_show(false);
 
-      const response: any = await fetch(`${sessionStorage.getItem('api')}?page=admin&action=add_admin_sheet_id_manual`, {
+      const response: any = await fetch(`${get_api().admin_api}?page=admin&action=add_admin_sheet_id_manual`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

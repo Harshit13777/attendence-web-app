@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Set } from 'typescript';
 import { arrayBuffer } from 'stream/consumers';
 import { error } from 'console';
+import { get_api } from '../static_api';
 
 interface store_student_imgs {
   [key: string]: number[];
@@ -352,7 +353,7 @@ export const Take_Attendence = () => {
 
 
 
-      const response = await fetch(`${sessionStorage.getItem('teacher_api')}?page=teacher&action=upload_attendance`, {
+      const response = await fetch(`${get_api().teacher_api}?page=teacher&action=upload_attendance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',

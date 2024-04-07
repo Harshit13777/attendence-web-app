@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
 import { useNavigate } from 'react-router-dom';
+import { get_api } from '../static_api';
 
 export const Upload_Img: React.FC<{ set_uploaded_img_status: React.Dispatch<React.SetStateAction<boolean>> }> = ({ set_uploaded_img_status }) => {
   const webcamRef = useRef<Webcam | null>(null);
@@ -142,7 +143,7 @@ export const Upload_Img: React.FC<{ set_uploaded_img_status: React.Dispatch<Reac
       const student_img_array = Array.from(selected_face.descriptor);
       console.log(student_img_array, student_img_array.length);
 
-      const response = await fetch(`${sessionStorage.getItem('student_api')}?page=student&action=add_student_img`, {
+      const response = await fetch(`${get_api().student_api}?page=student&action=add_student_img`, {
         method: 'POST',
 
         headers: {

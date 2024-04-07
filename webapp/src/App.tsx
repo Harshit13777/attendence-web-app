@@ -25,7 +25,6 @@ const App: React.FC = () => {
     //set teacher api
     sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbzA1iY8Q3lGxU_x8PWzZeOkKz4YIaTckMO3PdXL4OxqHN0JuFBo3d_GkwHsALGuCAdvDA/exec')
 
-
     const obj = localStorage.getItem('User_data');
     console.log('obj', obj)
     if (obj) {
@@ -54,8 +53,6 @@ const App: React.FC = () => {
 
         {/* for admin 
       */}
-        <Route path="/test" element={<Upload_Img />} />
-        <Route path='/take_attendance' element={<Take_Attendence />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget_password" element={<Forget_password />} />
