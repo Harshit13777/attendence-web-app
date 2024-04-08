@@ -307,6 +307,7 @@ export const Take_Attendence = () => {
     setMessage('Start')
     if (webcamRef.current && webcamRef.current.getScreenshot()) {
       setMessage('Start Detecting ...')
+      if (imgref.current) imgref.current.src = ''
       start_detecting.current = true;
       setDetectedFaces([]);
       setTimeout(async () => {
@@ -325,8 +326,8 @@ export const Take_Attendence = () => {
   }
 
   const handlesenddata = async () => {
+    handleStop()
     setloading(true);
-
     try {
       const token = sessionStorage.getItem('token');
       if (!token) {

@@ -4,9 +4,9 @@ export function get_api() {
 
             'admin_api': 'https://script.google.com/macros/s/AKfycbwKjWuy16RStn_W4OTdnOid2rP4m6tdiuXvuNOVh1SYjMxYcsGC2KKjAms9pZfcVtT3zg/exec',
             //set student api
-            'student_api': 'https://script.google.com/macros/s/AKfycby9ffgJiw-qGIY69GyQeThoUwIRJPri98rD50PHg-5JdWKi4Wne1egrmm_xcmgTarvx/exec',
+            'student_api': 'https://script.google.com/macros/s/AKfycbzG_GW7q7CKZIFf20H-AwOuCX6EGU-jFybw5TsYOTkA2SK-rZrOGy-OXTqcgGkQUhty/execc',
             //set teacher api
-            'teacher_api': 'https://script.google.com/macros/s/AKfycbzk13m5w5lUWJ3WbkyGJf_u3E-Rtou-F3glCKEToGR_lmSSd9l_PiOPECJhyTwnZ8U_jA/exec'
+            'teacher_api': 'https://script.google.com/macros/s/AKfycbwv8_8_cdlXWeBVJe7SsNRRo8EwCiB-gLVthRDvM1c0usfWHM_6QkOt9pCFIvDWgrmYNg/exec'
 
         }
     )
