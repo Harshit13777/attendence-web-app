@@ -50,7 +50,7 @@ const Login: React.FC = () => {
             break;
 
           case 'username':
-            handleSubmit();
+            handleSubmit(formData.email, formData.password, formData.username, selectedRole);
             break;
           case 'newPassword':
             conform_spasswordRef.current?.focus();
@@ -104,6 +104,23 @@ const Login: React.FC = () => {
   }, [])
 
 
+  useEffect(() => {//get params data
+    const searchParams = new URLSearchParams(window.location.search);
+    const email = searchParams.get('email');
+    const username = searchParams.get('username');
+    const role = searchParams.get('user')
+    const password = searchParams.get('password')
+    if (email && username && role && password && selectedRole) {
+      //set token in state value
+      formData.email = email;
+      formData.username = username;
+      formData.password = password;
+      setSelectedRole(role)
+      handleSubmit(email, password, selectedRole, username)
+    }
+
+
+  }, [])
 
   useEffect(() => {
     if (message.length > 0)
@@ -170,13 +187,10 @@ const Login: React.FC = () => {
     return isvalid;
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (email: string, password: string, username: string, selectedRole: string | null) => {
     set_loading(true);
 
     try {
-
-
-      const { email, password, username } = formData;
 
       if (!validateloginform(email, password, selectedRole, username)) {
         throw new Error('Fix the Error');
@@ -499,7 +513,7 @@ const Login: React.FC = () => {
 
 
                       <button
-                        onClick={handleSubmit}
+                        onClick={() => handleSubmit(formData.email, formData.password, formData.username, selectedRole)}
                         className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
                       >
                         Submit

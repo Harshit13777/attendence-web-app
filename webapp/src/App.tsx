@@ -13,18 +13,12 @@ import Take_Attendence from "./teacher/Take_attendence";
 import Add_Attendence_Sheet from "./teacher/Add_Attendence_Sheet";
 import { Sheet_invalid } from "./authentication/sheetinvalid";
 import { main_screen as Overview } from "./overview/main_screen";
+import ChangePassword from './authentication/change_password';
 
 const App: React.FC = () => {
 
   //set all local storage item in session
   useEffect(() => {
-    //set admin api
-    sessionStorage.setItem('api', 'https://script.google.com/macros/s/AKfycbwxYY1sqCu1J_BrZCnrvuWKdU5swicPXY2ZcOzs7GHjy0DqAcZYfat7dU-oWVsj6gT0Qg/exec')
-    //set student api
-    sessionStorage.setItem('student_api', 'https://script.google.com/macros/s/AKfycbyQnCuDY-rM5FsfUwne3YgmcvrfYNM3LwdEy6Dtv9FzEaLHfHrcjKkaa4MPVFPLi6h8/exec')
-    //set teacher api
-    sessionStorage.setItem('teacher_api', 'https://script.google.com/macros/s/AKfycbzA1iY8Q3lGxU_x8PWzZeOkKz4YIaTckMO3PdXL4OxqHN0JuFBo3d_GkwHsALGuCAdvDA/exec')
-
     const obj = localStorage.getItem('User_data');
     console.log('obj', obj)
     if (obj) {
@@ -56,6 +50,7 @@ const App: React.FC = () => {
         <Route path="/Login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget_password" element={<Forget_password />} />
+        <Route path="/change_password" element={<ChangePassword />} />
         <Route path="/sheet invalid" element={<Sheet_invalid />} />
 
         <Route path="/admin/*" element={<Admin />} />
