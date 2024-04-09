@@ -148,7 +148,7 @@ const NavBar = () => {
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                             mt-2 menu-items `} >
-                            <img src={require('../.icons/student upload image icon.png')} className={`${open ? 'w-8 h-8' : ''} ${route === 'student_img_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
+                            <img src={require('../.icons/student upload image icon.png')} className={`rounded-lg ${open ? 'w-8 h-8' : ''} ${route === 'student_img_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
                                 Check Student img status
                             </span>
