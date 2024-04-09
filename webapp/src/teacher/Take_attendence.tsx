@@ -79,7 +79,7 @@ export const Take_Attendence = () => {
 
       //parse json into object array
       const json = localStorage.getItem(student_imgs_key)
-      if (!json) { console.log('Student Img not found'); setMessage('Error'); return }
+      if (!json) { console.log('Student Img not found'); setMessage('Error:No Student Image Uploaded'); return }
       let student_id_imgs: store_student_imgs = JSON.parse(json);
       const labeledFaceDescriptors = Object.entries(student_id_imgs).map(([id, img]) => {
         //console.log(new Float32Array(item.img));   
@@ -412,10 +412,19 @@ export const Take_Attendence = () => {
       :
       faceMatcher === null
         ?
-        <div className="flex flex-row text-center justify-center  bg-lime-50 p-5 m-5 ">
-          <div className="mb-4 text-center">
-            <h1 className="text-2xl font-bold  text-gray-900">No Data Found! contact to admin</h1>
+
+        <div>
+          <div className="flex flex-row text-center justify-center  bg-lime-50 p-5 m-5 ">
+            <div className="mb-4 text-center">
+              <h1 className="text-2xl font-bold  text-gray-900">Loading...</h1>
+            </div>
           </div>
+          {message !== '' && (
+            <div className="bg-blue-100 border-t text-center border-b border-blue-500 text-blue-700 px-4" role="alert">
+              <p className="text-xl font-bold">{message}</p>
+            </div>
+          )
+          }
         </div>
 
         :

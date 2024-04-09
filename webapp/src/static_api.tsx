@@ -2,7 +2,7 @@ export function get_api() {
     return (
         {
 
-            'admin_api': 'https://script.google.com/macros/s/AKfycbz9l9DpWZFQFwgE__dsNCvEE52Grb4fzcv35yt-kcuF0XTI2q9D7tx3II0ltIqOMLw2aw/exec',
+            'admin_api': 'https://script.google.com/macros/s/AKfycbzjrM34pEiyNY5FWHRf1UJxoXQGtB_ckk1nNI_9NLwhD_A8IiX_2FnR80BwfSjBn0GQWA/exec',
 
             //set student api
             'student_api': 'https://script.google.com/macros/s/AKfycbxHOy3qJt33iokDoc59iUXZlhcfEdWWJClw-dWBDdawBQ-iF9uzXuZLtzvViePNWUeD/exec',

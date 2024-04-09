@@ -461,7 +461,7 @@ export const HomePage: React.FC = () => {
                 {
                     is_sync ?
 
-                        <div className='absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center gap-y-10'>
+                        <div className='ml-16 w-full  flex flex-col text-center items-center justify-center gap-y-10'>
 
                             <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
                                 Syncing...
