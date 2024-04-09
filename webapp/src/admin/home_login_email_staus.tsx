@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { get_api } from '../static_api';
+import { useNavigate } from 'react-router-dom';
 
 
 interface Response_Data {
-  Teacher_Name: string[];
+  Teacher: {
+    name: string,
+    is_login: boolean
+  }[],
   Student: {
     name: string;
     roll: string;
+    is_login: boolean
   }[],
 
 }
@@ -14,102 +19,208 @@ interface Response_Data {
 export const Login_Email_Status = () => {
 
   const [message, setMessage] = useState('');
-  const [response_data, setresponse_data] = useState<Response_Data>({
-    Teacher_Name: [],
-    Student: [{ name: '', roll: '' }],
-  });
+  const [response_data, setresponse_data] = useState<Response_Data | null>(null);
+  const [loading, set_loading] = useState(false)
+  const navigate = useNavigate()
+  //key to access localstorage of student data and teacher data
+  const student_storage_key = sessionStorage.getItem('student_data_key') as string
+  const teacher_storage_key = sessionStorage.getItem('teacher_data_key') as string
 
-  const fetchdata: any = () => {
-    let Admin_Sheet_Id = sessionStorage.getItem('Admin_Sheet_Id');
 
-    fetch(`${get_api().admin_api}?page=admin&action=check_login_email_status`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-      body: JSON.stringify({}),
-    })
-      .then((response: any) => {
-        if (!response.ok) {
-          setMessage('Network error');
-          console.log('Network response was not ok');
-        }
-        if (response.hasOwnProperty('error')) {
-          setMessage('Server error');
-          console.log(response.error);
-          return;
-        }
-        return response.json(); //convert json to object
+  const fetchdata: any = async () => {
+
+    setMessage('')
+    set_loading(true);
+    try {
+
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        sessionStorage.clear();
+        setTimeout(() =>
+          navigate('/login')
+          , 5000);
+        throw new Error('Error : No Token Found')
+      }
+      const response = await fetch(`${get_api().admin_api}?page=admin&action=get_login_status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify({ token }),
       })
-      .then((data) => {
+
+      if (!response.ok) {
+        throw new Error('Network error');
+
+      }
+
+      const data = await response.json()
 
 
-        if (data.hasOwnProperty('message')) {
+      if (data.hasOwnProperty('message')) {
 
-          setMessage('');
-          setresponse_data(data.response_data);
+        setMessage(data.message);
+      }
 
-          return;
+
+      if (data.hasOwnProperty('sheet_invalid')) {
+        sessionStorage.removeItem('sheet_exist')
+        setTimeout(() => {
+          navigate('/sheet invalid')
+        }, 500);
+      }
+      if (data.hasOwnProperty('sheet_Erased')) {
+        if (data.sheet_Erased.includes('Student')) {
+          localStorage.removeItem(student_storage_key)
         }
-
-        if (data.hasOwnProperty('sheet_valid')) {
-          if (!data.sheet_valid) {
-            setMessage('Sheet not Found');
-            sessionStorage.removeItem('Admin_Sheet_Id');
-          }
-          if (!data.admin_sheet_access_valid) {
-            sessionStorage.removeItem('admin_sheet_access_valid');
-            setMessage('Sheet not valid check instructions');
-          }
-          return;
+        else if (data.sheet_Erased.includes('Teacher')) {
+          localStorage.removeItem(teacher_storage_key)
         }
+        setTimeout(() => {
+          navigate('/admin')
+        }, 1000);
+        throw new Error(data.sheet_Erased);
 
-      });
+      }
+
+      if (data.hasOwnProperty('Login_status')) {
+        setresponse_data(data.Login_status)
+
+      }
+      set_loading(false)
+
+    } catch (error: any) {
+      set_loading(false)
+      setMessage(error.message)
+      console.log(error.message)
+    }
   }
 
   useEffect(() => {
     setMessage('fetching data...');
+
+
     fetchdata();
 
   }, []);
 
 
   return (
-    <div className="mx-auto w-screen p-4">
-      <div className="flex flex-col items-center justify-center h-20 bg-lime-50 pb-2">
-        <h1 className="text-4xl font-bold text-gray-900">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-950">
-            Teachers and Students Not Logged In
-          </span>
-        </h1>
-      </div>
-      {message === '' ? (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-6 bg-white shadow-md">
-            <h2 className="text-3xl font-semibold mb-6">Teachers</h2>
-            <ul className="text-lg">
-              {response_data.Teacher_Name.map((teacherName, index) => (
-                <li key={index} className="mb-3">
-                  {teacherName}
-                </li>
-              ))}
-            </ul>
+    <div className="mx-auto p-4">
+      <h1 className="flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+        <span className="bg-clip-text text-transparent bg-gradient-to-tl from-slate-300 to-gray-300 bg-lime-50 p-3 rounded-lg">
+          Login Status
+        </span>
+      </h1>
+      {response_data ? (
+        <div className="flex w-full flex-col md:flex-row gap-4">
+          <div className=" md:w-1/2 mt-20 m-5  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2"  >
+            <h1 className="mt-5  flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+              <span className="p-5 bg-clip-text text-transparent bg-gradient-to-tl from-blue-800 to-red-500 bg-lime-50 rounded-lg">
+                Teachers
+              </span>
+            </h1>
+            <div className="overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2">
+              <table className="w-full table-auto rounded-2xl">
+                <thead className=' text-center items-center '>
+                  <tr className=''>
+                    <th className="text-base md:text-xl font-bold md:px-2 py-2">Name</th>
+                    <th className="text-base md:text-xl font-bold md:px-2 py-2">Login Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    response_data.Teacher.map((row, rowIndex) => (
+                      <tr key={rowIndex} className=' border-b-2'>
+
+
+                        <td className={`px-4 py-2`} >
+                          <div className='flex items-center text-center justify-center font-semibold md:text-lg text-base'>
+
+                            {row.name}
+                          </div>
+
+                        </td>
+                        <td className={`px-4 py-2`} >
+                          <div className='flex items-center text-center justify-center font-semibold md:text-lg text-base '>
+
+                            <p>{row.is_login ? 'Login' : 'Not Login'}</p>
+                          </div>
+
+                        </td>
+
+
+
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+
           </div>
-          <div className="p-6 bg-white shadow-md">
-            <h2 className="text-3xl font-semibold mb-6">Students</h2>
-            <ul className="text-lg">
-              {response_data.Student.map((student, index) => (
-                <li key={index} className="mb-3">
-                  {student.name} - {student.roll}
-                </li>
-              ))}
-            </ul>
+          <div className=" md:w-1/2 mt-20 m-5  bg-gradient-to-tr from-blue-200 to-red-200 rounded-xl  p-2"  >
+            <h1 className="mt-5  flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+              <span className="p-5 bg-clip-text text-transparent bg-gradient-to-tl from-blue-800 to-red-500 bg-lime-50 rounded-lg">
+                Students
+              </span>
+            </h1>
+            <div className="overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2">
+              <table className="w-full table-auto rounded-2xl">
+                <thead className=' text-center items-center '>
+                  <tr className=''>
+                    <th className=" text-base md:text-xl font-bold md:px-2 py-2">Name</th>
+                    <th className=" text-base md:text-xl font-bold md:px-2 py-2">Roll No</th>
+                    <th className=" text-base md:text-xl font-bold md:px-2 py-2">Login Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    response_data.Student.map((row, rowIndex) => (
+                      <tr key={rowIndex} className=' border-b-2'>
+
+
+                        <td className={` `} >
+                          <div className='flex  items-center text-center justify-center font-semibold md:text-lg text-base '>
+
+                            {row.name}
+                          </div>
+
+                        </td>
+                        <td className={` `} >
+                          <div className='flex  items-center text-center justify-center font-semibold md:text-lg text-base '>
+
+                            {row.roll}
+                          </div>
+
+                        </td>
+                        <td className={` py-2`} >
+                          <div className='flex  items-center text-center justify-center font-semibold md:text-lg text-base'>
+
+                            <p>{row.is_login ? 'Login' : 'Not Login'}</p>
+                          </div>
+
+                        </td>
+
+
+
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+
           </div>
         </div>
       ) : (
-        <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 p-6 shadow-md">
-          <p className="text-xl">{message}</p>
-        </div>
+        <>
+          {loading &&
+            <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
+          }
+          <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 p-6 shadow-md">
+            <p className="text-xl">{message}</p>
+          </div>
+        </>
+
       )}
     </div>
 
