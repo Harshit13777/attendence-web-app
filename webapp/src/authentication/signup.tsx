@@ -270,7 +270,7 @@ const Signup: React.FC = () => {
                   onClick={handleSubmit}
                   className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
                 >
-                  Submit
+                  Create Admin Account
                 </button>
               }
 

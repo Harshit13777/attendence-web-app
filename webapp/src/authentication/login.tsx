@@ -110,13 +110,14 @@ const Login: React.FC = () => {
     const username = searchParams.get('username');
     const role = searchParams.get('user')
     const password = searchParams.get('password')
-    if (email && username && role && password && selectedRole) {
+    if (email && username && role && password) {
       //set token in state value
       formData.email = email;
       formData.username = username;
       formData.password = password;
       setSelectedRole(role)
-      handleSubmit(email, password, selectedRole, username)
+      console.log(email, password, role, username)
+      handleSubmit(email, password, username, role)
     }
 
 
