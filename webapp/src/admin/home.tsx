@@ -134,29 +134,27 @@ const NavBar = () => {
 
                     </li>
 
-                    {
-                        <Link to='/admin/login_email_status'>
-                            <li
-                                className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                    <Link to='/admin/login_email_status'>
+                        <li
+                            className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                     mt-2 menu-items `} >
-                                <img src={check_email} className={`${open ? 'w-8 h-8' : ''} ${route === 'login_email_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
-                                <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                                    Check Email Login Status
-                                </span>
-                            </li>
-                        </Link>
-                        /*
-                        <Link to='student_img_status'>
-                            <li
-                                className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                            <img src={check_email} className={`${open ? 'w-8 h-8' : ''} ${route === 'login_email_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
+                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
+                                Check Email Login Status
+                            </span>
+                        </li>
+                    </Link>
+                    <Link to='student_img_status'>
+                        <li
+                            className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                             mt-2 menu-items `} >
-                                <img className={`${open ? 'w-8 h-8' : ''} ${route === 'student_img_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
-                                <span className={` origin-left duration-200 ${!open && "hidden"}`}>
-                                    Check Student img status
-                                </span>
-                            </li>
-                        </Link>
-        
+                            <img src={require('../.icons/student upload image icon.png')} className={`${open ? 'w-8 h-8' : ''} ${route === 'student_img_status' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
+                            <span className={` origin-left duration-200 ${!open && "hidden"}`}>
+                                Check Student img status
+                            </span>
+                        </li>
+                    </Link>
+                    {/*
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                             mt-2 menu-items `} >

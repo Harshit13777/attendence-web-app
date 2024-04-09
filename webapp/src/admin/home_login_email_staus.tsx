@@ -104,7 +104,6 @@ export const Login_Email_Status = () => {
 
   }, []);
 
-
   return (
     <div className="mx-auto p-4">
       <h1 className="flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
@@ -132,8 +131,6 @@ export const Login_Email_Status = () => {
                   {
                     response_data.Teacher.map((row, rowIndex) => (
                       <tr key={rowIndex} className=' border-b-2'>
-
-
                         <td className={`px-4 py-2`} >
                           <div className='flex items-center text-center justify-center font-semibold md:text-lg text-base'>
 
@@ -148,9 +145,6 @@ export const Login_Email_Status = () => {
                           </div>
 
                         </td>
-
-
-
                       </tr>
                     ))}
                 </tbody>
@@ -216,9 +210,12 @@ export const Login_Email_Status = () => {
           {loading &&
             <div className=" absolute top-1/2 left-1/2  ml-auto mr-auto  animate-spin rounded-xl border-blue-500 border-solid border-8 h-10 w-10"></div>
           }
-          <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 p-6 shadow-md">
-            <p className="text-xl">{message}</p>
-          </div>
+          {
+            message !== '' &&
+            <div className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 p-6 shadow-md">
+              <p className="text-xl">{message}</p>
+            </div>
+          }
         </>
 
       )}
