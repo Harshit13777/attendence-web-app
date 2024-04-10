@@ -2,12 +2,12 @@ export function get_api() {
     return (
         {
 
-            'admin_api': 'https://script.google.com/macros/s/AKfycbwCEV5JK622obGBFcv6zi5zmrRK0_zr9uguZ53FAEGD7V94nzoyyx1alJEQCEAnyaIYaA/exec',
+            'admin_api': 'https://script.google.com/macros/s/AKfycbxUmAIuC5C7a8r1t6UDvilutoArCbeflkaXZo2KYnCkUpPGr6WDMUGQdhsSAL0oao0UrQ/exec',
 
             //set student api
-            'student_api': 'https://script.google.com/macros/s/AKfycbxHOy3qJt33iokDoc59iUXZlhcfEdWWJClw-dWBDdawBQ-iF9uzXuZLtzvViePNWUeD/exec',
+            'student_api': 'https://script.google.com/macros/s/AKfycbzF1koGkJKPld7I87WSwlacKEA7i3lhyOMr9XXz0DbuwqALnAPqmIMT8R9yFhmDYspg/exec',
             //set teacher api
-            'teacher_api': 'https://script.google.com/macros/s/AKfycbwHY2VU5agEKKqkLg0LrdZl6NJoG6-ZHSQBAwfDZ0UvLI2pPE0LWhXEqxuLXawlzW8Bfg/exec'
+            'teacher_api': 'https://script.google.com/macros/s/AKfycbylj6BDwPUXo3-PlAIqIAbHSOmWRWBrchKtb41ao-sRyjgke0v6JGNMDbVT_GLOuc2snw/exec'
 
         }
     )
