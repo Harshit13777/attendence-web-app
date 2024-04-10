@@ -295,6 +295,7 @@ const Add_Attendence_Sheet = () => {
       }
 
       throw new Error('Error')
+      setloading(false)
 
     } catch (error: any) {
       setloading(false);

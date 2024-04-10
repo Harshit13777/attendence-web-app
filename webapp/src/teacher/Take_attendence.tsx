@@ -81,6 +81,7 @@ export const Take_Attendence = () => {
       const json = localStorage.getItem(student_imgs_key)
       if (!json) { console.log('Student Img not found'); setMessage('Error:No Student Image Uploaded'); return }
       let student_id_imgs: store_student_imgs = JSON.parse(json);
+      console.log(student_id_imgs)
       const labeledFaceDescriptors = Object.entries(student_id_imgs).map(([id, img]) => {
         //console.log(new Float32Array(item.img));   
         return new faceapi.LabeledFaceDescriptors(id + '', [new Float32Array(img)]);
@@ -291,8 +292,8 @@ export const Take_Attendence = () => {
       context.stroke();
 
       // Draw the label
-      context.font = '24px Arial';
-      context.fillStyle = 'white';
+      context.font = '30px Arial';
+      context.fillStyle = 'red';
       context.fillText(label, box.x, box.y - 5); // Adjust label position
     });
     setDetectedFaces((prev) => [...prev, canvas]);
@@ -400,7 +401,7 @@ export const Take_Attendence = () => {
 
 
   return (
-    subject_names.current === null
+    subject_names.current === null || subject_names.current.length == 0
       ?
       <div className="flex flex-col items-center justify-center h-20 bg-lime-50 pb-2 ">
         <h1 className="text-4xl font-bold text-gray-900">

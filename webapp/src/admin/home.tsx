@@ -446,8 +446,7 @@ export const HomePage: React.FC = () => {
         console.log('syncing...')
 
         syncing_student();
-        //testing 
-        set_issync(false)
+
 
     }, [])
 
