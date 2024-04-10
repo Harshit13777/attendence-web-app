@@ -300,6 +300,7 @@ const HomePage = () => {
                 };
 
 
+
                 const dataJson = localStorage.getItem(student_imgs_key);
                 let students_imgs_all_store_ids: string[] = []
                 if (dataJson) {

@@ -156,7 +156,7 @@ const Get_Attendence_Sheet = () => {
                             row.map((data, index) => (
                               index !== 0 &&
                               <td className={`px-4 py-2 ${index === 1 && 'font-bold'}`} >
-                                {data}
+                                {data.toString().length !== 0 ? data : 0}
                               </td>
                             ))
                           }
