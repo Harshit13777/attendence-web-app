@@ -291,10 +291,10 @@ const Add_Attendence_Sheet = () => {
         }
         set_saved_subject_names(Object.keys(upd_subject_data))
         setMessage(['Data Added'])
-        return
+
       }
 
-      throw new Error('Error')
+
       setloading(false)
 
     } catch (error: any) {

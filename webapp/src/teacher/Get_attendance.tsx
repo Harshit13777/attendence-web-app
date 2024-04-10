@@ -154,10 +154,9 @@ const Get_Attendence_Sheet = () => {
                         <tr key={rowIndex} className=' border-b-2'>
                           {
                             row.map((data, index) => (
-
-                              <td className={`px-4 py-2 ${index === 0 && 'font-bold'}`} >
-                                {`${rowIndex === 0 && index === 0 ? 'Student_IDs' : data}`}
-
+                              index !== 0 &&
+                              <td className={`px-4 py-2 ${index === 1 && 'font-bold'}`} >
+                                {data}
                               </td>
                             ))
                           }

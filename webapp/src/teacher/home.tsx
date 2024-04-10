@@ -110,7 +110,7 @@ const NavBar = () => {
 };
 
 interface store_student_imgs {
-    [key: string]: number[];
+    [key: string]: { roll_id: string, img_arr: number[] };
 }
 
 interface store_subjects {

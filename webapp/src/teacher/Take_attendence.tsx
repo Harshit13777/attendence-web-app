@@ -8,7 +8,7 @@ import { error } from 'console';
 import { get_api } from '../static_api';
 
 interface store_student_imgs {
-  [key: string]: number[];
+  [key: string]: { roll_id: string, img_arr: number[] };
 }
 
 interface store_subjects {
@@ -41,8 +41,8 @@ export const Take_Attendence = () => {
   const student_imgs_key = sessionStorage.getItem('student_imgs_key') as string;
   const subject_names_key = sessionStorage.getItem('subject_names_key') as string;
   const start_detecting = useRef(false)
-
   const [facingMode, setFacingMode] = useState(FACING_MODE_USER);
+  const studentID_to_rollID = useRef<{ [key: string]: string }>({})
 
   const handleswitch = () => {
     setFacingMode(
@@ -82,10 +82,12 @@ export const Take_Attendence = () => {
       if (!json) { console.log('Student Img not found'); setMessage('Error:No Student Image Uploaded'); return }
       let student_id_imgs: store_student_imgs = JSON.parse(json);
       console.log(student_id_imgs)
-      const labeledFaceDescriptors = Object.entries(student_id_imgs).map(([id, img]) => {
+      const labeledFaceDescriptors = Object.entries(student_id_imgs).map(([id, obj]) => {
         //console.log(new Float32Array(item.img));   
-        return new faceapi.LabeledFaceDescriptors(id + '', [new Float32Array(img)]);
+        return new faceapi.LabeledFaceDescriptors(id + '', [new Float32Array(obj.img_arr)]);
       });
+      //add map id to roll ids
+      Object.entries(student_id_imgs).map(([id, obj]) => (studentID_to_rollID.current[id] = obj.roll_id))
       // Initialize the face matcher
       const matcher = new faceapi.FaceMatcher(labeledFaceDescriptors, .5);
       setFaceMatcher(matcher);
@@ -281,7 +283,7 @@ export const Take_Attendence = () => {
 
     detections.forEach((detection, index) => {
 
-      const label = labels[index];
+      const label = studentID_to_rollID.current[labels[index]] ?? 'UnKnown';
       const box = detection.detection.box;
 
       // Draw the box
@@ -478,9 +480,9 @@ export const Take_Attendence = () => {
                     </h1>
                     <div className=' bg-gradient-to-r from-blue-300 to-red-200 p-3 pl-7 font-semibold rounded-lg'>
                       <ul className='flex flex-wrap gap-x-4 list-disc '>
-                        {Array.from(RollNo as any).map((id, index) => (
+                        {Array.from(RollNo as any).map((id: any, index) => (
                           <li className='pr-5' key={index}>
-                            <h3>{id as any}</h3>
+                            <h3>{studentID_to_rollID.current[id] ?? '' as any}</h3>
                           </li>
                         ))}
                       </ul>
