@@ -197,7 +197,6 @@ const Login: React.FC = () => {
         throw new Error('Fix the Error');
       }
       console.log(selectedRole)
-
       const response = await fetch(`${selectedRole === 'admin' ? get_api().admin_api : selectedRole === 'teacher' ? get_api().teacher_api : get_api().student_api}?page=${selectedRole}&action=login`, {
         method: 'post',
         //headers: {
@@ -239,9 +238,9 @@ const Login: React.FC = () => {
 
         sessionStorage.setItem('student_data_key', `${email}_Student_Data`)
         sessionStorage.setItem('teacher_data_key', `${email}_Teacher_Data`)
-
+        sessionStorage.setItem('LAST_SYNC_TIME', `${email}_${selectedRole}_SYNC_TIME_Data`)
         //set all user data in localstorage
-        const obj: { user: string, username: string, token: string, email: string } = { 'user': 'admin', username: data.username, token: data.token, email }
+        const obj: { user: string, username: string, token: string, email: string } = { 'user': selectedRole, username: data.username, token: data.token, email }
         localStorage.setItem('User_data', JSON.stringify(obj));
 
         //if sheet valid then add sheet_exist in session so then it can go to home screen
@@ -269,9 +268,9 @@ const Login: React.FC = () => {
         //key , we get data from localstorage by key
         sessionStorage.setItem('student_imgs_key', `${email}_Student_Img_Data`)
         sessionStorage.setItem('subject_names_key', `${email}_Subject_Name_Data`)
-
+        sessionStorage.setItem('LAST_SYNC_TIME', `${email}_${selectedRole}_SYNC_TIME_Data`)
         //set all user data in localstorage
-        const obj: { user: string, username: string, token: string, email: string } = { 'user': 'teacher', username: username, token: data.token, email }
+        const obj: { user: string, username: string, token: string, email: string } = { 'user': selectedRole, username: username, token: data.token, email }
         localStorage.setItem('User_data', JSON.stringify(obj));
         if (data.set_Password === true) {
           set_opensetpassword_comp(true)

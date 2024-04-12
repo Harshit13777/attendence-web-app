@@ -27,15 +27,19 @@ const App: React.FC = () => {
       sessionStorage.setItem('user', user_data.user);
       sessionStorage.setItem('username', user_data.username);//unique name to get admin info from my sheet
       sessionStorage.setItem('email', user_data.email);
+      if (user_data.user !== 'student')
+        sessionStorage.setItem('LAST_SYNC_TIME', `${user_data.email}_${user_data.user}_LAST_SYNC_TIME_Data`)
       if (user_data.user === 'admin') {
         //key , we get data from localstorage by key
         sessionStorage.setItem('student_data_key', `${user_data.email}_Student_Data`)
         sessionStorage.setItem('teacher_data_key', `${user_data.email}_Teacher_Data`)
+
       }
       else if (user_data.user === 'teacher') {
         //key , we get data from localstorage by key
         sessionStorage.setItem('student_imgs_key', `${user_data.email}_Student_Img_Data`)
         sessionStorage.setItem('subject_names_key', `${user_data.email}_Subject_Name_Data`)
+
       }
     }
   }, [])

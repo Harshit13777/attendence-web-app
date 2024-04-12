@@ -424,6 +424,8 @@ const SpreadsheetInterface = () => {
                     set_student_updatedRows({})
                     set_student_deleteRows({});
                     //add all stored email and rolls in variable so that computation easy
+                    stored_Rolls.current = {}
+                    stored_emails.current = {}
                     Object.values(save_updated_data).map((row, i) => stored_emails.current[row.Student_Email] = true)
                     Object.values(save_updated_data).map((row, i) => stored_Rolls.current[row.Student_Roll_No] = true)
                     history.current = ([{ studentRows: save_updated_data, error_row: datarow_error, update_row: {} }])

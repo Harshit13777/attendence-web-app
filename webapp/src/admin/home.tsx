@@ -232,12 +232,14 @@ export const HomePage: React.FC = () => {
         // Check attendance sheet name presence and sync
         const student_store_key = sessionStorage.getItem('student_data_key');
         const teacher_store_key = sessionStorage.getItem('teacher_data_key');
+        const last_sync_time_key = sessionStorage.getItem('LAST_SYNC_TIME')
 
-        if (!student_store_key || !teacher_store_key) {
+
+        if (!student_store_key || !teacher_store_key || !last_sync_time_key) {
             set_sync_message(['Error']);
             return;
         } else {
-            const sync_student_data = async (all_store_ids: string[]) => {
+            const sync_student_data = async (all_store_ids: string[], Last_sync_time: string) => {
                 try {
                     set_issync(true)
                     const token = sessionStorage.getItem('token');
@@ -248,14 +250,14 @@ export const HomePage: React.FC = () => {
                             , 5000);
                         throw new Error('Error : No Token Found')
                     }
-
+                    console.log('Request data', all_store_ids, Last_sync_time)
                     const response: Response = await fetch(`${get_api().admin_api}?page=admin&action=sync_student_data`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'text/plain',
                         },
                         body: JSON.stringify({
-                            token, all_store_ids
+                            token, all_store_ids, Last_sync_time
                         }),
                     });
 
@@ -265,7 +267,7 @@ export const HomePage: React.FC = () => {
 
                     const data = await response.json();
 
-                    console.log("response", data)
+
 
                     if (data.hasOwnProperty('sheet_invalid')) {
                         sessionStorage.removeItem('sheet_exist')
@@ -326,7 +328,7 @@ export const HomePage: React.FC = () => {
                     console.error(error);
                 }
             };
-            const sync_teacher_data = async (all_store_ids: string[]) => {
+            const sync_teacher_data = async (all_store_ids: string[], Last_sync_time: string) => {
                 try {
                     set_issync(true)
                     const token = sessionStorage.getItem('token');
@@ -344,7 +346,7 @@ export const HomePage: React.FC = () => {
                             'Content-Type': 'text/plain',
                         },
                         body: JSON.stringify({
-                            token, all_store_ids
+                            token, all_store_ids, Last_sync_time
                         }),
                     });
 
@@ -354,7 +356,7 @@ export const HomePage: React.FC = () => {
 
                     const data = await response.json();
 
-                    console.log("response", data)
+
 
                     if (data.hasOwnProperty('sheet_invalid')) {
                         sessionStorage.removeItem('sheet_exist')
@@ -400,6 +402,9 @@ export const HomePage: React.FC = () => {
                         }
                         localStorage.setItem(teacher_store_key, JSON.stringify(updated_data))
                         set_sync_message((p) => [...p, 'Successfully Sync'])
+                        //save last time sync
+                        localStorage.setItem(last_sync_time_key, new Date().toISOString())
+
                         set_issync(false)
                     }
                     else {
@@ -416,15 +421,16 @@ export const HomePage: React.FC = () => {
                 }
             };
 
+            const LAST_SYNC_TIME = localStorage.getItem(last_sync_time_key) ?? new Date('2000-04-06T08:30:00.000Z').toISOString()
             const dataJson = localStorage.getItem(student_store_key);
             let S_all_store_ids: string[] = []
             if (dataJson) {
                 const Student_data = JSON.parse(dataJson);
                 S_all_store_ids = Object.keys(Student_data)
             }
-            console.log('saved ids student', S_all_store_ids)
+            //console.log('saved ids student', S_all_store_ids)
             set_sync_message((p) => ['Syncing Student Data'])
-            await sync_student_data(S_all_store_ids)
+            await sync_student_data(S_all_store_ids, LAST_SYNC_TIME)
 
             // Check attendance sheet name presence and sync
             const TdataJson = localStorage.getItem(teacher_store_key);
@@ -433,9 +439,9 @@ export const HomePage: React.FC = () => {
                 const Teacher_data = JSON.parse(TdataJson);
                 T_all_store_ids = Object.keys(Teacher_data)
             }
-            console.log(' teacher saved IDs', T_all_store_ids)
+            //console.log(' teacher saved IDs', T_all_store_ids)
             set_sync_message((p) => [...p, 'Syncing Teacher Data'])
-            await sync_teacher_data(T_all_store_ids)
+            await sync_teacher_data(T_all_store_ids, LAST_SYNC_TIME)
 
         }
 
@@ -445,7 +451,7 @@ export const HomePage: React.FC = () => {
 
         console.log('syncing...')
 
-        syncing_student();
+        if (!is_sync) syncing_student();
 
 
     }, [])

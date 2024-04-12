@@ -139,14 +139,15 @@ const HomePage = () => {
             // Check attendance sheet name presence and sync
             const student_imgs_key = sessionStorage.getItem('student_imgs_key');
             const subject_names_key = sessionStorage.getItem('subject_names_key');
+            const last_sync_time_key = sessionStorage.getItem('LAST_SYNC_TIME')
 
-            if (!student_imgs_key || !subject_names_key) {
+            if (!student_imgs_key || !subject_names_key || !last_sync_time_key) {
                 set_sync_message(['Error']);
                 console.log("Error syncing: No store key found")
                 return;
             } else {
 
-                const sync_student_imgs_data = async (all_studnts_imgs_store_ids: string[]) => {
+                const sync_student_imgs_data = async (all_studnts_imgs_store_ids: string[], Last_sync_time: string) => {
                     try {
                         set_issync(true)
                         const token = sessionStorage.getItem('token');
@@ -164,7 +165,7 @@ const HomePage = () => {
                                 'Content-Type': 'text/plain',
                             },
                             body: JSON.stringify({
-                                token, all_studnts_imgs_store_ids
+                                token, all_studnts_imgs_store_ids, Last_sync_time
                             }),
                         });
 
@@ -222,7 +223,7 @@ const HomePage = () => {
                         console.error(error);
                     }
                 };
-                const sync_subjects_data = async (all_subjects_store_ids: string[]) => {
+                const sync_subjects_data = async (all_subjects_store_ids: string[], Last_sync_time: string) => {
                     try {
                         set_issync(true)
                         const token = sessionStorage.getItem('token');
@@ -240,7 +241,7 @@ const HomePage = () => {
                                 'Content-Type': 'text/plain',
                             },
                             body: JSON.stringify({
-                                token, all_subjects_store_ids
+                                token, all_subjects_store_ids, Last_sync_time
                             }),
                         });
 
@@ -284,6 +285,8 @@ const HomePage = () => {
                             localStorage.setItem(subject_names_key, JSON.stringify(updated_data))
                             set_sync_message((p) => [...p, 'Successfully Sync subjects data'])
                             set_issync(false)
+                            //save last time sync
+                            localStorage.setItem(last_sync_time_key, new Date().toISOString())
                         }
                         else {
                             throw new Error("Not Received data");
@@ -300,7 +303,7 @@ const HomePage = () => {
                 };
 
 
-
+                const LAST_SYNC_TIME = localStorage.getItem(last_sync_time_key) ?? new Date('2000-04-06T08:30:00.000Z').toISOString()
                 const dataJson = localStorage.getItem(student_imgs_key);
                 let students_imgs_all_store_ids: string[] = []
                 if (dataJson) {
@@ -309,7 +312,7 @@ const HomePage = () => {
                 }
                 console.log('saved ids student', students_imgs_all_store_ids)
                 set_sync_message((p) => ['Syncing Student Data'])
-                await sync_student_imgs_data(students_imgs_all_store_ids)
+                await sync_student_imgs_data(students_imgs_all_store_ids, LAST_SYNC_TIME)
 
                 // Check attendance sheet name presence and sync
                 const subjectsdataJson = localStorage.getItem(subject_names_key);
@@ -320,7 +323,7 @@ const HomePage = () => {
                 }
                 console.log(' teacher saved IDs', subjects_all_store_ids)
                 set_sync_message((p) => [...p, 'Syncing Teacher Data'])
-                await sync_subjects_data(subjects_all_store_ids)
+                await sync_subjects_data(subjects_all_store_ids, LAST_SYNC_TIME)
 
             }
 
