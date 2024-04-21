@@ -5,6 +5,7 @@ import navbar_open from "../.icons/navbar.png";
 import overview from "../.icons/overview.png";
 import { Upload_Img } from "./Upload_Img";
 import { get_api } from '../static_api';
+import { Attendance_show } from './attendance';
 
 
 
@@ -25,6 +26,7 @@ export const HomePage: React.FC = () => {
     const sync_student_img_status = async () => {
         try {
             set_issync(true)
+            set_sync_message([])
             const token = sessionStorage.getItem('token');
             if (!token) {
                 sessionStorage.clear();
@@ -89,9 +91,8 @@ export const HomePage: React.FC = () => {
 
         console.log('syncing...')
 
-        sync_student_img_status();
-        //testing 
-        set_issync(false)
+        if (!is_sync) sync_student_img_status();
+
 
     }, [])
 
@@ -116,7 +117,7 @@ export const HomePage: React.FC = () => {
                     {
                         is_sync ?
 
-                            <div className='absolute top-1/4  left-1/2 right-1/2 text-center items-center justify-center gap-y-10'>
+                            <div className='mt-10 w-full  flex flex-col text-center items-center justify-center gap-y-10'>
 
                                 <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
                                     Syncing...
@@ -134,9 +135,7 @@ export const HomePage: React.FC = () => {
                             uploaded_img
                                 ?
 
-                                <div>
-                                    Attendance info
-                                </div>
+                                <Attendance_show />
                                 :
                                 <Upload_Img set_uploaded_img_status={set_uploaded_img} />
 

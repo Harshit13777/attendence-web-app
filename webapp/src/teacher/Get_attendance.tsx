@@ -153,14 +153,16 @@ const Get_Attendence_Sheet = () => {
                       subject_sheetData_obj[selectedSheet].map((row, rowIndex) => (
                         <tr key={rowIndex} className=' border-b-2'>
                           {
+
+
                             row.map((data, index) => (
 
                               <td className={`px-4 py-2 ${index === 0 && 'font-bold'}`} >
-                                {data.toString().length !== 0 ? data : 0}
+                                {data.toString().length !== 0 ? rowIndex === 0 ? new Date(data).toUTCString() : data : 0}
                               </td>
                             ))
-                          }
 
+                          }
                         </tr>
                       ))}
                   </tbody>
