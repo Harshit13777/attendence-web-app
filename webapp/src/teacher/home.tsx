@@ -36,7 +36,7 @@ const NavBar = () => {
         sessionStorage.clear();
         localStorage.removeItem('User_data')
         setTimeout(() => {
-            navigate('/login');
+            navigate('/');
         }, 200);
     };
 

@@ -100,7 +100,7 @@ export const HomePage: React.FC = () => {
         sessionStorage.clear();
         localStorage.removeItem('User_data')
         setTimeout(() => {
-            navigate('/login')
+            navigate('/')
         }, 300);
     }
 

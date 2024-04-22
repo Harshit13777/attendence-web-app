@@ -103,7 +103,9 @@ export const Attendance_show = () => {
                     {
                         subject_sheetData_obj
                             ?
-                            <AttendanceTable data={subject_sheetData_obj} />
+                            <div className="mt-10">
+                                <AttendanceTable data={subject_sheetData_obj} />
+                            </div>
                             :
                             <div className="flex flex-col items-center justify-center h-20 mt-10 pb-2 ">
                                 <h1 className="text-4xl font-bold text-gray-900">
@@ -197,76 +199,94 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
     // Render the component
     return (
         <div className="p-4">
-
-            <div className=' flex justify-center  text-center space-x-1 space-y-1'>
-
-                <select id="subject-select" onChange={e => handleSubjectChange(e.target.value)} className=" p-2 rounded-lg border-2 border-blue-950 font-semibold text-center md:text-lg">
-                    <option value="" className="md:text-lg font-medium text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200">-- Select subject --</option>
-                    <option value="ALL" className="md:text-lg font-medium text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200">ALL</option>
-                    {subjectOptions}
-                </select>
-            </div>
             {
-                Object.entries(subjects).map(([subName, obj]) => (
-
+                Object.keys(subjects).length !== 0
+                    ?
                     <>
-                        {(selectedSubject == 'ALL' || selectedSubject === subName) &&
-                            <motion.div
-                                initial={{ opacity: 1, y: 100 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{
-                                    delay: 0.3,
-                                    duration: 0.8,
-                                    ease: "easeInOut",
-                                }}
-                                className=""
-                            >
+
+                        <div className=' flex justify-center  text-center space-x-1 space-y-1'>
+
+
+
+                            <select id="subject-select" onChange={e => handleSubjectChange(e.target.value)} className=" p-2 rounded-lg border-2 border-blue-950 font-semibold text-center md:text-lg">
+                                <option value="" className="md:text-lg font-medium text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200">-- Select subject --</option>
+
+                                <option value="ALL" className="md:text-lg font-medium text-center rounded-md bg-gradient-to-r from-blue-300 to-red-200">ALL</option>
+                                {subjectOptions}
+                            </select>
+
+                        </div>
+                        {
+                            Object.entries(subjects).map(([subName, obj]) => (
+
                                 <>
-                                    <h2 className="text-2xl font-bold mt-6 text-center text-gray-200">{subName}</h2>
-                                    <div className=" mt-6 overflow-x-auto   mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-2 border-l-2 border-b-8 border-t-2  border-blue-400 rounded-xl  p-2">
-                                        <table className="w-full text-sm md:text-md text-center ">
-                                            <thead className=" text-gray-700 uppercase">
-                                                <tr>
-                                                    <th scope="col" className="px-6 py-3">
-                                                        Month
-                                                    </th>
-                                                    <th scope="col" className="px-6 py-3">
-                                                        Lectures Held
-                                                    </th>
-                                                    <th scope="col" className="px-6 py-3">
-                                                        Classes Taken
-                                                    </th>
-                                                    <th scope="col" className="px-6 py-3">
-                                                        Attendance %
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {Object.entries(obj.months).map(([month, obj], index) => (
-                                                    <>
-                                                        <tr key={index} className=" border-b ">
-                                                            <td className="px-6 py-4">{month}</td>
-                                                            <td className="px-6 py-4">{obj.date.length}</td>
-                                                            <td className="px-6 py-4">{obj.attend}</td>
-                                                            <td className="px-6 py-4">{Math.round(obj.attend / obj.date.length * 100)}%</td>
-                                                        </tr>
-                                                    </>
-                                                ))}
-                                                <tr className="">
-                                                    <td className="px-6 py-4 font-semibold">Total</td>
-                                                    <td className="px-6 py-4">{obj.Total_lectures}</td>
-                                                    <td className="px-6 py-4">{obj.Total_attend}</td>
-                                                    <td className="px-6 py-4">{Math.round(obj.Total_attend / obj.Total_lectures * 100)}%</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    {(selectedSubject == 'ALL' || selectedSubject === subName) &&
+                                        <motion.div
+                                            initial={{ opacity: 1, y: 100 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            transition={{
+                                                delay: 0.3,
+                                                duration: 0.8,
+                                                ease: "easeInOut",
+                                            }}
+                                            className=""
+                                        >
+                                            <>
+                                                <h2 className="text-2xl font-bold mt-6 text-center text-gray-200">{subName}</h2>
+                                                <div className=" mt-6 overflow-x-auto   mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-2 border-l-2 border-b-8 border-t-2  border-blue-400 rounded-xl  p-2">
+                                                    <table className="w-full text-sm md:text-md text-center ">
+                                                        <thead className=" text-gray-700 uppercase">
+                                                            <tr>
+                                                                <th scope="col" className="px-6 py-3">
+                                                                    Month
+                                                                </th>
+                                                                <th scope="col" className="px-6 py-3">
+                                                                    Lectures Held
+                                                                </th>
+                                                                <th scope="col" className="px-6 py-3">
+                                                                    Classes Taken
+                                                                </th>
+                                                                <th scope="col" className="px-6 py-3">
+                                                                    Attendance %
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(obj.months).map(([month, obj], index) => (
+                                                                <>
+                                                                    <tr key={index} className=" border-b ">
+                                                                        <td className="px-6 py-4">{month}</td>
+                                                                        <td className="px-6 py-4">{obj.date.length}</td>
+                                                                        <td className="px-6 py-4">{obj.attend}</td>
+                                                                        <td className="px-6 py-4">{Math.round(obj.attend / obj.date.length * 100)}%</td>
+                                                                    </tr>
+                                                                </>
+                                                            ))}
+                                                            <tr className=" border-t-4 border-t-slate-100">
+                                                                <td className="px-6 py-4 font-semibold">Total</td>
+                                                                <td className="px-6 py-4">{obj.Total_lectures}</td>
+                                                                <td className="px-6 py-4">{obj.Total_attend}</td>
+                                                                <td className="px-6 py-4">{Math.round(obj.Total_attend / obj.Total_lectures * 100)}%</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </>
+                                        </motion.div>
+                                    }
                                 </>
-                            </motion.div>
+
+                            ))
                         }
                     </>
-
-                ))
+                    :
+                    <div className="flex flex-col items-center justify-center h-20 mt-10 pb-2 ">
+                        <h1 className="text-4xl font-bold text-gray-900">
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-red-950">
+                                No attendance Found
+                            </span>
+                        </h1>
+                    </div>
             }
         </div >
     );

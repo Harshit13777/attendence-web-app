@@ -15,16 +15,19 @@ import Add_data_student from './add_student';
 import { Edit_student } from './edit_student';
 import { Edit_teacher } from './edit_teacher';
 import { get_api } from '../static_api';
+import { Admin_overview } from '../overview/admin_overview';
+import Joyride, { ACTIONS, EVENTS, ORIGIN, STATUS, CallBackProps, Placement, Styles } from 'react-joyride';
+import { act } from 'react-dom/test-utils';
+import { stat } from 'fs';
 
 
 // HomePage.tsx
 
 
 
-const NavBar = () => {
+const NavBar = ({ open, setOpen, datamenuopen, setdatamenuOpen }: { open: boolean, setOpen: React.Dispatch<React.SetStateAction<boolean>>, datamenuopen: boolean, setdatamenuOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
 
-    const [open, setOpen] = useState(false);
-    const [datamenuopen, setdatamenuOpen] = useState(false);
+
     const navigate = useNavigate();
     const location = useLocation();
     const handleOnClick = () => setOpen((prevState) => !prevState);
@@ -53,16 +56,23 @@ const NavBar = () => {
         sessionStorage.clear();
         localStorage.removeItem('User_data')
         setTimeout(() => {
-            navigate('/login')
+            navigate('/')
         }, 300);
     }
 
 
 
-    return (
-        <>
 
-            <div className={`${open ? 'w-64' : 'w-16'} fixed h-full min-h-screen md:h-screen p-2 pt-8 bg-slate-900  transition-all duration-300 top-0`}
+
+
+
+
+
+    return (
+        <div className=' relative overflow-visible'>
+
+
+            <div className={`${open ? 'w-64' : 'w-16'}  fixed h-full min-h-screen md:h-screen p-2 pt-8 bg-slate-900  transition-all duration-300 top-0`}
                 onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}
             >
                 <div className={`flex  rounded-md pt-2 pb-2 text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
@@ -77,9 +87,9 @@ const NavBar = () => {
 
                 </div>
 
-                <ul className="pt-6 overflow-y-auto menu">
+                <ul data-testid="navbartop" className=" pt-6 overflow-y-auto menu">
 
-                    <Link to="/admin/">
+                    <Link to="/admin/" className='' data-testid="overview-link">
                         <li
                             className={`flex  rounded-md pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center  hover:bg-gray-50 gap-x-4 hover:text-slate-900 
                                         mt-2 menu-items `}>
@@ -91,12 +101,12 @@ const NavBar = () => {
                     </Link>
 
 
-                    <li
+                    <li data-testid="data-management-link"
                         className={` rounded-lg pt-2 pb-2 cursor-pointer  hover:bg-gray-50 hover:text-slate-900 hover:bg-light-white text-gray-300 text-sm items-center 
                                         mt-2 menu-items `} >
 
 
-                        <div className='flex origin-left gap-x-4'>
+                        <div className=' flex origin-left gap-x-4'>
                             <img src={add_data_icon} className={`${open ? 'w-8 h-8' : ''} ${/^(add_teacher|add_student|edit_student|edit_teacher)$/.test(route) && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` ${!open && "hidden"}   duration-200 `} onClick={handleOndatamenu}>
                                 Data Management
@@ -107,24 +117,24 @@ const NavBar = () => {
                         </div>
                         <div className={` ${!open && "hidden"}  block ${!datamenuopen && "hidden"}`}>
                             <ul className='pt-5  menu'>
-                                <Link to="/admin/add_teacher">
-                                    <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
+                                <Link to="/admin/add_teacher" >
+                                    <li data-testid="add-teacher-link" className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
                                         Add Teacher
                                     </li>
                                 </Link>
-                                <Link to="/admin/add_student">
+                                <Link to="/admin/edit_teacher" data-testid="edit-teacher-link">
+                                    <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
+                                        Edit Teacher
+                                    </li>
+                                </Link>
+                                <Link to="/admin/add_student" data-testid="add-student-link">
                                     <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
                                         Add Student
                                     </li>
                                 </Link>
-                                <Link to="/admin/edit_student">
+                                <Link to="/admin/edit_student" data-testid="edit-student-link">
                                     <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
                                         Edit Student
-                                    </li>
-                                </Link>
-                                <Link to="/admin/edit_teacher">
-                                    <li className='rounded-md p-2 text-center cursor-pointer hover:bg-slate-900 hover:text-white'>
-                                        Edit Teacher
                                     </li>
                                 </Link>
 
@@ -134,7 +144,7 @@ const NavBar = () => {
 
                     </li>
 
-                    <Link to='/admin/login_email_status'>
+                    <Link to='/admin/login_email_status' data-testid="check-email-link">
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                     mt-2 menu-items `} >
@@ -144,7 +154,7 @@ const NavBar = () => {
                             </span>
                         </li>
                     </Link>
-                    <Link to='student_img_status'>
+                    <Link to='student_img_status' data-testid="student-img-link">
                         <li
                             className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                             mt-2 menu-items `} >
@@ -189,7 +199,8 @@ const NavBar = () => {
                 </ul>
             </div >
 
-        </>
+
+        </div>
     )
 }
 
@@ -220,6 +231,10 @@ export const HomePage: React.FC = () => {
     const [wdth, setWdth] = useState(window.innerWidth);//width of scroll bar 16
     const [is_sync, set_issync] = useState(false)
     const [sync_message, set_sync_message] = useState<string[]>([])
+    const [show_tutorial, set_showtutorial] = useState(false)
+    const [open, setOpen] = useState(false);
+    const [datamenuopen, setdatamenuOpen] = useState(false);
+
 
     useEffect(() => {
         setWdth(window.innerWidth)
@@ -447,21 +462,25 @@ export const HomePage: React.FC = () => {
 
     };
 
+
+
+
     useEffect(() => {
 
         console.log('syncing...')
 
-        if (!is_sync) syncing_student();
+        // if (!is_sync) syncing_student();
 
 
     }, [])
 
     return (
-        <>
-
+        <div className='relative overflow-hidden'>
+            <JoyrideTut show_tutorial={show_tutorial} set_show_tutorial={set_showtutorial} setOpen={setOpen} setdatamenuOpen={setdatamenuOpen} />
             <div className='flex flex-row bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
+
                 <div className=''>
-                    <NavBar />
+                    <NavBar open={open} setOpen={setOpen} datamenuopen={datamenuopen} setdatamenuOpen={setdatamenuOpen} />
                 </div>
                 {
                     is_sync ?
@@ -481,7 +500,9 @@ export const HomePage: React.FC = () => {
 
                         :
                         <div className='ml-16' style={{ width: '100%', maxWidth: 'calc(100% - 64px)' }}>
+
                             <Routes>
+                                <Route index path="/" element={<Admin_overview set_show_tutorial={set_showtutorial} />} />
                                 <Route index path="/add_teacher" element={<Add_data_teacher />} />
                                 <Route path="/add_student" element={<Add_data_student />} />
                                 <Route path="/edit_student" element={<Edit_student />} />
@@ -493,11 +514,164 @@ export const HomePage: React.FC = () => {
                 }
             </div>
 
-        </>
+        </div>
     )
 };
 
-function syncing() {
-    throw new Error('Function not implemented.');
+const JoyrideTut = ({ show_tutorial, set_show_tutorial, setOpen, setdatamenuOpen }: { show_tutorial: boolean, set_show_tutorial: React.Dispatch<React.SetStateAction<boolean>>, setOpen: React.Dispatch<React.SetStateAction<boolean>>, setdatamenuOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
+
+    const [stepIndex, setStepIndex] = useState(0);
+    const navigate = useNavigate()
+
+    const handleJoyrideCallback = (data: CallBackProps) => {
+        const { action, index, origin, status, type } = data;
+
+        if (action === ACTIONS.CLOSE) {
+            // do something
+            navigate('./')
+        }
+
+        if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
+            // Update state to advance the tour
+            setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
+        } else if (status === STATUS.SKIPPED || status === STATUS.FINISHED || status === STATUS.ERROR) {
+            // You need to set our running state to false, so we can restart if we click start again.
+            set_show_tutorial(false);
+            setStepIndex(0)
+            navigate('./')
+            setOpen(false)
+        }
+
+        if (index === 1) {
+            setOpen(true)
+            setdatamenuOpen(true)
+        }
+        else if (index === 2) {
+            setOpen(true)
+            //navigate to add teacher 
+            navigate('./add_teacher')
+        }
+        else if (index == 3) {
+            //add teacher sceren
+            setOpen(false)
+
+        }
+        else if (index === 7) {
+            setOpen(true);
+            setdatamenuOpen(true);
+            navigate('./edit_teacher')
+            //going to navbar to highlight edit teacher 
+        }
+        else if (index === 8) {
+            setOpen(true);
+            setdatamenuOpen(true);
+            navigate('./add_student')
+            //going to navbar to highlight add student 
+        }
+        else if (index === 9) {
+            setOpen(true);
+            setdatamenuOpen(true);
+            navigate('./edit_student')
+            //going to navbar to highlight edit student 
+        }
+        else if (index === 10) {
+            setOpen(true);
+            setdatamenuOpen(false);
+            //going to navbar to highlight edit student 
+        }
+        else if (index === 11) {
+            setOpen(true);
+            //going to navbar to highlight edit student 
+        }
+
+
+
+
+
+        console.log(data); //eslint-disable-line no-console
+
+    };
+
+    const steps = [
+        {
+            placement: 'center' as 'center',
+            disableBeacon: true,
+            target: '[data-testid="Hellotut"]',
+            content: "Welcome to AI-Attend! Let's get started.",
+        },
+        {
+            target: '[data-testid="data-management-link"]',
+            content: 'Manage your database here.',
+        },
+        {//2 navigate to add_teacher
+            target: '[data-testid="add-teacher-link"]',
+            content: 'Add a new teacher.',
+        },
+        {//3 input field teacher screen 
+            target: '[data-testid="add-teacher-input-field"]',
+            content: 'Enter the teacher name and email.',
+        },
+        {//4 select colum pasteclipboard 
+            target: '[data-testid="add-teacher-select_paste_Clipboard"]',
+            content: 'Copy a column from Excel and paste it here.',
+        },
+        {//5 paste clipboard 
+            target: '[data-testid="add-teacher-paste_clipboard"]',
+            content: 'Paste the copied column here.',
+        },
+        {//6 save button
+            target: '[data-testid="add-teacher-save-button"]',
+            content: 'Click Save after filling the form. An email will be sent to the teacher.',
+        },
+        {//7    navbar edit teacher
+            target: '[data-testid="edit-teacher-link"]',
+            content: 'Edit or delete teacher data here.',
+        },
+        {//8    navbar add student
+            target: '[data-testid="add-student-link"]',
+            content: 'Add new student data. Login email will be sent after adding.',
+        },
+        {//9    navbar edit student
+            target: '[data-testid="edit-student-link"]',
+            content: 'Edit student data.',
+        },
+        {//10  check login status
+            target: '[data-testid="check-email-link"]',
+            content: 'Check if teachers or students have logged in for the first time.',
+        },
+        {//11 check student image status
+            target: '[data-testid="student-img-link"]',
+            content: 'Check if students have uploaded their face images.',
+        },
+    ];
+
+
+
+
+    return (<>
+        <Joyride stepIndex={stepIndex} callback={handleJoyrideCallback} run={show_tutorial} steps={steps} locale={{ next: 'Next', back: 'Back' }} showSkipButton={true} continuous={true} />
+    </>)
 }
 
+
+const customStyles = {
+    borderRadius: '10px', padding: '30px', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)', backgroundColor: '#fff', color: '#333', fontSize: '20px', lineHeight: '1.5', textAlign: 'center',
+    beacon: { top: '20px', right: '20px', backgroundColor: '#222', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)', },
+    beaconInner: { width: '12px', height: '12px', backgroundColor: '#fff', borderRadius: '50%', },
+    beaconOuter: { width: '20px', height: '20px', Position: 'relative', },
+    buttonBack: { backgroundColor: '#333', color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 20px', marginRight: '10px', cursor: 'pointer', },
+    buttonClose: { backgroundColor: '#333', color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 20px', cursor: 'pointer', },
+    buttonNext: { backgroundColor: '#333', color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 20px', marginLeft: '10px', cursor: 'pointer', },
+    buttonSkip: { backgroundColor: '#333', color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 20px', cursor: 'pointer', },
+    options: { zIndex: 9999, },
+    overlay: { backgroundColor: 'rgba(55, 55, 55, 0.5)', Position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', },
+    overlayLegacy: { backgroundColor: 'rgba(55, 55, 55, 0.5)', Position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', },
+    overlayLegacyCenter: { backgroundColor: 'rgba(55, 55, 55, 0.5)', Position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', },
+    spotlight: { borderRadius: '10px', backgroundColor: 'rgba(255, 255, 255, 0.3)', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)', },
+    spotlightLegacy: { borderRadius: '10px', backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)', },
+    tooltip: { backgroundColor: '#333', color: '#fff', borderRadius: '5px', padding: '10px 20px', boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.2)', },
+    tooltipContainer: { Position: 'fixed', zIndex: 9999, },
+    tooltipContent: { padding: '10px', TextAlign: 'center', },
+};
+
+export default customStyles;

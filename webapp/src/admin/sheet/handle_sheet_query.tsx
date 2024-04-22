@@ -81,7 +81,7 @@ export const Admin_sheet_query = () => {
         sessionStorage.clear();
         localStorage.removeItem('User_data');
         setTimeout(() => {
-            navigate('/login')
+            navigate('/')
         }, 500);
     }
 

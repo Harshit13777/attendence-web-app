@@ -190,7 +190,7 @@ const SpreadsheetInterface = () => {
     };
 
     const handleUndo = () => {
-        if (currentIndex.current > 1) {
+        if (currentIndex.current > 2) {
             setHistoryon(true);
             currentIndex.current = (currentIndex.current - 1);
             //console.log(history.current[currentIndex.current]['error_row'][0]['Teacher_Email'], ' ', history.current[currentIndex.current]['teacherRows'][0]['Teacher_Email']);
@@ -447,7 +447,7 @@ const SpreadsheetInterface = () => {
                             </div>
 
 
-                            <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+                            <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-2 border-l-2 border-t-2 border-b-8  border-blue-400 rounded-xl  p-2'>
                                 <table className="table-auto w-full ">
                                     <thead className=' text-center items-center '>
                                         <tr className=''>
@@ -473,7 +473,7 @@ const SpreadsheetInterface = () => {
                                                             onChange={(e) =>
                                                                 handleInputChange_Teacher(id, key, e.target.value)
                                                             }
-                                                            className={`${Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] !== '' ? 'border-red-300 border-4' : Teacher_updatedRows.hasOwnProperty(id) && Teacher_updatedRows[id].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                                                            className={`${Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] !== '' ? 'border-red-300 border-4' : Teacher_updatedRows.hasOwnProperty(id) && Teacher_updatedRows[id].hasOwnProperty(key) ? ' border-green-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black w-40 md:w-full`}
                                                         />
                                                         {Datarow_error_message.hasOwnProperty(id) && Datarow_error_message[id].hasOwnProperty(key) && Datarow_error_message[id][key] &&
                                                             Datarow_error_message[id][key].length !== 0 && <h5 className=''>{Datarow_error_message[id][key]}</h5>}

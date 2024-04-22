@@ -13,7 +13,7 @@ export const Main: React.FC = () => {
   if (!sessionStorage.getItem('token')) {//token + email 
 
     setTimeout(() => {
-      navigate('/login')
+      navigate('/')
     }, 5000);
 
     return (

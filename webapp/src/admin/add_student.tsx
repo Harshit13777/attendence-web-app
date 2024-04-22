@@ -216,7 +216,7 @@ const SpreadsheetInterface = () => {
 
   const handleUndo = () => {
     if (currentIndex.current > 0) {
-      history_on(true);
+      history_on(true);//to stop creating history of datarow which is already in histroy
       currentIndex.current = (currentIndex.current - 1);
       set_studentDatarows(history.current[currentIndex.current]['studentRows']);
       set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
@@ -226,7 +226,7 @@ const SpreadsheetInterface = () => {
 
   const handleRedo = () => {
     if (currentIndex.current < history.current.length - 1) {
-      history_on(true);
+      history_on(true);//to stop creating history of datarow which is already in histroy
       currentIndex.current = (currentIndex.current + 1);
       set_studentDatarows(history.current[currentIndex.current]['studentRows']);
       set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
@@ -578,7 +578,7 @@ const SpreadsheetInterface = () => {
             </span>
           </h1>
 
-          <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+          <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-2 border-l-2  border-b-8 border-t-2 border-blue-400 rounded-xl  p-2'>
             <table className="table-auto w-full rounded-2xl ">
               <thead className=' text-center items-center '>
                 <tr className=''>
@@ -596,7 +596,7 @@ const SpreadsheetInterface = () => {
                 {Student_dataRows.map((row, rowIndex) => (
                   <tr key={rowIndex} id={`input-${rowIndex}`}>
                     {Object.keys(row).map((key) => (
-                      <td key={key} className="px-4 py-2">
+                      <td key={key} className="px-2 py-2">
                         <input
                           maxLength={50}
                           id={`input-${rowIndex}-${key}`}
@@ -605,7 +605,7 @@ const SpreadsheetInterface = () => {
                           onChange={(e) =>
                             handleInputChange_Teacher(rowIndex, key, e.target.value)
                           }
-                          className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                          className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : ' focus:border-4 w-40 md:w-60 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
                         />
                         {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
                       </td>

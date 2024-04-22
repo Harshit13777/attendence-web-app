@@ -46,7 +46,7 @@ const SpreadsheetInterface = () => {
   const [rowsToAddCount, setRowsToAddCount] = useState(1); // Default value for row count to add
   const [rowsToDeleteCount, setRowsToDeleteCount] = useState(1); // Default value for row count to delete
 
-  const [open_copyPaste, set_open_copyPaste] = useState(false);
+  const [open_copyPaste, set_open_copyPaste] = useState(true);
   const [loading, set_loading] = useState(false);
   const navigate = useNavigate();
 
@@ -191,18 +191,16 @@ const SpreadsheetInterface = () => {
 
   const handleUndo = () => {
     if (currentIndex.current > 0) {
-      setHistoryon(true);
+      setHistoryon(true);//set true so that when teacher datarow taken from history then not again add in history queue
       currentIndex.current = (currentIndex.current - 1);
       set__teacherDatarows(history.current[currentIndex.current]['teacherRows']);
       set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
-
-
     }
   };
 
   const handleRedo = () => {
     if (currentIndex.current < history.current.length - 1) {
-      setHistoryon(true);
+      setHistoryon(true);//to stop creating history of datarow which is already in histroy
       currentIndex.current = (currentIndex.current + 1);
       set__teacherDatarows(history.current[currentIndex.current]['teacherRows']);
       set_Datarow_error_message(history.current[currentIndex.current]['error_row']);
@@ -443,8 +441,8 @@ const SpreadsheetInterface = () => {
       });
 
 
-      set__teacherDatarows(updatedDataRows);
       setSelectedColumn('');
+      set__teacherDatarows(updatedDataRows);
 
       // Add the updated dataRows to history
 
@@ -523,19 +521,19 @@ const SpreadsheetInterface = () => {
             </div>
           </div>
 
-          <h1 className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
+          <h1 data-testid="add-teacher-input-field" className="mt-10 mb-5 flex text-center items-center justify-center text-2xl md:text-5xl font-extrabold text-gray-900 ">
             <span className="bg-clip-text text-transparent bg-gradient-to-tl from-blue-800 to-red-500 bg-lime-50 rounded-lg">
               Fill the Form
             </span>
           </h1>
-          <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-8 border-l-8  border-blue-400 rounded-xl  p-2'>
+          <div className='overflow-x-scroll mb-4  bg-gradient-to-r from-blue-300 to-red-200 border-r-2 border-l-2 border-b-8 border-t-2 border-blue-400 rounded-xl  p-2'>
             <table className="table-auto w-full ">
               <thead className=' text-center items-center '>
                 <tr className=''>
                   <th colSpan={3} className=" text-xl md:text-3xl font-bold px-4 py-2">Teacher</th>
 
                 </tr>
-                <tr className=' '>
+                <tr className=' ' >
                   <th className="text-lg md:text-2xl font-bold py-2 pr-20">Name</th>
                   <th className="text-lg md:text-2xl font-bold py-2 pr-20">Email</th>
                   {/* Add more column headers */}
@@ -554,7 +552,7 @@ const SpreadsheetInterface = () => {
                           onChange={(e) =>
                             handleInputChange_Teacher(rowIndex, key, e.target.value)
                           }
-                          className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  hover:bg-slate-100 hover:text-black`}
+                          className={`${Datarow_error_message[rowIndex][key] !== '' ? 'border-red-300 border-4' : ' focus:border-4 focus:border-blue-400 border'} rounded-xl font-bold  p-2 focus:outline-none  w-40 md:w-60 hover:bg-slate-100 hover:text-black`}
                         />
                         {Datarow_error_message[rowIndex][key].length !== 0 && <h5 className=''>{Datarow_error_message[rowIndex][key]}</h5>}
                       </td>
@@ -584,7 +582,7 @@ const SpreadsheetInterface = () => {
           {open_copyPaste &&
 
             <div className="flex mt-5 flex-col md:flex-row mb-4 md:items-center">
-              <div className="md:mr-4 mb-2 md:mb-0">
+              <div data-testid="add-teacher-select_paste_Clipboard" className="md:mr-4 mb-2 md:mb-0">
                 {Object.keys(Teacher_dataRows[0]).map((columnName, columnIndex) => (
                   <button
                     key={columnIndex}
@@ -597,6 +595,7 @@ const SpreadsheetInterface = () => {
               </div>
               <p className={`${selectedColumn !== '' ? 'block' : 'hidden'} `}><h1 className=' font-semibold '>Note:</h1><h3 className=' font-medium'>First copy only one coloum of google spreadsheet then select target coloum to paste data</h3></p>
               <button
+                data-testid="add-teacher-paste_clipboard"
                 onClick={handlePasteClipboard}
                 disabled={selectedColumn === ''}
                 className={`bg-green-500 text-white  p-5 py-2 rounded-lg hover:bg-green-400 ${selectedColumn ? '' : 'opacity-50 cursor-not-allowed'
@@ -611,10 +610,10 @@ const SpreadsheetInterface = () => {
 
 
         <button
+          data-testid="add-teacher-save-button"
           onClick={() => submitData(Teacher_dataRows)}
           className=" bg-gradient-to-t text-xl font-bold hover:bg-gradient-to-b from-red-400 to-blue-400  text-white px-4 py-2 rounded-lg">
-          Submit
-        </button>
+          Save        </button>
 
       </div>
       {loading &&
