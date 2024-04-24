@@ -18,6 +18,7 @@ const Login: React.FC = () => {
 
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [message, setMessage] = useState<string[]>([]);
+  const [show_Password, set_showPassword] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -36,6 +37,7 @@ const Login: React.FC = () => {
   const roleInputRef = useRef<HTMLSelectElement | null>(null);
   const spasswordRef = useRef<HTMLInputElement | null>(null);
   const conform_spasswordRef = useRef<HTMLInputElement | null>(null);
+
 
 
   useEffect(() => {
@@ -443,18 +445,25 @@ const Login: React.FC = () => {
                     <label htmlFor="password" className={`block ${formData.password.length === 0 && 'hidden'} text-sm p-1 md:text-xl  opacity-75`}>
                       Password
                     </label>
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      ref={passwordInputRef}
-                      maxLength={30}
+                    <div className='relative flex'>
 
-                      placeholder='password'
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full text-black px-3 py-2 border-2 rounded-md"
-                    />
+                      <input
+                        type={`${show_Password ? 'text' : 'password'}`}
+                        id="password"
+                        name="password"
+                        ref={passwordInputRef}
+                        maxLength={30}
+
+                        placeholder='password'
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="w-full text-black px-3 py-2 border-2 rounded-md"
+                      >
+                      </input>
+                      <div className='absolute right-0 ' onClick={() => set_showPassword((p) => !p)}>
+                        <img width={40} height={40} src={show_Password ? require('./../.icons/show_eye.png') : require('./../.icons/hide_eye.png')} />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="mb-4">
@@ -549,25 +558,33 @@ const Login: React.FC = () => {
                     <label htmlFor="newPassword" className={`block ${spassword.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                       New Password
                     </label>
-                    <input
-                      type="password"
-                      id="newPassword"
-                      name='newPassword'
-                      ref={spasswordRef}
-                      placeholder='Enter new Password'
-                      value={spassword}
-                      maxLength={50}
+                    <div className='relative flex'>
 
-                      onChange={(e) => set_spassword(e.target.value)}
-                      className="w-full text-black px-3 py-2 border-2 rounded-md"
-                    />
+                      <input
+                        type={`${show_Password ? 'text' : 'password'}`}
+
+                        id="newPassword"
+                        name='newPassword'
+                        ref={spasswordRef}
+                        placeholder='Enter new Password'
+                        value={spassword}
+                        maxLength={50}
+
+                        onChange={(e) => set_spassword(e.target.value)}
+                        className="w-full text-black px-3 py-2 border-2 rounded-md"
+                      />
+                      <div className='absolute right-0 ' onClick={() => set_showPassword((p) => !p)}>
+                        <img width={40} height={40} src={show_Password ? require('./../.icons/show_eye.png') : require('./../.icons/hide_eye.png')} />
+                      </div>
+                    </div>
                   </div>
                   <div className="mb-8">
                     <label htmlFor="confirmPassword" className={`block ${s_conformpassword.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                       Confirm Password
                     </label>
                     <input
-                      type="password"
+                      type={`${show_Password ? 'text' : 'password'}`}
+
                       id="conformPassword"
                       name='conformPassword'
                       ref={conform_spasswordRef}
@@ -577,6 +594,7 @@ const Login: React.FC = () => {
                       onChange={(e) => set_sconformpassword(e.target.value)}
                       className="w-full text-black px-3 py-2 border-2 rounded-md"
                     />
+
                   </div>
                 </div>
                 {message.length !== 0 && message.map((message, i) => (

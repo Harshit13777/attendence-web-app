@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { setFlagsFromString } from 'v8';
 import { get_api } from '../static_api';
 
@@ -246,6 +246,12 @@ const ForgotPassword: React.FC = () => {
               >
                 Submit
               </button>
+              <div className="bg-blue-500 text-2xl text-white px-4 py-2 from-blue-600 to-blue-900 bg-gradient-to-r hover:from-blue-800 hover:to-blue-400 rounded-3xl"
+              >
+                <Link to="/login">
+                  Login
+                </Link>
+              </div>
 
             </div>
           </div>

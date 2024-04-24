@@ -469,7 +469,7 @@ export const HomePage: React.FC = () => {
 
         console.log('syncing...')
 
-        // if (!is_sync) syncing_student();
+        if (!is_sync) syncing_student();
 
 
     }, [])

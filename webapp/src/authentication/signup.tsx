@@ -20,6 +20,7 @@ const Signup: React.FC = () => {
   });
   const [message, setMessage] = useState<string[]>([]);
 
+  const [show_Password, set_showPassword] = useState(false)
   const locat = useLocation();
   const navigat = useNavigate();
   const [loading, set_loading] = useState(false);
@@ -181,13 +182,13 @@ const Signup: React.FC = () => {
   return (
     <>
       <div className="mx-auto bg-gray-750 pt-4 pb-4 md:p-8">
-        <div className="p-8 m-auto  h-max min-h-[calc(100vh-32px)]  md:min-h-[calc(100vh-64px)]  md:h-screen md:w-7/12 lg:w-5/12  bg-gray-800 text-white rounded-md shadow-lg hover:shadow-xl transition duration-300">
-          <h1 className="text-3xl text-center  text font-bold m-10 bg-gradient-to-r  from-gray-600 to-gray-800">Signup</h1>
+        <div className="p-8  m-auto  h-max min-h-[calc(100vh-50px)] md:min-h-fit  md:w-7/12 lg:w-5/12  bg-gray-800 rounded-xl text-white  shadow-lg hover:shadow-xl transition duration-300">
+          <h1 className="text-3xl text-center  rounded-full text font-bold m-10 bg-gradient-to-r  from-gray-600 to-gray-800">Signup</h1>
 
 
 
           <div className={` ${loading && 'opacity-50 pointer-events-none'} `}>
-            <div className="mb-8">
+            <div className="mb-8 ml-5 mr-5 md:ml-10 md:mr-10">
               <label htmlFor="name" className={`block ${formData.name.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Name
               </label>
@@ -203,7 +204,7 @@ const Signup: React.FC = () => {
                 className="w-full   text-black px-3 py-2  rounded-md border-2"
               />
             </div>
-            <div className="mb-8">
+            <div className="mb-8 ml-5 mr-5 md:ml-10 md:mr-10">
               <label htmlFor="username" className={`block ${formData.username.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Username
               </label>
@@ -220,7 +221,7 @@ const Signup: React.FC = () => {
                 className="w-full   text-black px-3 py-2  rounded-md border-2"
               />
             </div>
-            <div className="mb-8">
+            <div className="mb-8 ml-5 mr-5 md:ml-10 md:mr-10">
               <label htmlFor="email" className={`block ${formData.email.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Email address
               </label>
@@ -236,21 +237,27 @@ const Signup: React.FC = () => {
                 className="w-full   text-black px-3 py-2  rounded-md border-2"
               />
             </div>
-            <div className="mb-8">
+            <div className="mb-8 ml-5 mr-5 md:ml-10 md:mr-10">
               <label htmlFor="password" className={`block ${formData.password.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                 Password
               </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                maxLength={50}
-                ref={passwordInputRef}
-                placeholder='Enter Password'
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full   text-black px-3 py-2  rounded-md border-2"
-              />
+              <div className='relative flex'>
+
+                <input
+                  type={`${show_Password ? 'text' : 'password'}`}
+                  id="password"
+                  name="password"
+                  maxLength={30}
+                  ref={passwordInputRef}
+                  placeholder='Enter Password'
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full   text-black px-3 py-2  rounded-md border-2"
+                />
+                <div className='absolute right-0 ' onClick={() => set_showPassword((p) => !p)}>
+                  <img width={40} height={40} src={show_Password ? require('./../.icons/show_eye.png') : require('./../.icons/hide_eye.png')} />
+                </div>
+              </div>
             </div>
             {message.length !== 0 && message.map((message, i) => (
               <div className="bg-blue-100  text-center rounded-md  border-t border-b border-red-500 text-red-700  px-4 py-3" role="alert">

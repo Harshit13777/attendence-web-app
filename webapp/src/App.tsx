@@ -14,6 +14,7 @@ import Add_Attendence_Sheet from "./teacher/Add_Attendence_Sheet";
 import { Sheet_invalid } from "./authentication/sheetinvalid";
 import { main_screen as Overview } from "./overview/main_screen";
 import ChangePassword from './authentication/change_password';
+import { Privacy_policy } from './overview/privacy_policy';
 
 const App: React.FC = () => {
 
@@ -51,6 +52,7 @@ const App: React.FC = () => {
 
         {/* for admin 
       */}
+        <Route path="/privacy-policy" element={<Privacy_policy />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget_password" element={<Forget_password />} />

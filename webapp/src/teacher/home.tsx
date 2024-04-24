@@ -12,9 +12,11 @@ import settingIcon from "../.icons/setting.png";
 import checkEmailIcon from '../.icons/check_email_status.png';
 import systemControlIcon from "../.icons/system_control.png";
 import { get_api } from '../static_api';
+import Joyride, { ACTIONS, CallBackProps, EVENTS, STATUS } from 'react-joyride';
+import { Teacher_overview } from '../overview/teacher_overview';
 
-const NavBar = () => {
-    const [open, setOpen] = useState(false);
+const NavBar = ({ open, setOpen }: { open: boolean, setOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
+
     const navigate = useNavigate();
     const location = useLocation()
     const [route, set_route] = useState<string>('')
@@ -67,7 +69,7 @@ const NavBar = () => {
                         </li>
                     </Link>
                     <Link to='/teacher/add_subject'>
-                        <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm  items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                        <li data-testid="add-attendance-sheet-link" className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm  items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
                             <img src={require('../.icons/add_sheet.png')} className={`${open && 'w-8 h-8'} ${route === 'add_subject' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
@@ -77,7 +79,7 @@ const NavBar = () => {
                     </Link>
 
                     <Link to='/teacher/take_attendance'>
-                        <li className={`flex pt-2 pb-2 cursor-pointer text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                        <li data-testid="take-attendance-link" className={`flex pt-2 pb-2 cursor-pointer text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
                             <img src={require('../.icons/add_attendance.png')} className={`${open && 'w-8 h-8'} ${route === 'take_attendance' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
@@ -87,7 +89,7 @@ const NavBar = () => {
                     </Link>
 
                     <Link to='/teacher/get_attendance_sheet'>
-                        <li className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
+                        <li data-testid="get-attendance-link" className={`flex pt-2 pb-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 hover:bg-gray-50 hover:text-slate-900 rounded-md
                                         mt-2 menu-items `} >
                             <img src={require('../.icons/get_sheet.png')} className={`${open && 'w-8 h-8'} ${route === 'get_attendance_sheet' && 'p-2 bg-gray-700 rounded-lg'}`} alt="" />
                             <span className={` origin-left duration-200 ${!open && "hidden"}`}>
@@ -123,6 +125,8 @@ const HomePage = () => {
     const [sync_message, set_sync_message] = useState<string[]>([])
     const navigate = useNavigate();
     const innerwidth = window.innerWidth;
+    const [open, setOpen] = useState(false);
+    const [show_tutorial, set_showtutorial] = useState(false)
 
     useEffect(() => {
         setWdth(window.innerWidth)
@@ -336,40 +340,111 @@ const HomePage = () => {
 
 
     return (
+        <div className='relative overflow-hidden'>
 
-        <div className='flex flex-row bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
-            <div className='z-50'>
-                <NavBar />
+
+
+            <JoyrideTut show_tutorial={show_tutorial} set_show_tutorial={set_showtutorial} setOpen={setOpen} />
+
+            <div className='flex flex-row bg-gradient-to-tr from-slate-500 to-slate-700 h-fit min-h-screen w-screen'>
+                <div className='z-50'>
+                    <NavBar open={open} setOpen={setOpen} />
+                </div>
+                {
+                    is_sync ?
+
+                        <div className='ml-16 w-full  flex flex-col text-center items-center justify-center gap-y-10'>
+
+                            <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
+                                Syncing...
+                            </h1>
+                            {sync_message.length !== 0 &&
+                                sync_message.map((message, i) => (
+                                    <div className="bg-blue-100 w-52 text-center mt-5 border-t border-b border-blue-300 text-blue-700 px-4 py-3" role="alert">
+                                        <p className="text-lg">{message}</p>
+                                    </div>
+                                ))}
+                        </div>
+
+                        :
+                        <div className={` ml-16 items-center `} style={{ width: '100%', maxWidth: 'calc(100% - 64px)' }}>
+                            <Routes>
+                                <Route path="/" element={<Teacher_overview set_show_tutorial={set_showtutorial} />} />
+                                <Route path="/add_subject" element={<AddAttendanceSheet />} />
+                                <Route path="/get_attendance_sheet" element={<GetAttendanceSheet />} />
+                                <Route index path='/take_attendance' element={<TakeAttendance />} />
+                            </Routes>
+                        </div>
+                }
             </div>
-            {
-                is_sync ?
-
-                    <div className='ml-16 w-full  flex flex-col text-center items-center justify-center gap-y-10'>
-
-                        <h1 className=" text-2xl md:text-5xl font-extrabold text-gray-900 ">
-                            Syncing...
-                        </h1>
-                        {sync_message.length !== 0 &&
-                            sync_message.map((message, i) => (
-                                <div className="bg-blue-100 w-52 text-center mt-5 border-t border-b border-blue-300 text-blue-700 px-4 py-3" role="alert">
-                                    <p className="text-lg">{message}</p>
-                                </div>
-                            ))}
-                    </div>
-
-                    :
-                    <div className={` ml-16 items-center `} style={{ width: '100%', maxWidth: 'calc(100% - 64px)' }}>
-                        <Routes>
-                            <Route path="/add_subject" element={<AddAttendanceSheet />} />
-                            <Route path="/get_attendance_sheet" element={<GetAttendanceSheet />} />
-                            <Route index path='/take_attendance' element={<TakeAttendance />} />
-                        </Routes>
-                    </div>
-            }
         </div>
-
     );
 
 }
 
 export default HomePage;
+
+
+const JoyrideTut = ({ show_tutorial, set_show_tutorial, setOpen }: { show_tutorial: boolean, set_show_tutorial: React.Dispatch<React.SetStateAction<boolean>>, setOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
+
+    const [stepIndex, setStepIndex] = useState(0);
+    const navigate = useNavigate()
+
+    const handleJoyrideCallback = (data: CallBackProps) => {
+        const { action, index, origin, status, type } = data;
+
+        if (action === ACTIONS.CLOSE) {
+            // do something
+            navigate('./')
+        }
+
+        if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
+            // Update state to advance the tour
+            setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
+        } else if (status === STATUS.SKIPPED || status === STATUS.FINISHED || status === STATUS.ERROR) {
+            // You need to set our running state to false, so we can restart if we click start again.
+            set_show_tutorial(false);
+            setStepIndex(0)
+            navigate('./')
+            setOpen(false)
+        }
+        if (index == 1) {
+            setOpen(true);
+        }
+
+
+
+
+
+        console.log(data); //eslint-disable-line no-console
+
+    };
+
+    const steps = [
+        {
+            placement: 'center' as 'center',
+            disableBeacon: true,
+            target: '[data-testid="Hellotut"]',
+            content: "Welcome to AI-Attend! Let's get started.",
+        },
+        {
+            target: '[data-testid="add-attendance-sheet-link"]',
+            content: 'Here, you add subjects , the attendance sheet will created from subject name',
+        },
+        {//2 navigate to add_teacher
+            target: '[data-testid="take-attendance-link"]',
+            content: 'Here, you open your camera to take facial attendance and mark attendace.',
+        },
+        {//3 input field teacher screen 
+            target: '[data-testid="get-attendance-link"]',
+            content: 'HEre, you can see all attendance data of subjects',
+        },
+    ];
+
+
+
+
+    return (<>
+        <Joyride stepIndex={stepIndex} callback={handleJoyrideCallback} run={show_tutorial} steps={steps} locale={{ next: 'Next', back: 'Back' }} showSkipButton={true} continuous={true} />
+    </>)
+}

@@ -13,6 +13,8 @@ const ChangePassword: React.FC = () => {
     const [message, setMessage] = useState<string[]>([]);
     const [ForgetCompOn, setForgetCompOn] = useState(true);
 
+    const [show_Password, set_showPassword] = useState(false)
+
     const [token, set_token] = useState<string | null>(null);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -208,23 +210,29 @@ const ChangePassword: React.FC = () => {
                                 <label htmlFor="newPassword" className={`block ${newPassword.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                                     New password
                                 </label>
-                                <input
-                                    type="password"
-                                    id="newPassword"
-                                    ref={newPasswordInputRef}
-                                    name='newPassword'
-                                    value={newPassword}
-                                    placeholder='Enter New Password'
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    className="w-full text-black px-3 py-2 border-2 rounded-md"
-                                />
+                                <div className='flex relative'>
+
+                                    <input
+                                        type={`${show_Password ? 'text' : 'password'}`}
+                                        id="newPassword"
+                                        ref={newPasswordInputRef}
+                                        name='newPassword'
+                                        value={newPassword}
+                                        placeholder='Enter New Password'
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        className="w-full text-black px-3 py-2 border-2 rounded-md"
+                                    />
+                                    <div className='absolute right-0 ' onClick={() => set_showPassword((p) => !p)}>
+                                        <img width={40} height={40} src={show_Password ? require('./../.icons/show_eye.png') : require('./../.icons/hide_eye.png')} />
+                                    </div>
+                                </div>
                             </div>
                             <div className="mb-8">
                                 <label htmlFor="confirmPassword" className={`block ${confirmPassword.length === 0 && 'hidden'}  text-sm p-1 md:text-xl  opacity-75`}>
                                     Confirm Password
                                 </label>
                                 <input
-                                    type="password"
+                                    type={`${show_Password ? 'text' : 'password'}`}
                                     id="confirmPassword"
                                     ref={conformPassInputRef}
                                     placeholder='conform New Password'
