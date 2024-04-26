@@ -80,7 +80,7 @@ const HowWorks = () => {
                 'Teachers receive login credentials on their email from the admin. They can log in to the platform using their email and password. Once logged in, teachers can set up their classrooms or subjects within the system.',
         },
         {
-            image: require('../extra_res/teacher_photo click 2.png'),
+            image: require('../screenshots/attendance real.png'),
             header: 'Taking Face Attendance',
             description:
                 "The system will automatically detect faces in the captured image and system will mark the student as present. If not, the system will mark them as absent . The attendance data is then recorded and stored securely in the system for future reference and reporting.",
@@ -140,24 +140,27 @@ const HowWorks = () => {
 
 
 
+
+                                            <div className="mb-2 ">
+
+                                                <p className=" text-left font-medium mt-2">
+                                                    Step {i + 1}.
+                                                </p>
+                                                <div className="flex items-center">
+                                                    <div className=" space-y-5">
+
+                                                        <strong>{obj.header}</strong>
+                                                        <p>
+                                                            {obj.description}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <img
                                                 src={obj.image}
                                                 alt={obj.header}
-                                                className=""
+                                                className=" m-auto"
                                             />
-
-                                            <p className=" text-left font-medium mt-2">
-                                                Step {i + 1}.
-                                            </p>
-                                            <div className="flex items-center">
-                                                <div className=" space-y-5">
-
-                                                    <strong>{obj.header}</strong>
-                                                    <p>
-                                                        {obj.description}
-                                                    </p>
-                                                </div>
-                                            </div>
                                         </li>
                                     </motion.div>
                                 ))
@@ -233,33 +236,21 @@ const Sticky_Scroll_comp = () => {
     const img5 = require('../extra_res/detect attend.jpg')
     const content = [
         {
-            title: "Automated Attendance Tracking",
+            title: "Automated Face Attendance",
             description:
-                "AI Attend automates attendance tracking using advanced facial recognition technology. Say goodbye to manual attendance taking and hello to accurate, real-time attendance records.",
+                "Say goodbye to manual attendance taking and hello to accurate, real-time attendance records.",
             content: img // You can replace img with the actual image related to attendance tracking
         },
         {
             title: "Real-time Access and Updates",
             description:
-                "Access attendance records and receive real-time updates from anywhere, anytime. Stay informed about attendance changes instantly without delays.",
+                "Access attendance records and receive real-time updates from anywhere, anytime.",
             content: img2 // You can replace img with the actual image related to real-time updates
         },
         {
-            title: "User-friendly Interface",
+            title: "Data Analysis",
             description:
-                "Enjoy a user-friendly interface that makes navigation and attendance management a breeze. Our intuitive design ensures a seamless experience for teachers, students, and administrators.",
-            content: img3 // You can replace img with the actual image related to user-friendly interface
-        },
-        {
-            title: "Integration with Google Services",
-            description:
-                "Seamlessly integrate AI Attend with Google Sheets and Google Apps Script. Manage attendance data efficiently and securely using familiar Google services.",
-            content: img4 // You can replace img with the actual image related to Google services integration
-        },
-        {
-            title: "Data Analysis and Insights",
-            description:
-                "Gain valuable insights from attendance data analysis. Track progress, identify patterns, and make data-driven decisions for improved attendance management.",
+                "Track progress, identify patterns, and make data-driven decisions for improved attendance management.",
             content: img5 // You can replace img with the actual image related to data analysis
         },
     ];
