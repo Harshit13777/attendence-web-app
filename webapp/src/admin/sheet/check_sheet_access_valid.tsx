@@ -80,10 +80,9 @@ export const Admin_sheet_access_valid: React.FC<{ get_sheet_status: () => Promis
           onClick={handleOnClick}>{show_instruction ? '' : 'show instruction'}</button>
         <div className={`${!show_instruction && 'hidden'} bg-yellow-100 rounded-md`}>
           <div className=' p-2 border-solid   rounded-md'>
-            instruction of sheet access...
+            Check if server email Shared on google sheet or not , 'omnamahshivay7777777@gmail.com'
           </div>
         </div>
-
       </div>
 
 
