@@ -20,6 +20,7 @@ export const main_screen = () => {
 
                     <Sticky_Scroll_comp />
                     <HowWorks />
+                    <AboutUs />
                 </div>
             </TracingBeam>
         </div>
@@ -263,3 +264,32 @@ const Sticky_Scroll_comp = () => {
     )
 }
 
+
+const AboutUs = () => {
+    return (
+        <div className="about-us min-h-max  bg-gray-950 text-center  text-gray-200 rounded-lg p-10 m-5" >
+            <div className="text-center">
+
+                <h1 className=" text-xl m-10" >About Us</h1>
+                <p className="p-5">
+                    Welcome to our website! We are a team of passionate developers dedicated to creating amazing products.
+                </p>
+            </div>
+            <ul>
+                <li>
+                    <Link to="/privacy-policy">Privacy Policy</Link>
+                </li>
+                <li>Email: omnamahshivay7777777@gmail.com</li>
+                <li>
+                    <a target="blank" href="https://www.instagram.com/harshit.13777/">Instagram</a>
+                </li>
+                <li>
+                    <a target="blank" href="https://www.youtube.com/harshit13777">YouTube</a>
+                </li>
+            </ul>
+
+        </div>
+    );
+};
+
+export default AboutUs;
